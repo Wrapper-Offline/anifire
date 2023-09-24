@@ -75,87 +75,46 @@ package anifire.component
 		private var GoColorMapShaderClass:Class;
 		
 		private const BODYSHAPE:String = "bodyshape";
-		
 		private const XML_DESC:String = "desc.xml";
-		
 		private const UPPERBODY:String = "upper_body";
-		
 		private const CLIPUPPER:String = "theUpper";
-		
 		private const LOWERBODY:String = "lower_body";
-		
 		private const CLIPLOWER:String = "theLower";
-		
 		private const DEFAULTHEAD:String = "defaultHead";
-		
 		private const LIB_LEFT:String = "Left";
-		
 		private const LIB_RIGHT:String = "Right";
-		
 		private const NODE_COMPONENT:String = "component";
-		
 		private const SWF_EXT:String = ".swf";
-		
 		private const SKELETON:String = "skeleton";
-		
 		private var _eventDispatcher:EventDispatcher;
-		
 		private var _myActionModel:CCCharacterActionModel;
-		
 		private var _charXML:XML;
-		
 		private var _charSwfs:UtilHashBytes;
-		
 		private var _charZip:ZipFile;
-		
 		private const MC:String = "MC";
-		
 		private var _componentOrder:Array;
-		
 		private var _componentQueue:Array;
-		
 		private var should_decrypt:Boolean = true;
-		
 		private var _customColor:UtilHashSelectedColor;
-		
 		private var _shouldPauseOnLoadByteComplete:Boolean;
-		
 		private var _state:String;
-		
 		private var _waiting:Array;
-		
 		private var _decoArray:Array;
-		
 		private var _lookAtCameraSupported:Boolean = false;
-		
 		private var _prop:DisplayObjectContainer = null;
-		
 		private var _hasProp:Boolean = false;
-		
 		private var _sceneId:String;
-		
 		private var _head:CcHeadComponent;
-		
 		private var _head2:CCHeadView;
-		
 		private var _loadHead:Boolean = true;
-		
 		private var _useImageLibrary:Boolean = false;
-		
 		private var _headRect:Rectangle;
-		
 		private var _tempworker:GoBaseWorkerImp;
-		
 		private var _ccm:CCManager;
-		
 		private var _ver:Number;
-		
 		private var _libraries:UtilHashArray;
-		
 		private var _sDate:Date;
-		
 		private var _isLoadingLipSyncMouth:Boolean = false;
-		
 		private var _assetImageIdArray:UtilHashNumber;
 		
 		public function CustomCharacterMaker()
@@ -1452,7 +1411,6 @@ package anifire.component
 		private function onBodyLoaded(param1:Event) : void
 		{
 			IEventDispatcher(param1.target).removeEventListener(param1.type,this.onBodyLoaded);
-			var _loc2_:Date = new Date();
 			if(this._loadHead)
 			{
 				this._head = new CcHeadComponent();
@@ -1469,7 +1427,6 @@ package anifire.component
 		private function onBodyLoadedByCam(param1:Event) : void
 		{
 			IEventDispatcher(param1.target).removeEventListener(param1.type,this.onBodyLoadedByCam);
-			var _loc2_:Date = new Date();
 			if(this._loadHead)
 			{
 				this._head2 = new CCHeadView();

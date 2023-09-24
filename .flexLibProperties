@@ -12,7 +12,6 @@
     <classEntry path="anifire.util.Crypto.FastRC4"/>
     <classEntry path="anifire.util.Crypto.TEA"/>
     <classEntry path="anifire.util.UtilMath"/>
-    <classEntry path="anifire.util.UtilDictOffline"/>
     <classEntry path="anifire.util.UtilHashArray"/>
     <classEntry path="anifire.util.UtilHashMap"/>
     <classEntry path="anifire.util.IUtilMap"/>
@@ -58,9 +57,18 @@
     <classEntry path="anifire.browser.skins.CcProductExplorerThumbRenderer"/>
     <classEntry path="anifire.browser.skins.ThumbImageBase"/>
     <classEntry path="anifire.browser.skins.CharacterThumbSparkImage"/>
-    <classEntry path="anifire.browser.skins.BusyIndicator"/>
     <classEntry path="anifire.browser.skins.CcBrowserTabBarButtonSkin"/>
     <classEntry path="anifire.browser.skins.CopyCcButtonSkin"/>
+    <classEntry path="anifire.browser.skins.CloseButtonSkin"/>
+    <classEntry path="anifire.browser.skins.PageNavigationButtonSkin"/>
+    <classEntry path="anifire.browser.skins.BusyIndicator"/>
+    <classEntry path="anifire.browser.skins.CategoryDropDownButtonSkin"/>
+    <classEntry path="anifire.browser.skins.CategoryDropDownListSkin"/>
+    <classEntry path="anifire.browser.components.ArrowTipContainer"/>
+    <classEntry path="anifire.browser.components.PopUpAnchor"/>
+    <classEntry path="anifire.browser.skins.CategoryDropDownListItemRenderer"/>
+    <classEntry path="anifire.browser.skins.ArrowTipContainerSkin"/>
+    <classEntry path="anifire.browser.skins.DefaultTextInputSkin"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

@@ -19,7 +19,7 @@
 			protected var _model:ThumbModel;
 			protected var _product:Thumb;
 
-			[Bindable(event="propertyChange")]
+			[Bindable]
 			public function get model() : ThumbModel
 			{
 				return this._model;

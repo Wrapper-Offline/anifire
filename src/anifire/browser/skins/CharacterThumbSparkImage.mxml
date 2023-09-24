@@ -69,7 +69,7 @@
 			
 			override protected function cancelProcessing() : void
 			{
-				if(this._processing)
+				if(_processing)
 				{
 					if(this._loader)
 					{
@@ -330,9 +330,9 @@
 		<s:State name="ready"/>
 	</bSkins:states>
 	
-	<s:Group width="100%" height="100%" clipAndEnableScrolling="true" id="_CharacterThumbSparkImage_Group1">
+	<s:Group width="100%" height="100%" clipAndEnableScrolling="true">
 		<s:BitmapImage scaleMode="letterbox" width="100%" height="100%" smooth="true" horizontalCenter="0" verticalCenter="0" ioError="onImageIOError(event)" complete="onImageComplete(event)" id="imageContainer"/>
 	</s:Group>
-	<bSkins:BusyIndicator itemCreationPolicy="deferred" includeIn="busyStates" horizontalCenter="0" verticalCenter="0" id="_CharacterThumbSparkImage_BusyIndicator1"/>
+	<bSkins:BusyIndicator itemCreationPolicy="deferred" includeIn="busyStates" horizontalCenter="0" verticalCenter="0" symbolColor="0x000000"/>
 
 </bSkins:ThumbImageBase>

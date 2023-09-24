@@ -6,33 +6,42 @@ package anifire.util
 	
 	public class UtilCrypto
 	{
-		
 		public static const MODE_DECRYPT_SWF:int = 0;
-		
 		public static const MODE_DECRYPT_RTMPE_TOKEN:int = 1;
-		
 		private static const KEY_MODE_DECRYPT_RTMPE_TOKEN:String = "gaGh0hiaEb8wa4wi";
-		
-		
 		private var _mode:int;
-		
 		private var _legacyCryptKey:ByteArray;
-		
-		public function UtilCrypto(param1:int = 0)
+		private var _modernCryptKey:ByteArray;
+
+		/**
+		 * used for decrypting assets
+		 * @param {int} 0 for swf decryption, 1 for rtmpe token
+		 */
+		public function UtilCrypto(mode:int = 0)
 		{
-			var _loc2_:String = null;
-			var _loc3_:int = 0;
+			var legacyKey:String = null;
+			var legacyKeyIndex:int = 0;
+			var modernKey:String = null;
+			var modernKeyIndex:int = 0;
 			super();
-			this._mode = param1;
+			this._mode = mode;
 			if(this._mode == MODE_DECRYPT_SWF)
 			{
-				_loc2_ = "g0o1a2n3i4m5a6t7e";
+				legacyKey = "g0o1a2n3i4m5a6t7e";
 				this._legacyCryptKey = new ByteArray();
-				_loc3_ = 0;
-				while(_loc3_ < _loc2_.length)
+				legacyKeyIndex = 0;
+				while(legacyKeyIndex < legacyKey.length)
 				{
-					this._legacyCryptKey[_loc3_] = _loc2_.charCodeAt(_loc3_) as uint;
-					_loc3_++;
+					this._legacyCryptKey[legacyKeyIndex] = legacyKey.charCodeAt(legacyKeyIndex) as uint;
+					legacyKeyIndex++;
+				}
+				modernKey = "sorrypleasetryagainlater";
+				this._modernCryptKey = new ByteArray();
+				modernKeyIndex = 0;
+				while(modernKeyIndex < modernKey.length)
+				{
+					this._modernCryptKey[modernKeyIndex] = modernKey.charCodeAt(modernKeyIndex) as uint;
+					modernKeyIndex++;
 				}
 			}
 			else if(this._mode == MODE_DECRYPT_RTMPE_TOKEN)
@@ -40,58 +49,63 @@ package anifire.util
 			}
 		}
 		
-		public function decrypt(param1:ByteArray) : void
+		public function decrypt(bytes:ByteArray) : void
 		{
-			var _loc2_:ByteArray = null;
-			if(this._mode == MODE_DECRYPT_SWF)
+			var decrypted:ByteArray = null;
+			if (this._mode == MODE_DECRYPT_SWF)
 			{
-				_loc2_ = new ByteArray();
-				param1.position = 0;
-				param1.readBytes(_loc2_,0,10);
-				this.decryptBytes(_loc2_);
-				if(this.isFlashPrefix(_loc2_))
+				// attempt to decrypt using the modern key first
+				decrypted = new ByteArray();
+				bytes.position = 0;
+				bytes.readBytes(decrypted, 0, 10);
+				this.decryptBytes(decrypted);
+				if (this.isFlashPrefix(decrypted))
 				{
-					this.decryptBytes(param1);
+					this.decryptBytes(bytes);
 				}
+				// try the legacy key if that didn't work
 				else
 				{
-					param1.position = 0;
-					param1.readBytes(_loc2_,0,10);
-					this.decryptBytesWithLegacyAlgorithm(_loc2_);
-					if(this.isFlashPrefix(_loc2_))
+					bytes.position = 0;
+					bytes.readBytes(decrypted, 0, 10);
+					this.decryptBytesWithLegacyAlgorithm(decrypted);
+					if (this.isFlashPrefix(decrypted))
 					{
-						this.decryptBytesWithLegacyAlgorithm(param1);
+						this.decryptBytesWithLegacyAlgorithm(bytes);
 					}
 				}
 			}
 		}
 		
-		public function decryptString(param1:String) : String
+		public function decryptString(encrypted:String) : String
 		{
-			var _loc2_:String = null;
-			if(this._mode == MODE_DECRYPT_RTMPE_TOKEN)
+			var decrypted:String = null;
+			if (this._mode == MODE_DECRYPT_RTMPE_TOKEN)
 			{
-				_loc2_ = TEA.decrypt(param1,KEY_MODE_DECRYPT_RTMPE_TOKEN);
+				decrypted = TEA.decrypt(encrypted, KEY_MODE_DECRYPT_RTMPE_TOKEN);
 			}
-			return _loc2_;
+			return decrypted;
+		}
+
+		/**
+		 * checks if the signature at the beginning matches an swf's
+		 */
+		private function isFlashPrefix(flashBytes:ByteArray) : Boolean
+		{
+			var signature:String = flashBytes.toString().substr(0, 3);
+			return signature == "CWS" || signature == "FWS";
 		}
 		
-		private function isFlashPrefix(param1:ByteArray) : Boolean
+		private function decryptBytes(bytes:ByteArray) : void
 		{
-			var _loc2_:String = param1.toString().substr(0,3);
-			return _loc2_ == "CWS" || _loc2_ == "FWS";
+			var rc4:FastRC4 = new FastRC4(this._modernCryptKey);
+			rc4.decrypt(bytes);
 		}
 		
-		private function decryptBytes(param1:ByteArray) : void
+		private function decryptBytesWithLegacyAlgorithm(bytes:ByteArray) : void
 		{
-			var _loc2_:FastRC4 = new FastRC4(UtilMath.instance.randomizeKebo());
-			_loc2_.decrypt(param1);
-		}
-		
-		private function decryptBytesWithLegacyAlgorithm(param1:ByteArray) : void
-		{
-			var _loc2_:FastRC4 = new FastRC4(this._legacyCryptKey);
-			_loc2_.decrypt(param1);
+			var rc4:FastRC4 = new FastRC4(this._legacyCryptKey);
+			rc4.decrypt(bytes);
 		}
 	}
 }

@@ -1,27 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
-		xmlns:s="library://ns.adobe.com/flex/spark" 
-		xmlns:mx="library://ns.adobe.com/flex/mx">
-	<!-- host component -->
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx">
+
 	<fx:Metadata>
 		[HostComponent("anifire.browser.components.PageNavigation")]
 	</fx:Metadata>
-	
-	<!-- SkinParts
-	name=btnPrev, type=spark.components.Button, required=true
-	name=btnFirst, type=spark.components.Button, required=true
-	name=btnLast, type=spark.components.Button, required=true
-	name=currentPageTextInput, type=spark.components.TextInput, required=false
-	name=btnNext, type=spark.components.Button, required=true
-	-->
-	
+
+	<fx:Script>
+		<![CDATA[
+			private static const lt:String = "<";
+		]]>
+	</fx:Script>
+
 	<mx:HBox verticalAlign="middle">
-		<s:Button id="btnFirst" label="First" enabled="false" buttonMode="true"/>
-		<s:Button id="btnPrev" label="Prev" enabled="false" buttonMode="true"/>
+		<s:Button id="btnFirst" skinClass="anifire.browser.skins.PageNavigationButtonSkin" label="{lt + lt}" enabled="false" buttonMode="true"/>
+		<s:Button id="btnPrev" skinClass="anifire.browser.skins.PageNavigationButtonSkin" label="{lt}" enabled="false" buttonMode="true"/>
 		<s:Label text="Page"/>
 		<s:TextInput id="currentPageTextInput" textAlign="center" restrict="0-9" maxChars="3" widthInChars="3" text="{hostComponent.currentPage}"/>
-		<s:Label id="_PageNavigationSkin_Label2" text="of {hostComponent.totalPage}"/>
-		<s:Button id="btnNext" label="Next" enabled="false" buttonMode="true"/>
-		<s:Button id="btnLast" label="Last" enabled="false" buttonMode="true"/>
+		<s:Label text="of {hostComponent.totalPage}"/>
+		<s:Button id="btnNext" skinClass="anifire.browser.skins.PageNavigationButtonSkin" label=">" enabled="false" buttonMode="true"/>
+		<s:Button id="btnLast" skinClass="anifire.browser.skins.PageNavigationButtonSkin" label=">>" enabled="false" buttonMode="true"/>
 	</mx:HBox>
+
 </s:Skin>

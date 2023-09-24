@@ -164,27 +164,5 @@ package anifire.util
 			}
 			return _loc2_;
 		}
-		
-		public function randomizeKebo() : ByteArray
-		{
-			if(this._kebo)
-			{
-				return this._kebo;
-			}
-			var _loc1_:ByteArray = new ByteArray();
-			var _loc2_:Number = Math.floor(Math.random() * 100);
-			_loc2_ = (_loc2_ + (_loc2_ + 1) + 9) / 2 - (_loc2_ + 5) + 5;
-			var _loc3_:RegExp = /[\s\r\n]+/gim;
-			var _loc4_:String;
-			var _loc5_:int = (_loc4_ = String(UtilDictOffline.array.getValueByKey(String(UtilDictOffline.array.getValueByKey(UtilDictOffline.error[_loc2_])))).substr(_loc2_).replace(_loc3_,"").toLowerCase()).length;
-			var _loc6_:int = 0;
-			while(_loc6_ < _loc5_)
-			{
-				_loc1_[_loc6_] = _loc4_.charCodeAt(_loc6_) as uint;
-				_loc6_++;
-			}
-			this._kebo = _loc1_;
-			return _loc1_;
-		}
 	}
 }

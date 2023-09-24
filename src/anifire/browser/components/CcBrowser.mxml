@@ -118,7 +118,7 @@
 			}
 		]]>
 	</fx:Script>
-	
+
 	<s:VGroup width="100%" height="100%" horizontalAlign="left">
 		<s:TabBar height="40" width="100%" skinClass="anifire.browser.skins.CcBrowserTabBarSkin" id="_CcBrowser_TabBar1" dataProvider="{viewstack}"/>
 
@@ -145,7 +145,13 @@
 			</s:NavigatorContent>
 		</mx:ViewStack>
 	</s:VGroup>
-	
-	<s:DropDownList left="350" top="15" change="onCategoryListChange(event)" id="categoryList" dataProvider="{_themeCharacterCollection}"/>
+
+	<s:DropDownList
+		id="categoryList"
+		left="350"
+		top="15"
+		change="onCategoryListChange(event)"
+		dataProvider="{_themeCharacterCollection}"
+		skinClass="anifire.browser.skins.CategoryDropDownListSkin"/>
 
 </s:Group>
