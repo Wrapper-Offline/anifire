@@ -54,13 +54,12 @@ package anifire.cc.view
 		
 		private function createComponentContainers() : void
 		{
-			var _loc3_:Sprite = null;
 			var _loc1_:Array = CcLibConstant.GET_COMPONENT_ORDER_IN_HEAD;
 			this._containers = new UtilHashArray();
 			var _loc2_:int = 0;
 			while(_loc2_ < _loc1_.length)
 			{
-				_loc3_ = new Sprite();
+				var _loc3_:Sprite = new Sprite();
 				_loc3_.name = _loc1_[_loc2_] + CcLibConstant.MC_NAME_EXT;
 				this.addChild(_loc3_);
 				this._containers.push(_loc3_.name,_loc3_);
@@ -122,13 +121,11 @@ package anifire.cc.view
 				this._state = this.STATE_LOADING;
 				this.createFaceDecorationContainers();
 				this.createAllComponents();
-				return;
 			}
 			catch(e:Error)
 			{
 				this.dispatchEvent(new Event(Event.COMPLETE));
 				UtilErrorLogger.getInstance().appendCustomError("CcHeadComponent:load",e);
-				return;
 			}
 		}
 		
@@ -251,13 +248,11 @@ package anifire.cc.view
 		
 		private function removeImage(param1:String) : void
 		{
-			var _loc3_:Number = NaN;
-			var _loc4_:uint = 0;
 			var _loc2_:DisplayObjectContainer = UtilPlain.getInstance(this,param1);
 			if(_loc2_)
 			{
-				_loc3_ = _loc2_.numChildren;
-				_loc4_ = _loc3_;
+				var _loc3_:Number = _loc2_.numChildren;
+				var _loc4_:uint = _loc3_;
 				while(_loc4_ > 0)
 				{
 					_loc2_.removeChildAt(_loc4_ - 1);
@@ -317,13 +312,13 @@ package anifire.cc.view
 		
 		private function borrowComponent(param1:XML, param2:String, param3:Boolean) : CcComponent
 		{
-			var _loc4_:CcComponent = null;
-			var _loc5_:Object = null;
-			var _loc6_:String = null;
-			var _loc7_:AssetImageLibraryObject = null;
-			var _loc9_:CcComponentModel = null;
+			var _loc4_:CcComponent;
+			var _loc5_:Object;
+			var _loc6_:String;
+			var _loc7_:AssetImageLibraryObject;
 			_loc6_ = param1.@theme_id + "." + param2 + "." + param1.@path + "." + param1.@file;
 			var _loc8_:Number = 0;
+			var _loc9_:CcComponentModel;
 			if(!param3)
 			{
 				_loc8_ = this._assetImageIdArray.getValueByKey(_loc6_);
@@ -345,16 +340,13 @@ package anifire.cc.view
 		
 		private function createComponentFromXml(param1:XML, param2:String) : CcComponent
 		{
-			var _loc4_:String = null;
-			var _loc5_:Number = NaN;
-			var _loc6_:CcComponentModel = null;
 			var _loc3_:CcComponent = CcComponentFactory.create(param2);
 			if(this._useImageLibrary)
 			{
 				if(param1)
 				{
-					_loc4_ = param1.@theme_id + "." + param2 + "." + param1.@path + "." + param1.@file;
-					_loc5_ = 0;
+					var _loc4_:String = param1.@theme_id + "." + param2 + "." + param1.@path + "." + param1.@file;
+					var _loc5_:Number = 0;
 					_loc5_ = CcImageLibrary.library.requestImage(_loc4_,this._sceneId,_loc3_);
 					if(_loc5_ > 0)
 					{
@@ -364,7 +356,7 @@ package anifire.cc.view
 			}
 			if(_loc3_)
 			{
-				_loc6_ = CcComponentModel.createModelByType(param1.@type);
+				var _loc6_:CcComponentModel = CcComponentModel.createModelByType(param1.@type);
 				_loc6_.initByXml(param1);
 				_loc3_.init(_loc6_);
 			}
@@ -442,9 +434,8 @@ package anifire.cc.view
 			}
 		}
 		
-		public function requestImage(param1:String) : void
+		public function requestImage(sceneId:String) : void
 		{
-			var sceneId:String = param1;
 			try
 			{
 				if(this._useImageLibrary)
@@ -456,13 +447,11 @@ package anifire.cc.view
 				{
 					this.dispatchEvent(new Event(Event.COMPLETE));
 				}
-				return;
 			}
 			catch(e:Error)
 			{
 				this.dispatchEvent(new Event(Event.COMPLETE));
 				UtilErrorLogger.getInstance().appendCustomError("CcHeadComponent:requestImage:" + sceneId,e);
-				return;
 			}
 		}
 		
@@ -500,27 +489,22 @@ package anifire.cc.view
 		
 		public function setComponent(param1:ICcComponent, param2:ByteArray) : Boolean
 		{
-			var _loc4_:String = null;
-			var _loc5_:String = null;
-			var _loc6_:DisplayObjectContainer = null;
-			var _loc7_:Sprite = null;
-			var _loc8_:Sprite = null;
 			var _loc3_:CcComponent = CcComponentFactory.create(param1.type);
 			if(_loc3_)
 			{
 				_loc3_.init(param1);
-				_loc4_ = param1.type;
+				var _loc4_:String = param1.type;
 				if(_loc4_ == "facedecoration")
 				{
 					_loc4_ = param1.id;
-					_loc5_ = param1.id + CcLibConstant.MC_NAME_EXT;
-					_loc6_ = UtilPlain.getInstance(this,_loc5_);
+					var _loc5_:String = param1.id + CcLibConstant.MC_NAME_EXT;
+					var _loc6_:DisplayObjectContainer = UtilPlain.getInstance(this,_loc5_);
 					if(!_loc6_)
 					{
-						_loc7_ = this._containers.getValueByKey("facedecorationMC");
+						var _loc7_:Sprite = this._containers.getValueByKey("facedecorationMC");
 						if(_loc7_)
 						{
-							_loc8_ = new Sprite();
+							var _loc8_:Sprite = new Sprite();
 							_loc8_.name = _loc5_;
 							_loc7_.addChild(_loc8_);
 						}
@@ -545,28 +529,23 @@ package anifire.cc.view
 			this.dispatchEvent(new Event(Event.COMPLETE));
 		}
 		
-		public function prepareImage(param1:String, param2:Boolean = true) : void
+		public function prepareImage(sceneId:String, isFirstBehaviour:Boolean = true) : void
 		{
-			var i:uint = 0;
-			var sceneId:String = param1;
-			var isFirstBehaviour:Boolean = param2;
 			try
 			{
 				this._sceneId = sceneId;
 				this.borrowAllComponents(isFirstBehaviour);
-				i = 0;
+				var i:uint = 0;
 				while(i < this._componentList.length)
 				{
 					this.addComponent(this._componentList.getValueByIndex(i) as CcComponent);
 					i++;
 				}
 				this.setColors();
-				return;
 			}
 			catch(e:Error)
 			{
 				UtilErrorLogger.getInstance().appendCustomError("CcHeadComponent:prepareImage:" + sceneId,e);
-				return;
 			}
 		}
 		
@@ -600,26 +579,22 @@ package anifire.cc.view
 					}
 					this._state = null;
 				}
-				return;
 			}
 			catch(e:Error)
 			{
 				UtilErrorLogger.getInstance().appendCustomError("CcHeadComponent:destroy",e);
-				return;
 			}
 		}
 		
 		protected function setColors() : void
 		{
-			var _loc1_:XML = null;
-			var _loc2_:SelectedColor = null;
 			UtilColor.resetAssetPartsColor(this);
 			if(this._charXml)
 			{
-				for each(_loc1_ in this._charXml.child(CcLibConstant.NODE_COLOR))
+				for each(var _loc1_:XML in this._charXml.child(CcLibConstant.NODE_COLOR))
 				{
-					_loc2_ = new SelectedColor(_loc1_.@r,String(_loc1_.@oc).length == 0?uint(uint.MAX_VALUE):uint(_loc1_.@oc),uint(_loc1_));
-					this.changeColor(_loc2_,_loc1_.@targetComponent == null?"":_loc1_.@targetComponent);
+					var _loc2_:SelectedColor = new SelectedColor(_loc1_.@r,String(_loc1_.@oc).length == 0 ? uint.MAX_VALUE : uint(_loc1_.@oc),uint(_loc1_));
+					this.changeColor(_loc2_, _loc1_.@targetComponent == null? "": _loc1_.@targetComponent);
 				}
 			}
 		}

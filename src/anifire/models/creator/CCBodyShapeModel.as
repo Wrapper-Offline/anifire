@@ -112,13 +112,8 @@ package anifire.models.creator
 		
 		private function createAction(param1:XML, param2:Boolean = true) : void
 		{
-			var _loc7_:CCComponentModel = null;
-			var _loc9_:int = 0;
-			var _loc10_:String = null;
-			var _loc11_:String = null;
-			var _loc12_:CCFaceModel = null;
-			var _loc13_:Object = null;
-			var _loc14_:* = null;
+			
+			
 			var _loc3_:CCActionModel = new CCActionModel();
 			_loc3_.id = param1.@id + ".xml";
 			_loc3_.name = param1.@name;
@@ -140,19 +135,21 @@ package anifire.models.creator
 			}
 			var _loc5_:XMLList = param1.selection;
 			var _loc6_:int = _loc5_.length();
+			var _loc7_:CCComponentModel;
 			var _loc8_:int = 0;
 			while(_loc8_ < _loc6_)
 			{
-				_loc10_ = _loc5_[_loc8_].@type;
+				var _loc9_:int;
+				var _loc10_:String = _loc5_[_loc8_].@type;
 				if(_loc10_ == "facial")
 				{
-					_loc11_ = _loc5_[_loc8_].@facial_id;
+					var _loc11_:String = _loc5_[_loc8_].@facial_id;
 					_loc3_.defaultFacialId = _loc11_ + ".xml";
-					_loc12_ = this.themeModel.faces[_loc11_];
+					var _loc12_:CCFaceModel = this.themeModel.faces[_loc11_];
 					if(_loc12_)
 					{
-						_loc13_ = _loc12_.componentStates;
-						for(_loc14_ in _loc13_)
+						var _loc13_:Object = _loc12_.componentStates;
+						for(var _loc14_:String in _loc13_)
 						{
 							_loc3_.addComponent(_loc14_,_loc13_[_loc14_]);
 						}

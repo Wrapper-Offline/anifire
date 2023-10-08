@@ -8,6 +8,9 @@ package anifire.models.creator
 	
 	public class CCThemeModel extends EventDispatcher
 	{
+		/**
+		 * i have no idea what this does
+		 */
 		public var runwayMode:Boolean;
 		public var themeId:String;
 		public var defaultBodyShape:CCBodyShapeModel;
@@ -41,9 +44,9 @@ package anifire.models.creator
 			}
 		}
 		
-		protected function onLoaderComplete(param1:Event) : void
+		protected function onLoaderComplete(event:Event) : void
 		{
-			this.loader.removeEventListener(Event.COMPLETE ,this.onLoaderComplete);
+			this.loader.removeEventListener(Event.COMPLETE, this.onLoaderComplete);
 			this.parse(XML(this.loader.data));
 		}
 
@@ -52,27 +55,23 @@ package anifire.models.creator
 		 */
 		public function parse(ccThemeXml:XML) : void
 		{
-			var node:XML = null;
-			var tagName:String = null;
-			var facialExpression:CCFaceModel = null;
-			var bodyshape:CCBodyShapeModel = null;
-			var component:CCComponentModel = null;
 			var nodes:XMLList = ccThemeXml.children();
 			var totalNodes:int = nodes.length();
+			var node:XML;
 			var nodeIndex:int = 0;
 			while (nodeIndex < totalNodes)
 			{
 				node = nodes[nodeIndex];
-				tagName = node.localName() as String;
+				var tagName:String = node.localName() as String;
 				switch (tagName)
 				{
 					case "facial":
-						facialExpression = new CCFaceModel();
+						var facialExpression:CCFaceModel = new CCFaceModel();
 						facialExpression.parse(node);
 						this.faces[facialExpression.id] = facialExpression;
 						break;
 					case "bodyshape":
-						bodyshape = new CCBodyShapeModel(this);
+						var bodyshape:CCBodyShapeModel = new CCBodyShapeModel(this);
 						bodyshape.parse(node);
 						if (!this.defaultBodyShape)
 						{
@@ -81,7 +80,7 @@ package anifire.models.creator
 						this.bodyShapes[bodyshape.bodyShapeId] = bodyshape;
 						break;
 					case "component":
-						component = new CCComponentModel(this.runwayMode);
+						var component:CCComponentModel = new CCComponentModel(this.runwayMode);
 						component.parse(node);
 						// any component in the root would be a shared component
 						// a shared component would be available to any bodyshape
@@ -104,24 +103,27 @@ package anifire.models.creator
 			return null;
 		}
 
-		protected function storeSharedComponent(component:CCComponentModel) : void
-		{
-			var uniqueId:String = this.componentUniqueId(component.type, component.id);
-			this.components[uniqueId] = component;
-		}
-
-		protected function getSharedComponent(type:String, id:String) : CCComponentModel
-		{
-			var uniqueId:String = this.componentUniqueId(type, id);
-			return this.components[uniqueId];
-		}
-
 		/**
 		 * takes in the component type and component and outputs something like "ear:006"
 		 */
 		protected function componentUniqueId(componentType:String, componentId:String) : String
 		{
 			return componentType + ":" + componentId;
+		}
+
+		protected function storeSharedComponent(component:CCComponentModel) : void
+		{
+			var uniqueId:String = this.componentUniqueId(component.type, component.id);
+			this.components[uniqueId] = component;
+		}
+
+		/**
+		 * get a shared component
+		 */
+		protected function getSharedComponent(type:String, id:String) : CCComponentModel
+		{
+			var uniqueId:String = this.componentUniqueId(type, id);
+			return this.components[uniqueId];
 		}
 
 		/**
@@ -138,32 +140,16 @@ package anifire.models.creator
 			}
 			return component;
 		}
-		
+
 		public function createCharacterActionModel(param1:CCBodyModel, param2:CCActionModel) : CCCharacterActionModel
 		{
-			var _loc6_:String = null;
-			var _loc8_:* = null;
-			var _loc9_:Object = null;
-			var _loc10_:* = null;
-			var _loc11_:Object = null;
-			var _loc12_:* = null;
-			var _loc13_:Object = null;
-			var _loc14_:CCCharacterActionModel = null;
-			var _loc15_:CCBodyComponentModel = null;
-			var _loc16_:CCComponentModel = null;
-			var _loc17_:String = null;
-			var _loc18_:CCComponentModel = null;
-			var _loc19_:Object = null;
-			var _loc20_:* = null;
-			var _loc21_:String = null;
-			var _loc22_:CCLibraryModel = null;
 			var _loc3_:CCBodyShapeModel = this.bodyShapes[param1.bodyShapeId];
 			if(!this.runwayMode)
 			{
-				_loc13_ = this._actionModels[param1.assetId];
+				var _loc13_:Object = this._actionModels[param1.assetId];
 				if(_loc13_)
 				{
-					_loc14_ = _loc13_[_loc6_];
+					var _loc14_:CCCharacterActionModel = _loc13_[_loc6_];
 					if(_loc14_)
 					{
 						return _loc14_;
@@ -178,10 +164,15 @@ package anifire.models.creator
 			var _loc5_:CCCharacterActionModel = new CCCharacterActionModel();
 			_loc5_.actionModel = param2;
 			_loc5_.enabled = param2.enabled;
+			var _loc6_:String;
 			_loc6_ = param2.shortId;
 			var _loc7_:Object = param2.componentStates;
-			for(_loc8_ in _loc7_)
+			for(var _loc8_:String in _loc7_)
 			{
+				var _loc15_:CCBodyComponentModel;
+				var _loc16_:CCComponentModel;
+				var _loc17_:String;
+				var _loc18_:CCComponentModel;
 				if(_loc8_ == "freeaction")
 				{
 					_loc16_ = this.getComponent(_loc3_,"freeaction",_loc6_);
@@ -194,8 +185,8 @@ package anifire.models.creator
 				}
 				else if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(_loc8_) > -1)
 				{
-					_loc19_ = param1.getComponentId(_loc8_);
-					for(_loc20_ in _loc19_)
+					var _loc19_:Object = param1.getComponentId(_loc8_);
+					for(var _loc20_:String in _loc19_)
 					{
 						_loc15_ = _loc19_[_loc20_] as CCBodyComponentModel;
 						if(_loc15_)
@@ -212,7 +203,7 @@ package anifire.models.creator
 				else
 				{
 					_loc15_ = param1.getComponentId(_loc8_) as CCBodyComponentModel;
-					if(_loc15_)
+					if (_loc15_)
 					{
 						_loc17_ = _loc15_.component_id;
 						_loc18_ = this.getComponent(_loc3_,_loc8_,_loc17_);
@@ -223,18 +214,18 @@ package anifire.models.creator
 					}
 				}
 			}
-			_loc9_ = param1.libraries;
-			for(_loc10_ in _loc9_)
+			var _loc9_:Object = param1.libraries;
+			for(var _loc10_:String in _loc9_)
 			{
-				_loc21_ = param1.getLibraryId(_loc10_);
-				_loc22_ = _loc3_.getLibrary(_loc10_,_loc21_);
+				var _loc21_:String = param1.getLibraryId(_loc10_);
+				var _loc22_:CCLibraryModel = _loc3_.getLibrary(_loc10_,_loc21_);
 				if(_loc22_)
 				{
 					_loc5_.addLibrary(_loc10_,this.themeId + "/" + _loc22_.getPath());
 				}
 			}
-			_loc11_ = param1.colors;
-			for(_loc12_ in _loc11_)
+			var _loc11_:Object = param1.colors;
+			for(var _loc12_:String in _loc11_)
 			{
 				_loc5_.addColor(_loc12_,_loc11_[_loc12_]);
 			}
@@ -272,7 +263,10 @@ package anifire.models.creator
 			}
 			this._actionModels[param1][param2] = param3;
 		}
-		
+
+		/**
+		 * get a character action
+		 */
 		public function getCharacterActionModel(param1:CCBodyModel, param2:String) : CCCharacterActionModel
 		{
 			var _loc3_:CCCharacterActionModel = this.getCache(param1.assetId,param2);
@@ -288,23 +282,14 @@ package anifire.models.creator
 			var _loc5_:CCActionModel = _loc4_.actions[param2];
 			if(_loc5_)
 			{
-				_loc3_ = this.createCharacterActionModel(param1,_loc5_);
+				_loc3_ = this.createCharacterActionModel(param1, _loc5_);
 			}
-			this.putCache(param1.assetId,param2,_loc3_);
+			this.putCache(param1.assetId, param2, _loc3_);
 			return _loc3_;
 		}
 		
 		public function getCharacterFacialModel(param1:CCBodyModel, param2:String) : CCCharacterActionModel
 		{
-			var _loc6_:Object = null;
-			var _loc7_:* = null;
-			var _loc8_:Object = null;
-			var _loc9_:* = null;
-			var _loc10_:CCBodyComponentModel = null;
-			var _loc11_:String = null;
-			var _loc12_:CCComponentModel = null;
-			var _loc13_:Object = null;
-			var _loc14_:* = null;
 			var _loc3_:CCCharacterActionModel = this.getCache(param1.assetId,param2);
 			if(_loc3_)
 			{
@@ -316,17 +301,20 @@ package anifire.models.creator
 				return null;
 			}
 			_loc3_ = new CCCharacterActionModel();
-			param2 = param2.split(".")[0];
+			param2 = String(param2.split(".")[0]);
 			var _loc5_:CCFaceModel = this.faces[param2];
 			if(_loc5_)
 			{
-				_loc6_ = _loc5_.componentStates;
-				for(_loc7_ in _loc6_)
+				var _loc6_:Object = _loc5_.componentStates;
+				for(var _loc7_:String in _loc6_)
 				{
+					var _loc10_:CCBodyComponentModel;
+					var _loc11_:String;
+					var _loc12_:CCComponentModel;
 					if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(_loc7_) > -1)
 					{
-						_loc13_ = param1.getComponentId(_loc7_);
-						for(_loc14_ in _loc13_)
+						var _loc13_:Object = param1.getComponentId(_loc7_);
+						for(var _loc14_:String in _loc13_)
 						{
 							_loc10_ = _loc13_[_loc14_] as CCBodyComponentModel;
 							if(_loc10_)
@@ -340,8 +328,7 @@ package anifire.models.creator
 							}
 						}
 					}
-					else
-					{
+					else {
 						_loc10_ = param1.getComponentId(_loc7_) as CCBodyComponentModel;
 						if(_loc10_)
 						{
@@ -354,8 +341,8 @@ package anifire.models.creator
 						}
 					}
 				}
-				_loc8_ = param1.colors;
-				for(_loc9_ in _loc8_)
+				var _loc8_:Object = param1.colors;
+				for(var _loc9_:String in _loc8_)
 				{
 					_loc3_.addColor(_loc9_,_loc8_[_loc9_]);
 				}

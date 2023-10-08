@@ -200,16 +200,16 @@ package anifire.component
 		
 		public function updateComponentImageData(param1:String, param2:ByteArray, param3:String = "", param4:XML = null) : ExtraDataLoader
 		{
-			var _loc5_:String = null;
-			var _loc7_:String = null;
-			var _loc6_:ExtraDataLoader;
-			(_loc6_ = new ExtraDataLoader()).name = param3;
+			var _loc5_:String;
+			var _loc6_:ExtraDataLoader = new ExtraDataLoader();
+			_loc6_.name = param3;
 			_loc6_.extraData = {
-				"componentType":param1,
-				"clipName":_loc5_
+				"componentType": param1,
+				"clipName": _loc5_
 			};
 			if(param2 == null)
 			{
+				var _loc7_:String;
 				if(this._lipSync)
 				{
 					_loc7_ = this.themeId + "." + "mouth" + "." + CCLipSyncController.LIPSYNC_LIB_ID;
@@ -234,12 +234,10 @@ package anifire.component
 		
 		public function addMouthClipToHeadContainer(param1:DisplayObject, param2:DisplayObjectContainer) : void
 		{
-			var _loc5_:DisplayObjectContainer = null;
-			var _loc7_:DisplayObjectContainer = null;
-			var _loc8_:DisplayObjectContainer = null;
 			var _loc3_:DisplayObjectContainer = UtilPlain.getInstance(param2,UtilPlain.THE_CHAR_FLIP);
-			var _loc4_:DisplayObjectContainer;
-			if((_loc4_ = UtilPlain.getInstance(param2,UtilPlain.THE_CHAR)) != null)
+			var _loc4_:DisplayObjectContainer = UtilPlain.getInstance(param2,UtilPlain.THE_CHAR);
+			var _loc5_:DisplayObjectContainer;
+			if(_loc4_ != null)
 			{
 				if(_loc3_ != null && scaleX == -1)
 				{
@@ -257,9 +255,11 @@ package anifire.component
 			var _loc6_:int = 0;
 			while(_loc6_ < _loc5_.numChildren)
 			{
-				if((_loc7_ = _loc5_.getChildAt(_loc6_) as DisplayObjectContainer) != null)
+				var _loc7_:DisplayObjectContainer = _loc5_.getChildAt(_loc6_) as DisplayObjectContainer;
+				if(_loc7_ != null)
 				{
-					if((_loc8_ = UtilPlain.getMouth(_loc7_)) != null)
+					var _loc8_:DisplayObjectContainer = UtilPlain.getMouth(_loc7_);
+					if(_loc8_ != null)
 					{
 						_loc8_.getChildByName(AnimeConstants.MOVIECLIP_DEFAULT_MOUTH).alpha = 0;
 						while(_loc8_.numChildren > 1)
@@ -275,10 +275,9 @@ package anifire.component
 		
 		private function removeMouthClipToHeadContainer(param1:DisplayObjectContainer) : void
 		{
-			var _loc4_:DisplayObjectContainer = null;
-			var _loc5_:DisplayObjectContainer = null;
 			var _loc2_:DisplayObjectContainer = UtilPlain.getHead(param1);
 			var _loc3_:DisplayObjectContainer = _loc2_.getChildByName(AnimeConstants.MOVIECLIP_DEFAULT_HEAD) as DisplayObjectContainer;
+			var _loc4_:DisplayObjectContainer;
 			_loc4_ = _loc3_;
 			if(_loc3_ != null && _loc3_.alpha == 0)
 			{
@@ -286,7 +285,8 @@ package anifire.component
 			}
 			if(_loc4_ != null)
 			{
-				if((_loc5_ = UtilPlain.getMouth(_loc4_)) != null)
+				var _loc5_:DisplayObjectContainer = UtilPlain.getMouth(_loc4_);
+				if(_loc5_ != null)
 				{
 					_loc5_.getChildByName(AnimeConstants.MOVIECLIP_DEFAULT_MOUTH).alpha = 1;
 					_loc5_.removeChildAt(0);

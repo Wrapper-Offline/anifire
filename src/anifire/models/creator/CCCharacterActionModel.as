@@ -113,12 +113,12 @@ package anifire.models.creator
 		
 		public function serialize() : XML
 		{
-			var _loc2_:XML = null;
-			var _loc3_:* = null;
-			var _loc4_:Vector.<CCBodyComponentModel> = null;
-			var _loc5_:* = null;
-			var _loc6_:CCCharActionComponentModel = null;
 			var _loc1_:XML = <cam/>;
+			var _loc2_:XML;
+			var _loc3_:String;
+			var _loc4_:Vector.<CCBodyComponentModel>;
+			var _loc5_:String;
+			var _loc6_:CCCharActionComponentModel;
 			for(_loc3_ in this.colorCodes)
 			{
 				_loc1_.appendChild(CCColor(this.getColor(_loc3_)).serialize());
@@ -170,21 +170,19 @@ package anifire.models.creator
 		
 		public function deserialize(param1:XML) : void
 		{
-			var _loc3_:XML = null;
-			var _loc4_:CCCharActionComponentModel = null;
-			var _loc5_:CCColor = null;
-			var _loc6_:Vector.<CCBodyComponentModel> = null;
 			var _loc2_:int = 0;
+			var _loc3_:XML;
 			while(_loc2_ < param1.children().length())
 			{
 				_loc3_ = param1.children()[_loc2_];
 				switch(_loc3_.localName())
 				{
 					case "component":
-						_loc4_ = new CCCharActionComponentModel();
+						var _loc4_:CCCharActionComponentModel = new CCCharActionComponentModel();
 						_loc4_.deserialize(_loc3_);
 						if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(_loc4_.type) > -1)
 						{
+							var _loc6_:Vector.<CCBodyComponentModel>;
 							if(!this.components[_loc4_.type])
 							{
 								_loc6_ = this.components[_loc4_.type] = new Vector.<CCBodyComponentModel>();
@@ -213,7 +211,7 @@ package anifire.models.creator
 						this.headPos[_loc3_.@type] = _loc3_.text();
 						break;
 					case "color":
-						_loc5_ = new CCColor();
+						var _loc5_:CCColor = new CCColor();
 						_loc5_.deserialize(_loc3_);
 						if(_loc5_.targetComponent)
 						{

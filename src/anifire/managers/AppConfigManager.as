@@ -1,10 +1,9 @@
 package anifire.managers
 {
-	import mx.binding.IBindingClient;
 	import flash.net.URLVariables;
 	import mx.core.FlexGlobals;
 	
-	public class AppConfigManager implements IBindingClient
+	public class AppConfigManager
 	{
 		private static var __instance:anifire.managers.AppConfigManager;
 
@@ -34,10 +33,10 @@ package anifire.managers
 		public function processAppParams() : void
 		{
 			var owo:Object = FlexGlobals.topLevelApplication;
-			this.setParameters(owo.parameters);
+			this.setParamters(owo.parameters);
 		}
 
-		public function setParameters(param1:Object) : void
+		public function setParamters(param1:Object) : void
 		{
 			var key:String = null;
 			for(key in param1)
@@ -64,9 +63,8 @@ package anifire.managers
 
 		public function createURLVariables() : URLVariables
 		{
-			var _loc2_:String = null;
 			var _loc1_:URLVariables = new URLVariables();
-			for(_loc2_ in this._properties)
+			for(var _loc2_:String in this._properties)
 			{
 				_loc1_[_loc2_] = this._properties[_loc2_];
 			}

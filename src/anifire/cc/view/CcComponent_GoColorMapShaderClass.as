@@ -4,7 +4,7 @@ package anifire.cc.view
 	
 	public class CcComponent_GoColorMapShaderClass extends ByteArrayAsset
 	{
-		 
+		
 		
 		public function CcComponent_GoColorMapShaderClass()
 		{

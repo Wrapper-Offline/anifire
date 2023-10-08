@@ -21,7 +21,7 @@ package anifire.models.creator
 		{
 			this.type = param1.@r;
 			this.dest = uint(param1);
-			this.oc = param1.attribute("oc").length() == 0?uint(uint.MAX_VALUE):uint(param1.@oc);
+			this.oc = param1.attribute("oc").length() == 0 ? uint.MAX_VALUE : uint(param1.@oc);
 			if(param1.attribute("targetComponent").length() != 0)
 			{
 				this.targetComponent = param1.@targetComponent;

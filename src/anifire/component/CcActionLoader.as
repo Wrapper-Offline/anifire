@@ -64,8 +64,7 @@ package anifire.component
 		
 		public static function getStoreUrl(param1:String, param2:String = "", param3:Number = 1) : String
 		{
-			var _loc4_:String = null;
-			var _loc6_:RegExp = null;
+			var _loc4_:String;
 			switch(param3)
 			{
 				case 3:
@@ -74,14 +73,15 @@ package anifire.component
 				default:
 					_loc4_ = "cc_store/";
 			}
-			var _loc5_:String;
-			if((_loc5_ = _configManager.getValue(ServerConstants.FLASHVAR_STORE_PATH)) == "" || _loc5_ == null)
+			var _loc5_:String = _configManager.getValue(ServerConstants.FLASHVAR_STORE_PATH);
+			if(_loc5_ == "" || _loc5_ == null)
 			{
-				_loc5_ = (_loc5_ = _configManager.getValue(ServerConstants.FLASHVAR_APISERVER)) + ("static/store/" + _loc4_ + param1);
+				_loc5_ = _configManager.getValue(ServerConstants.FLASHVAR_APISERVER);
+				_loc5_ += "static/store/" + _loc4_ + param1;
 			}
 			else
 			{
-				_loc6_ = new RegExp(ServerConstants.FLASHVAR_STORE_PLACEHOLDER,"g");
+				var _loc6_:RegExp = new RegExp(ServerConstants.FLASHVAR_STORE_PLACEHOLDER,"g");
 				_loc5_ = _loc5_.replace(_loc6_,_loc4_ + param1);
 			}
 			return _loc5_;
@@ -92,45 +92,36 @@ package anifire.component
 			return this._imageData;
 		}
 		
-		public function load(param1:String, param2:String = "", param3:String = "", param4:Boolean = false) : void
+		public function load(aid:String, actionId:String = "", facialId:String = "", isDefault:Boolean = false) : void
 		{
-			var request:URLRequest = null;
-			var stream:UtilURLStream = null;
-			var aid:String = param1;
-			var actionId:String = param2;
-			var facialId:String = param3;
-			var isDefault:Boolean = param4;
 			try
 			{
-				if(aid)
+				if (aid)
 				{
-					stream = new UtilURLStream();
-					request = UtilNetwork.getGetCcActionRequest(aid,actionId,facialId,isDefault);
-					stream.addEventListener(Event.COMPLETE,this.onXmlLoaded);
-					stream.addEventListener(IOErrorEvent.IO_ERROR,this.ioErrorHandler);
-					stream.addEventListener(UtilURLStream.TIME_OUT,this.timeoutHandler);
+					var request:URLRequest;
+					var stream:UtilURLStream = new UtilURLStream();
+					request = UtilNetwork.getGetCcActionRequest(aid, actionId, facialId, isDefault);
+					stream.addEventListener(Event.COMPLETE, this.onXmlLoaded);
+					stream.addEventListener(IOErrorEvent.IO_ERROR, this.ioErrorHandler);
+					stream.addEventListener(UtilURLStream.TIME_OUT, this.timeoutHandler);
 					stream.load(request);
 				}
 			}
-			catch(e:Error)
+			catch (e:Error)
 			{
-				UtilErrorLogger.getInstance().appendCustomError("CcActionLoader:load",e);
+				UtilErrorLogger.getInstance().appendCustomError("CcActionLoader:load", e);
 			}
 		}
 		
-		private function onXmlLoaded(param1:Event) : void
+		private function onXmlLoaded(e:Event) : void
 		{
-			var stream:URLStream = null;
-			var bytes:ByteArray = null;
-			var xmlCC:XML = null;
-			var e:Event = param1;
 			try
 			{
 				IEventDispatcher(e.target).removeEventListener(e.type,this.onXmlLoaded);
-				stream = URLStream(e.target);
-				bytes = new ByteArray();
+				var stream:URLStream = URLStream(e.target);
+				var bytes:ByteArray = new ByteArray();
 				stream.readBytes(bytes);
-				xmlCC = XML(bytes);
+				var xmlCC:XML = XML(bytes);
 				this.loadCcComponents(xmlCC);
 			}
 			catch(e:Error)
@@ -404,24 +395,22 @@ package anifire.component
 		
 		public function doLoadExtraComponent(param1:XML, param2:String = "", param3:Number = 1) : void
 		{
-			var _loc4_:CcComponentLoader = null;
-			var _loc7_:UtilHashArray = null;
-			var _loc8_:String = null;
-			var _loc9_:String = null;
+			var _loc4_:CcComponentLoader;
 			var _loc5_:UtilHashArray = new UtilHashArray();
 			if(param1.@type == CcLibConstant.COMPONENT_TYPE_MOUTH)
 			{
-				_loc7_ = CCLipSyncController.getLipSyncComponentItems(param1,param2,param3);
+				var _loc7_:UtilHashArray = CCLipSyncController.getLipSyncComponentItems(param1,param2,param3);
 				_loc5_.insert(0,_loc7_);
 			}
 			var _loc6_:int = 0;
 			while(_loc6_ < _loc5_.length)
 			{
-				_loc8_ = _loc5_.getKey(_loc6_);
-				_loc9_ = _loc5_.getValueByIndex(_loc6_);
+				var _loc8_:String = _loc5_.getKey(_loc6_);
+				var _loc9_:String = _loc5_.getValueByIndex(_loc6_);
 				if(UtilHashBytes(this._imageData["imageData"]).getValueByKey(_loc9_) == null)
 				{
-					(_loc4_ = CcComponentLoader.getComponentLoader(_loc9_,_loc8_)).addEventListener(Event.COMPLETE,this.onCcComponentLoaded);
+					_loc4_ = CcComponentLoader.getComponentLoader(_loc9_,_loc8_);
+					_loc4_.addEventListener(Event.COMPLETE,this.onCcComponentLoaded);
 					_loc4_.addEventListener(IOErrorEvent.IO_ERROR,this.onCcComponentFailed);
 					this._regulator.addProcess(_loc4_,Event.COMPLETE);
 				}

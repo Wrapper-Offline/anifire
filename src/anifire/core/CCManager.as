@@ -199,10 +199,10 @@ package anifire.core
 		
 		public function getSkin(param1:String, param2:String, param3:Boolean = false) : DisplayObjectContainer
 		{
-			var _loc5_:DisplayObjectContainer = null;
-			var _loc6_:Class = null;
-			var _loc7_:Class = null;
 			var _loc4_:LoaderInfo = this._styleCollection.getValueByKey(!!this.isOneOfHandClass(param2)?AnimeConstants.CLASS_GOHAND:param2) as LoaderInfo;
+			var _loc5_:DisplayObjectContainer;
+			var _loc6_:Class;
+			var _loc7_:Class;
 			if(_loc4_)
 			{
 				if(this.haveProp() && this.isOneOfRightHandClass(param2))
@@ -251,24 +251,19 @@ package anifire.core
 		
 		protected function changeSkinColor(param1:DisplayObjectContainer) : void
 		{
-			var _loc4_:DisplayObject = null;
-			var _loc5_:String = null;
-			var _loc6_:String = null;
-			var _loc7_:uint = 0;
-			var _loc8_:ColorTransform = null;
 			var _loc2_:int = param1.numChildren;
 			var _loc3_:int = 0;
 			while(_loc3_ < _loc2_)
 			{
-				_loc4_ = param1.getChildAt(_loc3_);
-				_loc5_ = _loc4_.name;
+				var _loc4_:DisplayObject = param1.getChildAt(_loc3_);
+				var _loc5_:String = _loc4_.name;
 				if(_loc5_ && _loc5_.indexOf("theColor_") != -1)
 				{
-					_loc6_ = _loc5_.substr(9);
-					_loc7_ = this.getColorByName(_loc6_);
+					var _loc6_:String = _loc5_.substr(9);
+					var _loc7_:uint = this.getColorByName(_loc6_);
 					if(_loc7_ != uint.MAX_VALUE)
 					{
-						_loc8_ = new ColorTransform();
+						var _loc8_:ColorTransform = new ColorTransform();
 						_loc8_.color = _loc7_;
 						_loc4_.transform.colorTransform = _loc8_;
 					}

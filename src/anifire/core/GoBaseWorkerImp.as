@@ -29,13 +29,6 @@ package anifire.core
 		
 		override public function initSkin(param1:DisplayObjectContainer = null, param2:Boolean = false) : void
 		{
-			var _loc6_:Loader = null;
-			var _loc7_:DisplayObject = null;
-			var _loc8_:Array = null;
-			var _loc9_:int = 0;
-			var _loc10_:DisplayObjectContainer = null;
-			var _loc11_:DisplayObjectContainer = null;
-			var _loc12_:DisplayObject = null;
 			if(this._myDisplayObject == null)
 			{
 				this._myDisplayObject = param1;
@@ -50,10 +43,10 @@ package anifire.core
 			_loc4_ = _loc4_.substr(_loc5_ + 1);
 			if(param1.loaderInfo != null)
 			{
-				_loc6_ = Loader(param1.loaderInfo.loader);
+				var _loc6_:Loader = Loader(param1.loaderInfo.loader);
 				if(_loc6_ != null)
 				{
-					_loc7_ = _loc6_.parent;
+					var _loc7_:DisplayObject = _loc6_.parent;
 					if(_loc7_ != null && _loc7_ is ICharacter)
 					{
 						while(param1.numChildren > 0)
@@ -64,18 +57,18 @@ package anifire.core
 						{
 							param1.cacheAsBitmap = true;
 						}
-						_loc8_ = new Array(_loc3_,"default");
-						_loc9_ = 0;
+						var _loc8_:Array = new Array(_loc3_,"default");
+						var _loc9_:int = 0;
 						while(_loc9_ < _loc8_.length)
 						{
-							_loc10_ = ICharacter(_loc7_).CCM.getSkin(_loc8_[_loc9_],_loc4_,param2);
+							var _loc10_:DisplayObjectContainer = ICharacter(_loc7_).CCM.getSkin(_loc8_[_loc9_],_loc4_,param2);
 							if(_loc10_ != null)
 							{
 								ICharacter(_loc7_).CCM.addSkinLoadingCount();
 								if(CcLibConstant.HEAD_RELATED_LIBRARY.indexOf(_loc4_) > -1)
 								{
-									_loc11_ = UtilPlain.getInstance(param1.root as DisplayObjectContainer,AnimeConstants.MOVIECLIP_THE_HEAD);
-									_loc12_ = _loc11_.getChildAt(0);
+									var _loc11_:DisplayObjectContainer = UtilPlain.getInstance(param1.root as DisplayObjectContainer,AnimeConstants.MOVIECLIP_THE_HEAD);
+									var _loc12_:DisplayObject = _loc11_.getChildAt(0);
 									if(_loc12_)
 									{
 										_loc10_.scaleX = _loc10_.scaleY = _loc12_.scaleX;

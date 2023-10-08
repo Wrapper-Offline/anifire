@@ -746,7 +746,7 @@ package anifire.constant
 				case ThemeConstants.FAMILY_THEME_ID:
 				case ThemeConstants.STICKLY_BIZ_THEME_ID:
 				case ThemeConstants.BIZ_MODEL_THEME_ID:
-				case ThemeConstants.BOTDF_THEME_ID:
+				case "cctoonadventure":
 				case ThemeConstants.COMMON_CRAFT_THEME_ID:
 					return false;
 				default:

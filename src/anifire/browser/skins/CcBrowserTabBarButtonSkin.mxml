@@ -42,7 +42,11 @@
 				var _loc5_:Number = Number(height);
 				var _loc6_:Number = this.cornerRadius * 0.292893218813453;
 				var _loc7_:Number = this.cornerRadius * 0.585786437626905;
-				var _loc8_:String = (_loc8_ = (_loc8_ = (_loc8_ = (_loc8_ = "") + ("M " + _loc2_ + " " + _loc5_)) + (" L " + _loc2_ + " " + (_loc4_ + this.cornerRadius))) + (" Q " + _loc2_ + " " + (_loc4_ + _loc7_) + " " + (_loc2_ + _loc6_) + " " + (_loc4_ + _loc6_))) + (" Q " + (_loc2_ + _loc7_) + " " + _loc4_ + " " + (_loc2_ + this.cornerRadius) + " " + _loc4_);
+				var _loc8_:String = "";
+				_loc8_ += "M " + _loc2_ + " " + _loc5_;
+				_loc8_ += " L " + _loc2_ + " " + (_loc4_ + this.cornerRadius);
+				_loc8_ += " Q " + _loc2_ + " " + (_loc4_ + _loc7_) + " " + (_loc2_ + _loc6_) + " " + (_loc4_ + _loc6_);
+				_loc8_ += " Q " + (_loc2_ + _loc7_) + " " + _loc4_ + " " + (_loc2_ + this.cornerRadius) + " " + _loc4_;
 				if(param1)
 				{
 					_loc8_ += " L " + (_loc3_ - this.cornerRadius) + " " + _loc4_;
@@ -51,7 +55,9 @@
 				{
 					_loc8_ += " M " + (_loc3_ - this.cornerRadius) + " " + _loc4_;
 				}
-				return (_loc8_ = (_loc8_ += " Q " + (_loc3_ - _loc7_) + " " + _loc4_ + " " + (_loc3_ - _loc6_) + " " + (_loc4_ + _loc6_)) + (" Q " + _loc3_ + " " + (_loc4_ + _loc7_) + " " + _loc3_ + " " + (_loc4_ + this.cornerRadius))) + (" L " + _loc3_ + " " + _loc5_);
+				_loc8_ += " Q " + (_loc3_ - _loc7_) + " " + _loc4_ + " " + (_loc3_ - _loc6_) + " " + (_loc4_ + _loc6_);
+				_loc8_ += " Q " + _loc3_ + " " + (_loc4_ + _loc7_) + " " + _loc3_ + " " + (_loc4_ + this.cornerRadius);
+				return _loc8_ + (" L " + _loc3_ + " " + _loc5_);
 			}
 			
 			private function updateCornerRadius() : void

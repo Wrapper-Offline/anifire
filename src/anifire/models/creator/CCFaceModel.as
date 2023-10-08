@@ -20,8 +20,6 @@ package anifire.models.creator
 		
 		public function parse(param1:XML) : void
 		{
-			var _loc5_:String = null;
-			var _loc6_:String = null;
 			this.id = param1.@id;
 			this.name = param1.@name;
 			this.enable = param1.@enable == "N"?false:true;
@@ -30,8 +28,8 @@ package anifire.models.creator
 			var _loc4_:int = 0;
 			while(_loc4_ < _loc3_)
 			{
-				_loc5_ = _loc2_[_loc4_].@type;
-				_loc6_ = _loc2_[_loc4_].@state_id;
+				var _loc5_:String = _loc2_[_loc4_].@type;
+				var _loc6_:String = _loc2_[_loc4_].@state_id;
 				this.componentStates[_loc5_] = _loc6_;
 				_loc4_++;
 			}

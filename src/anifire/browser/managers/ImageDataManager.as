@@ -65,13 +65,12 @@ package anifire.browser.managers
 		
 		protected function getCharacterActionCache(param1:String, param2:String) : CharacterActionCache
 		{
-			var _loc5_:int = 0;
-			var _loc6_:CharacterActionCache = null;
 			var _loc3_:String = this.characterUniqueKey(param1,param2);
-			var _loc4_:CharacterActionCache;
-			if(_loc4_ = this._characterActionCacheDictionary[_loc3_])
+			var _loc4_:CharacterActionCache = this._characterActionCacheDictionary[_loc3_];
+			if(_loc4_)
 			{
-				if((_loc5_ = this._characterActionCacheList.indexOf(_loc4_)) > 0)
+				var _loc5_:int = this._characterActionCacheList.indexOf(_loc4_);
+				if(_loc5_ > 0)
 				{
 					this._characterActionCacheList.splice(_loc5_,1);
 					this._characterActionCacheList.unshift(_loc4_);
@@ -81,7 +80,8 @@ package anifire.browser.managers
 			{
 				if(this._characterActionCacheList.length >= MAX_CHAR_ACTION_CACHE)
 				{
-					(_loc6_ = this._characterActionCacheList.pop()).release();
+					var _loc6_:CharacterActionCache = this._characterActionCacheList.pop();
+					_loc6_.release();
 					delete this._characterActionCacheDictionary[_loc6_.uniqueKey];
 				}
 				_loc4_ = new CharacterActionCache(_loc3_);
@@ -93,20 +93,20 @@ package anifire.browser.managers
 		
 		public function setCharacterActionData(param1:String, param2:String, param3:String, param4:BitmapData) : void
 		{
-			var _loc5_:CharacterActionCache;
-			(_loc5_ = this.getCharacterActionCache(param1,param2)).setActionImage(param3,param4);
+			var _loc5_:CharacterActionCache = this.getCharacterActionCache(param1,param2);
+			_loc5_.setActionImage(param3,param4);
 		}
 		
 		public function getCharacterActionData(param1:String, param2:String, param3:String) : BitmapData
 		{
-			var _loc4_:CharacterActionCache;
-			return (_loc4_ = this.getCharacterActionCache(param1,param2)).getActionImage(param3);
+			var _loc4_:CharacterActionCache = this.getCharacterActionCache(param1,param2);
+			return _loc4_.getActionImage(param3);
 		}
 		
 		public function setCharacterActionCollection(param1:String, param2:String, param3:ActionExplorerCollection) : void
 		{
-			var _loc4_:CharacterActionCache;
-			(_loc4_ = this.getCharacterActionCache(param1,param2)).setActionCollection(param3);
+			var _loc4_:CharacterActionCache = this.getCharacterActionCache(param1,param2);
+			_loc4_.setActionCollection(param3);
 		}
 		
 		public function getCharacterActionCollection(param1:String, param2:String) : ActionExplorerCollection

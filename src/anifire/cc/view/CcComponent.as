@@ -9,6 +9,7 @@ package anifire.cc.view
 	import anifire.util.UtilErrorLogger;
 	import anifire.util.UtilHashArray;
 	import anifire.util.UtilPlain;
+	
 	import flash.display.BlendMode;
 	import flash.display.DisplayObject;
 	import flash.display.Loader;
@@ -99,45 +100,38 @@ package anifire.cc.view
 			return _loc1_;
 		}
 		
-		private function onCcComponentLoaded(param1:Event) : void
+		private function onCcComponentLoaded(e:Event) : void
 		{
-			var componentLoader:CcComponentLoader = null;
-			var e:Event = param1;
 			try
 			{
-				componentLoader = CcComponentLoader(e.target);
+				var componentLoader:CcComponentLoader = CcComponentLoader(e.target);
 				if(componentLoader)
 				{
 					componentLoader.removeEventListener(e.type,this.onCcComponentLoaded);
 					this.loadFromBytes(componentLoader.swfBytes);
 				}
-				return;
 			}
 			catch(e:Error)
 			{
-				UtilErrorLogger.getInstance().appendCustomError("CcComponent:onCcComponentLoaded",e);
-				return;
+				UtilErrorLogger.getInstance().appendCustomError("CcComponent:onCcComponentLoaded", e);
 			}
 		}
 		
 		public function loadFromBytes(param1:ByteArray, param2:Boolean = false) : void
 		{
-			var _loc3_:ByteArray = null;
-			var _loc4_:LoaderContext = null;
-			var _loc5_:UtilCrypto = null;
 			if(param1)
 			{
-				_loc3_ = param1;
+				var _loc3_:ByteArray = param1;
 				if(param2)
 				{
 					_loc3_ = new ByteArray();
 					param1.readBytes(_loc3_);
 					_loc3_.position = 0;
 					param1.position = 0;
-					_loc5_ = new UtilCrypto();
+					var _loc5_:UtilCrypto = new UtilCrypto();
 					_loc5_.decrypt(_loc3_);
 				}
-				_loc4_ = new LoaderContext();
+				var _loc4_:LoaderContext = new LoaderContext();
 				_loc4_.allowCodeImport = true;
 				this._loader = new Loader();
 				this._loader.contentLoaderInfo.addEventListener(Event.COMPLETE,this.onImageLoaded);
@@ -180,14 +174,12 @@ package anifire.cc.view
 		
 		protected function setColors() : void
 		{
-			var _loc1_:int = 0;
-			var _loc2_:Object = null;
 			if(this._model && this._model.colors)
 			{
-				_loc1_ = 0;
+				var _loc1_:int = 0;
 				while(_loc1_ < this._model.colors.length)
 				{
-					_loc2_ = this._model.colors[_loc1_] as Object;
+					var _loc2_:Object = this._model.colors[_loc1_] as Object;
 					this.updateColor(_loc2_);
 					_loc1_++;
 				}
@@ -234,19 +226,15 @@ package anifire.cc.view
 		
 		private function changeColorForShader(param1:UtilHashArray) : Number
 		{
-			var _loc2_:Number = NaN;
-			var _loc3_:Shader = null;
-			var _loc8_:int = 0;
-			var _loc9_:int = 0;
-			var _loc12_:Number = NaN;
-			var _loc13_:Number = NaN;
-			var _loc14_:Number = NaN;
-			_loc3_ = new Shader();
+			var _loc2_:Number;
+			var _loc3_:Shader = new Shader();
 			_loc3_.byteCode = new this.GoColorMapShaderClass();
 			var _loc4_:Array = new Array();
 			var _loc5_:Array = new Array();
 			var _loc6_:Array = new Array();
 			var _loc7_:UtilHashArray = new UtilHashArray();
+			var _loc8_:int;
+			var _loc9_:int;
 			_loc8_ = 0;
 			while(_loc8_ < this._customColor.length)
 			{
@@ -270,9 +258,9 @@ package anifire.cc.view
 			while(_loc9_ < _loc7_.length)
 			{
 				_loc6_.push(uint(_loc7_.getKey(_loc9_)));
-				_loc12_ = uint(_loc7_.getValueByIndex(_loc9_)) >> 16 & 255;
-				_loc13_ = uint(_loc7_.getValueByIndex(_loc9_)) >> 8 & 255;
-				_loc14_ = uint(_loc7_.getValueByIndex(_loc9_)) & 255;
+				var _loc12_:Number = uint(_loc7_.getValueByIndex(_loc9_)) >> 16 & 255;
+				var _loc13_:Number = uint(_loc7_.getValueByIndex(_loc9_)) >> 8 & 255;
+				var _loc14_:Number = uint(_loc7_.getValueByIndex(_loc9_)) & 255;
 				if(_loc9_ / 4 < 1)
 				{
 					_loc4_[_loc9_ * 4 + 0] = _loc12_ / 255;

@@ -4,7 +4,6 @@ package anifire.constant
 	public class ServerConstants
 	{
 		private static var _configManager:AppConfigManager = AppConfigManager.instance;
-		private static var _serverPath:String = "";
 		
 		public static const PARAM_THEME_ID:String = "themeId";
 		

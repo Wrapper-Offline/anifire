@@ -32,16 +32,17 @@
 			top="0"
 			bottom="0"/>
 		<s:Rect
+			id="border"
 			left="0"
 			right="0"
 			top="0"
 			bottom="0"
 			radiusX="3">
 			<s:stroke>
-				<s:SolidColorStroke color="0xA09F9F"/>
+				<s:SolidColorStroke id="borderStroke" color="0xA09F9F"/>
 			</s:stroke>
 			<s:fill>
-				<s:SolidColor color="0xFFFFFF"/>
+				<s:SolidColor id="bgFill" color="0xFFFFFF"/>
 			</s:fill>
 		</s:Rect>
 	</s:Group>

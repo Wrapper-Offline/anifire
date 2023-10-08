@@ -181,7 +181,7 @@ package anifire.browser.utils
 		{
 			if (index >= this.length || index < 0)
 			{
-				throw new Error("Index is out of bounds.");
+				throw new Error("index out of bound");
 			}
 			this.data[index] = newThumb;
 		}
@@ -194,7 +194,7 @@ package anifire.browser.utils
 			var index:* = this.keyToIndexMap.getValue(key);
 			if (index == null)
 			{
-				throw new Error("Key does not exist.");
+				throw new Error("key not exist!");
 			}
 			this.data[index as int] = newThumb;
 		}
@@ -225,9 +225,8 @@ package anifire.browser.utils
 		 */
 		public function getArray() : Array
 		{
-			var _loc2_:Thumb = null;
 			var _loc1_:Array = [];
-			for each (_loc2_ in this.data)
+			for each (var _loc2_:Thumb in this.data)
 			{
 				_loc1_.push(_loc2_);
 			}

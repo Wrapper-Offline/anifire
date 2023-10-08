@@ -146,8 +146,8 @@ package anifire.browser.models
          _loc7_.translate(-_loc8_.x,-_loc8_.y);
          _loc7_.scale(_loc5_,_loc5_);
          _loc6_.draw(_loc2_,_loc7_,null,null,null,true);
-         var _loc9_:Bitmap;
-         (_loc9_ = new Bitmap()).bitmapData = _loc6_;
+         var _loc9_:Bitmap = new Bitmap();
+         _loc9_.bitmapData = _loc6_;
          _loc9_.x = _loc9_.y = 0;
          this._width = _loc9_.width;
          this._height = _loc9_.height;

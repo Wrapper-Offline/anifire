@@ -34,7 +34,7 @@
 		autoClose="false"
 		itemDestructionPolicy="auto"
 	    popUpPosition="below"
-		popUpWidthMatchesAnchorWidth="true">
+		popUpWidthMatchesAnchorWidth="false">
         <s:Group minWidth="{popUp.width}" id="dropDown">
             <bComponents:ArrowTipContainer id="arrowGroup" tipPosition="below" targetWidth="20" offset="15">
 				<s:Scroller id="scroller" left="0" top="3" right="0" bottom="3" hasFocusableChildren="false" minViewportInset="1" horizontalScrollPolicy="off">

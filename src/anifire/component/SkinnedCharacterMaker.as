@@ -10,6 +10,7 @@ package anifire.component
 	import anifire.util.UtilHashBytes;
 	import anifire.util.UtilLoadMgr;
 	import anifire.util.UtilPlain;
+	
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.LoaderInfo;
@@ -50,8 +51,8 @@ package anifire.component
 			this.visible = false;
 			charXML = param1;
 			figure = param2;
-			var _loc8_:CcActionLoader;
-			(_loc8_ = CcActionLoader.getActionLoader(param6)).addEventListener(Event.COMPLETE,this.onCcActionLoaded);
+			var _loc8_:CcActionLoader = CcActionLoader.getActionLoader(param6);
+			_loc8_.addEventListener(Event.COMPLETE,this.onCcActionLoaded);
 			_loc8_.loadCcComponents(param1,0,0,param3,ver,param5,param6,param7);
 		}
 		
@@ -69,18 +70,16 @@ package anifire.component
 		
 		private function prepareSkin(param1:UtilHashArray = null) : void
 		{
-			var _loc2_:XML = null;
-			var _loc3_:* = null;
-			var _loc4_:ByteArray = null;
-			var _loc6_:ExtraDataLoader = null;
-			var _loc7_:String = null;
-			var _loc8_:Object = null;
-			var _loc5_:UtilLoadMgr;
-			(_loc5_ = new UtilLoadMgr()).addEventListener(LoadMgrEvent.ALL_COMPLETE,doLoadMainImage);
+			var _loc2_:XML;
+			var _loc3_:String;
+			var _loc4_:ByteArray;
+			var _loc5_:UtilLoadMgr = new UtilLoadMgr();
+			_loc5_.addEventListener(LoadMgrEvent.ALL_COMPLETE,doLoadMainImage);
 			for each(_loc2_ in charXML.child(CcLibConstant.NODE_LIBRARY))
 			{
-				_loc6_ = new ExtraDataLoader();
-				if((_loc7_ = _loc2_.@type) == "hands")
+				var _loc6_:ExtraDataLoader = new ExtraDataLoader();
+				var _loc7_:String = _loc2_.@type;
+				if(_loc7_ == "hands")
 				{
 					_loc7_ = CcLibConstant.LIBRARY_TYPE_GOHANDS;
 				}
@@ -98,7 +97,8 @@ package anifire.component
 				}
 				if(_loc4_ != null)
 				{
-					(_loc8_ = new Object())["part"] = _loc7_;
+					var _loc8_:Object = new Object();
+					_loc8_["part"] = _loc7_;
 					_loc6_.extraData = _loc8_;
 					_loc5_.addEventDispatcher(_loc6_.contentLoaderInfo,Event.COMPLETE);
 					_loc6_.contentLoaderInfo.addEventListener(Event.COMPLETE,this.onLoadStyleDone);
@@ -118,7 +118,7 @@ package anifire.component
 			(param1.target as IEventDispatcher).removeEventListener(param1.type,this.onLoadStyleDone);
 			var _loc2_:LoaderInfo = LoaderInfo(param1.currentTarget);
 			var _loc3_:Object = ExtraDataLoader(_loc2_.loader).extraData;
-			this.CCM.addStyle(_loc3_["part"],_loc2_);
+			CCM.addStyle(_loc3_["part"],_loc2_);
 		}
 		
 		override public function reloadSkin() : void
@@ -151,15 +151,13 @@ package anifire.component
 		
 		public function resetHeadPos() : void
 		{
-			var _loc2_:int = 0;
-			var _loc3_:DisplayObject = null;
 			var _loc1_:DisplayObjectContainer = UtilPlain.getInstance(this,AnimeConstants.MOVIECLIP_THE_HEAD);
 			if(_loc1_ != null)
 			{
-				_loc2_ = 0;
+				var _loc2_:int = 0;
 				while(_loc2_ < _loc1_.numChildren)
 				{
-					_loc3_ = _loc1_.getChildAt(_loc2_);
+					var _loc3_:DisplayObject = _loc1_.getChildAt(_loc2_);
 					_loc3_.x = 0;
 					_loc3_.y = 0;
 					_loc2_++;
@@ -169,15 +167,13 @@ package anifire.component
 		
 		public function updateHeadPos(param1:Number, param2:Number) : void
 		{
-			var _loc4_:int = 0;
-			var _loc5_:DisplayObject = null;
 			var _loc3_:DisplayObjectContainer = UtilPlain.getInstance(this,AnimeConstants.MOVIECLIP_THE_HEAD);
 			if(_loc3_ != null)
 			{
-				_loc4_ = 0;
+				var _loc4_:int = 0;
 				while(_loc4_ < _loc3_.numChildren)
 				{
-					_loc5_ = _loc3_.getChildAt(_loc4_);
+					var _loc5_:DisplayObject = _loc3_.getChildAt(_loc4_);
 					_loc5_.x += param1;
 					_loc5_.y += param2;
 					_loc4_++;
@@ -187,15 +183,14 @@ package anifire.component
 		
 		public function updateHeadScale(param1:Number, param2:Number) : void
 		{
-			var _loc4_:int = 0;
-			var _loc5_:DisplayObject = null;
 			var _loc3_:DisplayObjectContainer = UtilPlain.getInstance(this,AnimeConstants.MOVIECLIP_THE_HEAD);
 			if(_loc3_ != null)
 			{
-				_loc4_ = 0;
+				var _loc4_:int = 0;
 				while(_loc4_ < _loc3_.numChildren)
 				{
-					(_loc5_ = _loc3_.getChildAt(_loc4_)).scaleX = param1;
+					var _loc5_:DisplayObject = _loc3_.getChildAt(_loc4_);
+					_loc5_.scaleX = param1;
 					_loc5_.scaleY = param2;
 					_loc4_++;
 				}

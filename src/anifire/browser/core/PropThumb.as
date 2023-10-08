@@ -14,12 +14,14 @@ package anifire.browser.core
 	import anifire.util.UtilNetwork;
 	import anifire.util.UtilPlain;
 	import anifire.util.UtilURLStream;
+	
 	import flash.events.Event;
 	import flash.events.IEventDispatcher;
 	import flash.events.IOErrorEvent;
 	import flash.net.URLRequest;
 	import flash.net.URLStream;
 	import flash.utils.ByteArray;
+	
 	import nochump.util.zip.ZipEntry;
 	import nochump.util.zip.ZipFile;
 	
@@ -253,13 +255,6 @@ package anifire.browser.core
 		
 		override public function deSerialize(param1:XML, param2:ITheme, param3:Boolean = false) : void
 		{
-			var _loc4_:XML = null;
-			var _loc5_:int = 0;
-			var _loc6_:XML = null;
-			var _loc7_:String = null;
-			var _loc8_:XML = null;
-			var _loc9_:anifire.browser.core.State = null;
-			var _loc11_:String = null;
 			if(param1.state.length() <= 0)
 			{
 				this.setFileName("prop/" + param1.@id);
@@ -291,6 +286,9 @@ package anifire.browser.core
 				this.tags = param1.tags;
 				this.isPublished = param1.@published == "1" ? true : false;
 			}
+			var _loc4_:XML;
+			var _loc5_:int;
+			var _loc6_:XML;
 			_loc5_ = 0;
 			while(_loc5_ < param1.colorset.length())
 			{
@@ -308,6 +306,9 @@ package anifire.browser.core
 				}
 				_loc5_++;
 			}
+			var _loc7_:String;
+			var _loc8_:XML;
+			var _loc9_:State;
 			var _loc10_:Number = param1.state.length();
 			this._states = new Array();
 			_loc5_ = 0;
@@ -321,8 +322,9 @@ package anifire.browser.core
 				{
 					this.defaultState = _loc9_;
 				}
-					_loc5_++;
-					}
+				_loc5_++;
+			}
+			var _loc11_:String;
 			var _loc12_:XMLList = param1.tag;
 			_loc5_ = 0;
 			while(_loc5_ < _loc12_.length())
@@ -347,16 +349,12 @@ package anifire.browser.core
 		
 		override public function deSerializeFacial(param1:XML, param2:ITheme, param3:int = -1, param4:int = 1) : void
 		{
-			var _loc6_:String = null;
-			var _loc7_:XML = null;
-			var _loc8_:anifire.browser.core.State = null;
-			var _loc12_:Number = NaN;
 			if(param1.@cc_theme_id.length() > 0)
 			{
 				this.ccThemeId = param1.@cc_theme_id;
 			}
-			var _loc5_:XML;
-			if(_loc5_ = param1.facial[0])
+			var _loc5_:XML = param1.facial[0];
+			if(_loc5_)
 			{
 				thumbId = _loc5_.@id;
 				setFileName("char/" + param1.@id + "/head/" + thumbId);
@@ -399,13 +397,16 @@ package anifire.browser.core
 			}
 			theme = param2;
 			this.facing = AnimeConstants.FACING_UNKNOW;
+			var _loc6_:String;
+			var _loc7_:XML;
+			var _loc8_:State;
 			var _loc9_:XMLList = param1..facial as XMLList;
 			this.states = [];
 			var _loc10_:Number = -1;
 			var _loc11_:int = 0;
 			while(_loc11_ < _loc9_.length())
 			{
-				_loc12_ = 0;
+				var _loc12_:Number = 0;
 				_loc5_ = _loc9_[_loc11_];
 				_loc8_ = new anifire.browser.core.State(this,_loc5_.@id,_loc5_.@name,1,_loc5_.@enable,_loc5_.@aid);
 				this.addState(_loc8_);
@@ -603,26 +604,25 @@ package anifire.browser.core
 		
 		public function initImageData(param1:ZipFile, param2:String) : void
 		{
-			var _loc3_:int = 0;
-			var _loc4_:int = 0;
-			var _loc5_:String = null;
-			var _loc6_:ZipEntry = null;
-			var _loc7_:UtilCrypto = null;
-			var _loc8_:ByteArray = null;
-			var _loc9_:ZipFile = null;
-			var _loc10_:ZipEntry = null;
-			var _loc11_:ByteArray = null;
-			var _loc12_:UtilHashArray = null;
-			var _loc13_:Object = null;
-			var _loc15_:anifire.browser.core.State = null;
-			var _loc16_:XML = null;
+			var _loc3_:int;
+			var _loc4_:int;
+			var _loc5_:String;
+			var _loc6_:ZipEntry;
+			var _loc7_:UtilCrypto;
+			var _loc8_:ByteArray;
+			var _loc9_:ZipFile;
+			var _loc10_:ZipEntry;
+			var _loc11_:ByteArray;
+			var _loc12_:UtilHashArray;
+			var _loc13_:Object;
 			var _loc14_:Boolean = this.theme.id != "ugc" ? true : false;
 			_loc3_ = 0;
 			while(_loc3_ < this.getStateNum())
 			{
-				_loc15_ = this.getStateAt(_loc3_);
+				var _loc15_:State = this.getStateAt(_loc3_);
 				_loc5_ = param2 + _loc15_.id;
-				if((_loc6_ = param1.getEntry(_loc5_)) != null)
+				_loc6_ = param1.getEntry(_loc5_);
+				if(_loc6_ != null)
 				{
 					if(!isCC)
 					{
@@ -640,7 +640,7 @@ package anifire.browser.core
 					}
 					else
 					{
-						_loc16_ = XML(param1.getInput(_loc6_));
+						var _loc16_:XML = XML(param1.getInput(_loc6_));
 						_loc15_.loadImageDataByXml(_loc16_,1,true);
 					}
 				}
@@ -668,8 +668,6 @@ package anifire.browser.core
 		
 		override public function loadImageData() : void
 		{
-			var _loc2_:URLRequest = null;
-			var _loc3_:UtilURLStream = null;
 			var _loc1_:Object = ImageDataManager.instance.getImageData("prop",themeId,id);
 			if(_loc1_)
 			{
@@ -678,6 +676,7 @@ package anifire.browser.core
 			}
 			else
 			{
+				var _loc2_:URLRequest;
 				if(Boolean(this._assetUrl) && this._assetUrl != "")
 				{
 					_loc2_ = new URLRequest(this._assetUrl);
@@ -697,7 +696,7 @@ package anifire.browser.core
 				{
 					_loc2_ = UtilNetwork.getGetThemeAssetRequest(this.themeId,this.id,ServerConstants.PARAM_PROP);
 				}
-				_loc3_ = new UtilURLStream();
+				var _loc3_:UtilURLStream = new UtilURLStream();
 				_loc3_.addEventListener(Event.COMPLETE,this.loadImageDataComplete);
 				_loc3_.addEventListener(IOErrorEvent.IO_ERROR,this.ioErrorHandler);
 				_loc3_.load(_loc2_);
@@ -712,15 +711,15 @@ package anifire.browser.core
 		
 		override public function loadImageDataComplete(param1:Event) : void
 		{
-			var _loc5_:UtilCrypto = null;
 			this.removeLoadImageListeners(param1.target as IEventDispatcher);
 			var _loc2_:URLStream = URLStream(param1.target);
 			var _loc3_:ByteArray = new ByteArray();
 			_loc2_.readBytes(_loc3_,0,_loc2_.bytesAvailable);
 			var _loc4_:ByteArray = _loc3_;
-			if(this.themeId != "ugc")
+			if (this.themeId != "ugc")
 			{
-				(_loc5_ = new UtilCrypto()).decrypt(_loc4_);
+				var _loc5_:UtilCrypto = new UtilCrypto();
+				_loc5_.decrypt(_loc4_);
 			}
 			this.imageData = _loc4_;
 			ImageDataManager.instance.setImageData("prop",themeId,id,_loc4_);

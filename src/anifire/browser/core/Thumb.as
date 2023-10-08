@@ -373,7 +373,7 @@ package anifire.browser.core
 		
 		public function getKey() : String
 		{
-			if(!this.path)
+			if(this.path)
 			{
 			}
 			return this.theme.id + "." + this.id;
@@ -381,16 +381,14 @@ package anifire.browser.core
 		
 		public function getColorSetById(param1:String) : UtilHashSelectedColor
 		{
-			var _loc6_:XML = null;
-			var _loc7_:SelectedColor = null;
 			var _loc2_:XML = this.colorRef.getValueByKey(param1);
 			var _loc3_:UtilHashSelectedColor = new UtilHashSelectedColor();
 			var _loc4_:int = _loc2_.color.length();
 			var _loc5_:int = 0;
 			while(_loc5_ < _loc4_)
 			{
-				_loc6_ = _loc2_.child("color")[_loc5_];
-				_loc7_ = new SelectedColor(_loc6_.@r,_loc6_.attribute("oc").length() == 0 ? uint.MAX_VALUE : uint(_loc6_.@oc),uint(_loc6_));
+				var _loc6_:XML = _loc2_.child("color")[_loc5_];
+				var _loc7_:SelectedColor = new SelectedColor(_loc6_.@r,_loc6_.attribute("oc").length() == 0 ? uint.MAX_VALUE : uint(_loc6_.@oc),uint(_loc6_));
 				_loc3_.push(_loc2_.color[_loc5_].@r,_loc7_);
 				_loc5_++;
 			}
@@ -399,9 +397,9 @@ package anifire.browser.core
 		
 		public function getColorSetByIndex(param1:Number) : UtilHashArray
 		{
-			var _loc4_:int = 0;
 			var _loc2_:XML = this.colorRef.getValueByIndex(param1);
 			var _loc3_:UtilHashArray = new UtilHashArray();
+			var _loc4_:int;
 			_loc4_ = 0;
 			while(_loc4_ < _loc2_.color.length())
 			{
@@ -430,12 +428,11 @@ package anifire.browser.core
 		
 		public function get firstColorSetId() : String
 		{
-			var _loc3_:XML = null;
 			var _loc1_:int = this.colorRef.length;
 			var _loc2_:int = 0;
 			while(_loc2_ < _loc1_)
 			{
-				_loc3_ = this.colorRef.getValueByIndex(_loc2_);
+				var _loc3_:XML = this.colorRef.getValueByIndex(_loc2_);
 				if(_loc3_.@enable == "Y")
 				{
 					return _loc3_.@aid;

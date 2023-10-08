@@ -44,12 +44,9 @@
     <classEntry path="anifire.browser.managers.ImageDataManager"/>
     <classEntry path="anifire.component.CustomCharacterMaker"/>
     <classEntry path="anifire.component.SkinnedCharacterMaker"/>
-    <classEntry path="anifire.component.CustomCharacterMaker_GoColorMapShaderClass"/>
     <classEntry path="anifire.component.SkinnedAssetMaker"/>
     <classEntry path="anifire.browser.skins.AddBoyBodyTypeButtonSkin"/>
     <classEntry path="anifire.browser.skins.CreateCcButtonSkin"/>
-    <classEntry path="anifire.browser.components.CcProductExplorer"/>
-    <classEntry path="anifire.browser.components.PageNavigation"/>
     <classEntry path="anifire.browser.skins.CcProductExplorerSkin"/>
     <classEntry path="anifire.browser.skins.CcProductExplorerListSkin"/>
     <classEntry path="anifire.browser.skins.PageNavigationSkin"/>
@@ -61,7 +58,6 @@
     <classEntry path="anifire.browser.skins.CopyCcButtonSkin"/>
     <classEntry path="anifire.browser.skins.CloseButtonSkin"/>
     <classEntry path="anifire.browser.skins.PageNavigationButtonSkin"/>
-    <classEntry path="anifire.browser.skins.BusyIndicator"/>
     <classEntry path="anifire.browser.skins.CategoryDropDownButtonSkin"/>
     <classEntry path="anifire.browser.skins.CategoryDropDownListSkin"/>
     <classEntry path="anifire.browser.components.ArrowTipContainer"/>
@@ -69,6 +65,9 @@
     <classEntry path="anifire.browser.skins.CategoryDropDownListItemRenderer"/>
     <classEntry path="anifire.browser.skins.ArrowTipContainerSkin"/>
     <classEntry path="anifire.browser.skins.DefaultTextInputSkin"/>
+    <classEntry path="anifire.browser.components.CcProductExplorer"/>
+    <classEntry path="anifire.browser.components.PageNavigation"/>
+    <classEntry path="anifire.browser.skins.BusyIndicator"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

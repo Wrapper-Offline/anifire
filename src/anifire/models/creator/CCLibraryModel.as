@@ -64,17 +64,14 @@ package anifire.models.creator
 		
 		public function parse(param1:XML) : void
 		{
-			var _loc2_:XMLList = null;
-			var _loc3_:int = 0;
-			var _loc4_:int = 0;
 			this.id = param1.@id;
 			this.type = param1.@type;
 			this.basePath = param1.@path;
 			if(this.runwayMode)
 			{
-				_loc2_ = param1.tag;
-				_loc3_ = _loc2_.length();
-				_loc4_ = 0;
+				var _loc2_:XMLList = param1.tag;
+				var _loc3_:int = _loc2_.length();
+				var _loc4_:int = 0;
 				while(_loc4_ < _loc3_)
 				{
 					this.tags[_loc2_[_loc4_]] = true;
@@ -160,8 +157,6 @@ package anifire.models.creator
 		
 		public function getLocalXMLByBodyShape(param1:String) : XML
 		{
-			var _loc3_:* = null;
-			var _loc4_:XML = null;
 			var _loc2_:XML = <library/>;
 			_loc2_.@type = this.type;
 			_loc2_.@id = this.id;
@@ -175,11 +170,11 @@ package anifire.models.creator
 			_loc2_.@enable = !!this.enable?"Y":"N";
 			_loc2_.@sharing = "0";
 			_loc2_.@money = "0";
-			for(_loc3_ in this.tags)
+			for(var _loc3_:String in this.tags)
 			{
 				if(this.tags[_loc3_] && this.shouldIncludeTag(param1,_loc3_))
 				{
-					_loc4_ = <tag>{_loc3_}</tag>;
+					var _loc4_:XML = <tag>{_loc3_}</tag>;
 					_loc2_.appendChild(_loc4_);
 				}
 			}

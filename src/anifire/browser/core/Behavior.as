@@ -185,12 +185,10 @@ package anifire.browser.core
 		
 		public function loadImageData(param1:String = "char", param2:Boolean = false, param3:String = "", param4:Boolean = false) : void
 		{
-			var _loc5_:String = null;
-			var _loc6_:String = null;
-			var _loc10_:URLRequest = null;
-			var _loc11_:UtilURLStream = null;
 			this.withSpeech = param2;
 			this._slienceLoad = param4;
+			var _loc5_:String;
+			var _loc6_:String;
 			if(this.thumb is CharThumb && Boolean(CharThumb(this.thumb).ccThemeId))
 			{
 				_loc5_ = CharThumb(this.thumb).ccThemeId;
@@ -203,8 +201,8 @@ package anifire.browser.core
 			}
 			var _loc7_:CCThemeModel = CCThemeManager.instance.getThemeModel(_loc5_);
 			var _loc8_:CCBodyModel = CCBodyManager.instance.getBodyModel(_loc6_);
-			var _loc9_:CCCharacterActionModel;
-			if(_loc9_ = _loc7_.getCharacterFacialModel(_loc8_,this.id))
+			var _loc9_:CCCharacterActionModel = _loc7_.getCharacterFacialModel(_loc8_,this.id);
+			if(_loc9_)
 			{
 				this.loadImageDataByCam(_loc9_);
 			}
@@ -213,8 +211,8 @@ package anifire.browser.core
 				if(this._slienceLoad)
 				{
 				}
-				_loc10_ = UtilNetwork.getGetThemeAssetRequest(this.thumb.theme.id,this.thumb.id,param1,this.id,-1,param3);
-				_loc11_ = new UtilURLStream();
+				var _loc10_:URLRequest = UtilNetwork.getGetThemeAssetRequest(this.thumb.theme.id,this.thumb.id,param1,this.id,-1,param3);
+				var _loc11_:UtilURLStream = new UtilURLStream();
 				if(this._slienceLoad)
 				{
 				}
@@ -286,10 +284,7 @@ package anifire.browser.core
 		
 		public function loadImageDataComplete(param1:Event) : void
 		{
-			var _loc2_:UtilCrypto = null;
-			var _loc5_:Boolean = false;
-			var _loc6_:ZipFile = null;
-			var _loc7_:XML = null;
+			var _loc2_:UtilCrypto;
 			var _loc3_:URLStream = URLStream(param1.target);
 			if(this._slienceLoad)
 			{
@@ -309,7 +304,7 @@ package anifire.browser.core
 					}
 				}
 				this.imageData = new Object();
-				_loc5_ = false;
+				var _loc5_:Boolean = false;
 				if(this.thumb is CharThumb)
 				{
 					switch(this.thumb.raceCode)
@@ -354,7 +349,7 @@ package anifire.browser.core
 			}
 			else if(this.id.indexOf("zip") >= 0)
 			{
-				_loc6_ = new ZipFile(_loc4_);
+				var _loc6_:ZipFile = new ZipFile(_loc4_);
 				this.imageData = UtilPlain.convertZipAsImagedataObject(_loc6_);
 				if(this.isImageDataIncludedLibraries() || this.isThumbLibrariesReady())
 				{
@@ -364,20 +359,17 @@ package anifire.browser.core
 			}
 			else
 			{
-				_loc7_ = XML(_loc4_);
+				var _loc7_:XML = XML(_loc4_);
 				this.loadImageDataByXml(_loc7_);
 			}
 		}
 		
 		private function isThumbLibrariesReady() : Boolean
 		{
-			var _loc2_:XML = null;
-			var _loc3_:int = 0;
-			var _loc4_:XML = null;
-			var _loc5_:* = null;
 			var _loc1_:Boolean = true;
 			if(this.thumb is CharThumb)
 			{
+				var _loc2_:XML;
 				if(this.imageData["xml"] != null)
 				{
 					_loc2_ = this.imageData["xml"];
@@ -386,10 +378,11 @@ package anifire.browser.core
 				{
 					_loc2_ = CharThumb(this.thumb).xml;
 				}
-				_loc3_ = 0;
+				var _loc3_:int = 0;
 				while(_loc3_ < _loc2_.library.length())
 				{
-					_loc5_ = (_loc4_ = _loc2_.library[_loc3_]).@theme_id + "." + _loc4_.@type + "." + _loc4_.@component_id + ".swf";
+					var _loc4_:XML = _loc2_.library[_loc3_];
+					var _loc5_:String = _loc4_.@theme_id + "." + _loc4_.@type + "." + _loc4_.@component_id + ".swf";
 					if(CharThumb(this.thumb).getLibraryById(_loc5_) == null)
 					{
 						_loc1_ = false;
@@ -403,12 +396,10 @@ package anifire.browser.core
 		
 		private function isImageDataIncludedLibraries() : Boolean
 		{
-			var _loc2_:XML = null;
-			var _loc3_:int = 0;
-			var _loc4_:UtilHashArray = null;
-			var _loc5_:XML = null;
-			var _loc6_:* = null;
 			var _loc1_:Boolean = true;
+			var _loc2_:XML;
+			var _loc3_:int;
+			var _loc4_:UtilHashArray;
 			if(this.thumb is CharThumb)
 			{
 				if(!(this.imageData is ByteArray) && this.imageData["xml"] != null)
@@ -418,7 +409,8 @@ package anifire.browser.core
 					_loc3_ = 0;
 					while(_loc3_ < _loc2_.library.length())
 					{
-						_loc6_ = (_loc5_ = _loc2_.library[_loc3_]).@theme_id + "." + _loc5_.@type + "." + _loc5_.@component_id + ".swf";
+						var _loc5_:XML = _loc2_.library[_loc3_];
+						var _loc6_:String = _loc5_.@theme_id + "." + _loc5_.@type + "." + _loc5_.@component_id + ".swf";
 						if(_loc4_.getValueByKey(_loc6_) == null)
 						{
 							_loc1_ = false;

@@ -45,18 +45,15 @@ package anifire.constant
 		
 		private static function isHostMatch(param1:Array, param2:String) : Boolean
 		{
-			var permittedHosts:Array;
-			var result:Boolean;
-			var apiserver:String = null;
 			var list:Array = param1;
 			var cat:String = param2;
 			if(int(_specialModes[cat]) != 0)
 			{
 				return int(_specialModes[cat]) > 0;
 			}
-			permittedHosts = list;
-			apiserver = AppConfigManager.instance.getValue(ServerConstants.FLASHVAR_APISERVER);
-			result = permittedHosts.some(function(param1:*, param2:int, param3:Array):Boolean
+			var permittedHosts:Array = list;
+			var apiserver:String = AppConfigManager.instance.getValue(ServerConstants.FLASHVAR_APISERVER);
+			var result:Boolean = permittedHosts.some(function(param1:*, param2:int, param3:Array):Boolean
 			{
 				return apiserver.indexOf(param1 as String) >= 0;
 			});

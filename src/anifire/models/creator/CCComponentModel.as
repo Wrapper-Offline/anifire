@@ -51,9 +51,6 @@ package anifire.models.creator
 		
 		public function parse(param1:XML) : void
 		{
-			var _loc5_:String = null;
-			var _loc6_:String = null;
-			var _loc7_:XMLList = null;
 			this.id = param1.@id;
 			this.type = param1.@type;
 			this.basePath = param1.@path;
@@ -62,14 +59,14 @@ package anifire.models.creator
 			var _loc4_:int = 0;
 			while(_loc4_ < _loc3_)
 			{
-				_loc5_ = _loc2_[_loc4_].@id;
-				_loc6_ = _loc2_[_loc4_].@filename;
+				var _loc5_:String = _loc2_[_loc4_].@id;
+				var _loc6_:String = _loc2_[_loc4_].@filename;
 				this.states[_loc5_] = _loc6_;
 				_loc4_++;
 			}
 			if(this.runwayMode)
 			{
-				_loc7_ = param1.tag;
+				var _loc7_:XMLList = param1.tag;
 				_loc3_ = _loc7_.length();
 				_loc4_ = 0;
 				while(_loc4_ < _loc3_)
@@ -127,10 +124,6 @@ package anifire.models.creator
 		
 		public function toXML() : XML
 		{
-			var _loc2_:* = null;
-			var _loc3_:* = null;
-			var _loc4_:XML = null;
-			var _loc5_:XML = null;
 			var _loc1_:XML = <component/>;
 			_loc1_.@type = this.type;
 			_loc1_.@id = this.id;
@@ -141,18 +134,18 @@ package anifire.models.creator
 			_loc1_.@sharing = "0";
 			_loc1_.@enable = !!this.enable?"Y":"N";
 			_loc1_.@split = "N";
-			for(_loc2_ in this.states)
+			for(var _loc2_:String in this.states)
 			{
-				_loc4_ = <state/>;
+				var _loc4_:XML = <state/>;
 				_loc4_.@id = _loc2_;
 				_loc4_.@filename = _loc2_ + ".swf";
 				_loc1_.appendChild(_loc4_);
 			}
-			for(_loc3_ in this.tags)
+			for(var _loc3_:String in this.tags)
 			{
 				if(this.tags[_loc3_])
 				{
-					_loc5_ = <tag>{_loc3_}</tag>;
+					var _loc5_:XML = <tag>{_loc3_}</tag>;
 					_loc1_.appendChild(_loc5_);
 				}
 			}

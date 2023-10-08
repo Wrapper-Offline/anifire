@@ -221,20 +221,17 @@ package anifire.util
 		
 		public static function setAssetPartColor(param1:DisplayObject, param2:String, param3:uint = 4.294967295E9) : uint
 		{
-			var _loc5_:int = 0;
-			var _loc6_:Sprite = null;
-			var _loc7_:ColorTransform = null;
 			var _loc4_:Array = new Array();
 			_loc4_ = UtilPlain.getColorItem(param1,param2);
 			if(_loc4_.length > 0)
 			{
-				_loc5_ = 0;
+				var _loc5_:int = 0;
 				while(_loc5_ < _loc4_.length)
 				{
-					_loc6_ = Sprite(_loc4_[_loc5_]);
+					var _loc6_:Sprite = Sprite(_loc4_[_loc5_]);
 					if(param3 == uint.MAX_VALUE)
 					{
-						_loc7_ = new ColorTransform();
+						var _loc7_:ColorTransform = new ColorTransform();
 						_loc6_.transform.colorTransform = _loc7_;
 					}
 					else
@@ -249,18 +246,15 @@ package anifire.util
 		
 		public static function resetAssetPartsColor(param1:DisplayObject) : void
 		{
-			var _loc5_:int = 0;
-			var _loc6_:Sprite = null;
-			var _loc7_:ColorTransform = null;
 			var _loc2_:Array = new Array();
 			_loc2_ = UtilPlain.getColorItem(param1);
 			if(_loc2_.length > 0)
 			{
-				_loc5_ = 0;
+				var _loc5_:int = 0;
 				while(_loc5_ < _loc2_.length)
 				{
-					_loc6_ = Sprite(_loc2_[_loc5_]);
-					_loc7_ = new ColorTransform();
+					var _loc6_:Sprite = Sprite(_loc2_[_loc5_]);
+					var _loc7_:ColorTransform = new ColorTransform();
 					_loc6_.transform.colorTransform = _loc7_;
 					_loc5_++;
 				}

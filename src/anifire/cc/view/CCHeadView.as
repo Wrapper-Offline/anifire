@@ -47,13 +47,12 @@ package anifire.cc.view
 		
 		private function createComponentContainers() : void
 		{
-			var _loc3_:Sprite = null;
 			var _loc1_:Array = CcLibConstant.GET_COMPONENT_ORDER_IN_HEAD;
 			this._containers = new UtilHashArray();
 			var _loc2_:int = 0;
 			while(_loc2_ < _loc1_.length)
 			{
-				_loc3_ = new Sprite();
+				var _loc3_:Sprite = new Sprite();
 				_loc3_.name = _loc1_[_loc2_] + CcLibConstant.MC_NAME_EXT;
 				this.addChild(_loc3_);
 				this._containers.push(_loc3_.name,_loc3_);
@@ -63,30 +62,24 @@ package anifire.cc.view
 		
 		private function createFaceDecorationContainers() : void
 		{
-			var _loc1_:Sprite = null;
-			var _loc2_:* = null;
-			var _loc3_:Object = null;
-			var _loc4_:* = null;
-			var _loc5_:CCBodyComponentModel = null;
-			var _loc6_:Sprite = null;
 			if(this._myActionModel)
 			{
-				_loc1_ = this._containers.getValueByKey("facedecorationMC");
+				var _loc1_:Sprite = this._containers.getValueByKey("facedecorationMC");
 				if(_loc1_)
 				{
-					for(_loc2_ in this._myActionModel.components)
+					for(var _loc2_:String in this._myActionModel.components)
 					{
 						if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(_loc2_) > -1)
 						{
-							_loc3_ = this._myActionModel.getComponentByType(_loc2_);
+							var _loc3_:Object = this._myActionModel.getComponentByType(_loc2_);
 							if(_loc3_)
 							{
-								for(_loc4_ in _loc3_)
+								for(var _loc4_:String in _loc3_)
 								{
-									_loc5_ = _loc3_[_loc4_] as CCBodyComponentModel;
+									var _loc5_:CCBodyComponentModel = _loc3_[_loc4_] as CCBodyComponentModel;
 									if(_loc5_.id)
 									{
-										_loc6_ = new Sprite();
+										var _loc6_:Sprite = new Sprite();
 										_loc6_.name = _loc5_.id + CcLibConstant.MC_NAME_EXT;
 										_loc1_.addChild(_loc6_);
 									}
@@ -107,14 +100,14 @@ package anifire.cc.view
 		
 		private function createAllComponents(param1:Boolean = false) : void
 		{
-			var _loc2_:CcComponent = null;
-			var _loc3_:* = null;
-			var _loc4_:ProcessRegulator = null;
-			var _loc5_:String = null;
-			var _loc6_:Object = null;
-			var _loc7_:* = null;
 			if(this._myActionModel)
 			{
+				var _loc2_:CcComponent;
+				var _loc3_:String;
+				var _loc4_:ProcessRegulator;
+				var _loc5_:String;
+				var _loc6_:Object;
+				var _loc7_:String;
 				_loc4_ = new ProcessRegulator();
 				if(!param1)
 				{
@@ -176,42 +169,36 @@ package anifire.cc.view
 			this.dispatchEvent(new Event(Event.COMPLETE));
 		}
 		
-		override public function prepareImage(param1:String, param2:Boolean = true) : void
+		override public function prepareImage(sceneId:String, isFirstBehaviour:Boolean = true) : void
 		{
-			var i:uint = 0;
-			var sceneId:String = param1;
-			var isFirstBehaviour:Boolean = param2;
 			try
 			{
 				this._sceneId = sceneId;
 				this.borrowAllComponents(isFirstBehaviour);
-				i = 0;
+				var i:uint = 0;
 				while(i < _componentList.length)
 				{
 					this.addComponent(_componentList.getValueByIndex(i) as CcComponent);
 					i++;
 				}
 				this.setColors();
-				return;
 			}
 			catch(e:Error)
 			{
 				UtilErrorLogger.getInstance().appendCustomError("CcHeadComponent:prepareImage:" + sceneId,e);
-				return;
 			}
 		}
 		
 		private function createComponentFromCam(param1:String, param2:String = "") : CcComponent
 		{
-			var _loc4_:Object = null;
-			var _loc5_:String = null;
-			var _loc6_:Number = NaN;
-			var _loc7_:CcComponentModel = null;
 			var _loc3_:CcComponent = CcComponentFactory.create(param1);
 			if(this._useImageLibrary)
 			{
 				if(this._myActionModel)
 				{
+					var _loc4_:Object;
+					var _loc5_:String;
+					var _loc6_:Number;
 					if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(param1) > -1)
 					{
 						_loc4_ = this._myActionModel.getComponentByType(param1);
@@ -231,6 +218,7 @@ package anifire.cc.view
 			}
 			if(_loc3_)
 			{
+				var _loc7_:CcComponentModel;
 				_loc7_ = CcComponentModel.createModelByType(param1);
 				if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(param1) > -1)
 				{
@@ -246,9 +234,8 @@ package anifire.cc.view
 			return _loc3_;
 		}
 		
-		override public function requestImage(param1:String) : void
+		override public function requestImage(sceneId:String) : void
 		{
-			var sceneId:String = param1;
 			try
 			{
 				if(this._useImageLibrary)
@@ -260,13 +247,11 @@ package anifire.cc.view
 				{
 					this.dispatchEvent(new Event(Event.COMPLETE));
 				}
-				return;
 			}
 			catch(e:Error)
 			{
 				this.dispatchEvent(new Event(Event.COMPLETE));
 				UtilErrorLogger.getInstance().appendCustomError("CcHeadComponent:requestImage:" + sceneId,e);
-				return;
 			}
 		}
 		
@@ -299,15 +284,15 @@ package anifire.cc.view
 		
 		private function borrowAllComponents(param1:Boolean = true) : void
 		{
-			var _loc2_:* = null;
-			var _loc3_:CcComponent = null;
-			var _loc4_:* = null;
-			var _loc5_:Object = null;
-			var _loc6_:String = null;
 			if(this._useImageLibrary)
 			{
 				if(this._myActionModel)
 				{
+					var _loc2_:String;
+					var _loc3_:CcComponent;
+					var _loc4_:String;
+					var _loc5_:Object;
+					var _loc6_:String;
 					_componentList.removeAll();
 					for(_loc2_ in this._myActionModel.components)
 					{
@@ -318,8 +303,9 @@ package anifire.cc.view
 							if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(_loc2_) > -1)
 							{
 								_loc5_ = this._myActionModel.components[_loc2_];
-								for(_loc4_ in _loc5_)
+								for(_loc6_ in _loc5_)
 								{
+									_loc4_ = _loc6_;
 									_loc3_ = this.borrowComponentByCam(_loc2_,param1,_loc4_);
 									if(_loc3_)
 									{
@@ -343,12 +329,10 @@ package anifire.cc.view
 		
 		private function borrowComponentByCam(param1:String, param2:Boolean, param3:String) : CcComponent
 		{
-			var _loc4_:CcComponent = null;
-			var _loc5_:Object = null;
-			var _loc6_:String = null;
-			var _loc7_:Object = null;
-			var _loc8_:AssetImageLibraryObject = null;
-			var _loc10_:CcComponentModel = null;
+			var _loc4_:CcComponent;
+			var _loc5_:Object;
+			var _loc6_:String;
+			var _loc7_:Object;
 			if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(param1) > -1)
 			{
 				_loc7_ = this._myActionModel.getComponentByType(param1);
@@ -358,6 +342,7 @@ package anifire.cc.view
 			{
 				_loc6_ = this._myActionModel.getComponentByType(param1).path;
 			}
+			var _loc8_:AssetImageLibraryObject;
 			var _loc9_:Number = 0;
 			if(!param2)
 			{
@@ -370,7 +355,7 @@ package anifire.cc.view
 				_loc4_ = _loc8_.image as CcComponent;
 				if(_loc4_)
 				{
-					_loc10_ = CcComponentModel.createModelByType(param1);
+					var _loc10_:CcComponentModel = CcComponentModel.createModelByType(param1);
 					if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(param1) > -1)
 					{
 						_loc10_.initByCACam(_loc7_[param3]);
@@ -392,16 +377,13 @@ package anifire.cc.view
 		
 		override protected function setColors() : void
 		{
-			var _loc1_:* = null;
-			var _loc2_:CCColor = null;
-			var _loc3_:SelectedColor = null;
 			UtilColor.resetAssetPartsColor(this);
 			if(this._myActionModel)
 			{
-				for(_loc1_ in this._myActionModel.colorCodes)
+				for(var _loc1_:String in this._myActionModel.colorCodes)
 				{
-					_loc2_ = this._myActionModel.getColor(_loc1_);
-					_loc3_ = new SelectedColor(_loc2_.type,_loc2_.oc,_loc2_.dest);
+					var _loc2_:CCColor = this._myActionModel.getColor(_loc1_);
+					var _loc3_:SelectedColor = new SelectedColor(_loc2_.type,_loc2_.oc,_loc2_.dest);
 					changeColor(_loc3_,!!_loc2_.targetComponent?_loc2_.targetComponent:"");
 				}
 			}

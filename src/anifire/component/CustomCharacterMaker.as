@@ -29,7 +29,6 @@ package anifire.component
 	import anifire.util.UtilHashUint;
 	import anifire.util.UtilLoadMgr;
 	import anifire.util.UtilPlain;
-	
 	import flash.display.BitmapData;
 	import flash.display.BlendMode;
 	import flash.display.DisplayObject;
@@ -50,7 +49,6 @@ package anifire.component
 	import flash.system.LoaderContext;
 	import flash.utils.ByteArray;
 	import flash.utils.setTimeout;
-	
 	import nochump.util.zip.ZipEntry;
 	import nochump.util.zip.ZipFile;
 	
@@ -71,50 +69,91 @@ package anifire.component
 		
 		private static var _numTotalLoadBytes:Number = 0;
 		
-		
+		[Embed("CustomCharacterMaker_GoColorMapShaderClass.bin", mimeType="application/octet-stream")]
 		private var GoColorMapShaderClass:Class;
 		
 		private const BODYSHAPE:String = "bodyshape";
+		
 		private const XML_DESC:String = "desc.xml";
+		
 		private const UPPERBODY:String = "upper_body";
+		
 		private const CLIPUPPER:String = "theUpper";
+		
 		private const LOWERBODY:String = "lower_body";
+		
 		private const CLIPLOWER:String = "theLower";
+		
 		private const DEFAULTHEAD:String = "defaultHead";
+		
 		private const LIB_LEFT:String = "Left";
+		
 		private const LIB_RIGHT:String = "Right";
+		
 		private const NODE_COMPONENT:String = "component";
+		
 		private const SWF_EXT:String = ".swf";
+		
 		private const SKELETON:String = "skeleton";
+		
 		private var _eventDispatcher:EventDispatcher;
+		
 		private var _myActionModel:CCCharacterActionModel;
+		
 		private var _charXML:XML;
+		
 		private var _charSwfs:UtilHashBytes;
+		
 		private var _charZip:ZipFile;
+		
 		private const MC:String = "MC";
+		
 		private var _componentOrder:Array;
+		
 		private var _componentQueue:Array;
+		
 		private var should_decrypt:Boolean = true;
+		
 		private var _customColor:UtilHashSelectedColor;
+		
 		private var _shouldPauseOnLoadByteComplete:Boolean;
+		
 		private var _state:String;
+		
 		private var _waiting:Array;
+		
 		private var _decoArray:Array;
+		
 		private var _lookAtCameraSupported:Boolean = false;
+		
 		private var _prop:DisplayObjectContainer = null;
+		
 		private var _hasProp:Boolean = false;
+		
 		private var _sceneId:String;
+		
 		private var _head:CcHeadComponent;
+		
 		private var _head2:CCHeadView;
+		
 		private var _loadHead:Boolean = true;
+		
 		private var _useImageLibrary:Boolean = false;
+		
 		private var _headRect:Rectangle;
+		
 		private var _tempworker:GoBaseWorkerImp;
+		
 		private var _ccm:CCManager;
+		
 		private var _ver:Number;
+		
 		private var _libraries:UtilHashArray;
+		
 		private var _sDate:Date;
+		
 		private var _isLoadingLipSyncMouth:Boolean = false;
+		
 		private var _assetImageIdArray:UtilHashNumber;
 		
 		public function CustomCharacterMaker()
@@ -338,8 +377,8 @@ package anifire.component
 		
 		public function addLibrary(param1:String, param2:String, param3:String) : void
 		{
-			var _loc4_:Library;
-			(_loc4_ = new Library()).type = param1;
+			var _loc4_:Library = new Library();
+			_loc4_.type = param1;
 			_loc4_.component_id = param2;
 			_loc4_.theme_id = param3;
 			this._libraries.push(_loc4_.type,_loc4_);
@@ -399,18 +438,15 @@ package anifire.component
 		
 		private function prepareSkinByCam() : void
 		{
-			var _loc2_:String = null;
-			var _loc3_:ByteArray = null;
-			var _loc5_:String = null;
-			var _loc6_:ExtraDataLoader = null;
-			var _loc7_:LoaderContext = null;
-			var _loc8_:Object = null;
 			var _loc1_:Date = new Date();
-			var _loc4_:UtilLoadMgr;
-			(_loc4_ = new UtilLoadMgr()).addEventListener(LoadMgrEvent.ALL_COMPLETE,this.doPrepareFinishedByCam);
+			var _loc2_:String;
+			var _loc3_:ByteArray;
+			var _loc4_:UtilLoadMgr = new UtilLoadMgr();
+			_loc4_.addEventListener(LoadMgrEvent.ALL_COMPLETE,this.doPrepareFinishedByCam);
+			var _loc5_:String;
 			for(_loc5_ in this._myActionModel.libraryPaths)
 			{
-				_loc6_ = new ExtraDataLoader();
+				var _loc6_:ExtraDataLoader = new ExtraDataLoader();
 				_loc2_ = String(this._myActionModel.libraryPaths[_loc5_]);
 				if(this._useImageLibrary)
 				{
@@ -420,10 +456,12 @@ package anifire.component
 					}
 				}
 				_loc3_ = this.charSwfs.getValueByKey(_loc2_);
-				(_loc7_ = new LoaderContext()).allowCodeImport = true;
+				var _loc7_:LoaderContext = new LoaderContext();
+				_loc7_.allowCodeImport = true;
 				if(_loc3_ != null)
 				{
-					(_loc8_ = new Object())["part"] = _loc5_;
+					var _loc8_:Object = new Object();
+					_loc8_["part"] = _loc5_;
 					_loc6_.extraData = _loc8_;
 					_loc4_.addEventDispatcher(_loc6_.contentLoaderInfo,Event.COMPLETE);
 					_loc6_.contentLoaderInfo.addEventListener(Event.COMPLETE,this.onLoadStyleDone);
@@ -436,18 +474,15 @@ package anifire.component
 		
 		private function prepareSkin(param1:UtilHashBytes = null) : void
 		{
-			var _loc3_:XML = null;
-			var _loc4_:String = null;
-			var _loc5_:ByteArray = null;
-			var _loc7_:ExtraDataLoader = null;
-			var _loc8_:ZipEntry = null;
-			var _loc9_:Object = null;
 			var _loc2_:Date = new Date();
-			var _loc6_:UtilLoadMgr;
-			(_loc6_ = new UtilLoadMgr()).addEventListener(LoadMgrEvent.ALL_COMPLETE,this.doPrepareFinished);
+			var _loc3_:XML;
+			var _loc4_:String;
+			var _loc5_:ByteArray;
+			var _loc6_:UtilLoadMgr = new UtilLoadMgr();
+			_loc6_.addEventListener(LoadMgrEvent.ALL_COMPLETE,this.doPrepareFinished);
 			for each(_loc3_ in this.charXML.child(CcLibConstant.NODE_LIBRARY))
 			{
-				_loc7_ = new ExtraDataLoader();
+				var _loc7_:ExtraDataLoader = new ExtraDataLoader();
 				_loc4_ = _loc3_.@theme_id + "." + _loc3_.@type + "." + _loc3_.@component_id + this.SWF_EXT;
 				if(this._useImageLibrary)
 				{
@@ -460,7 +495,8 @@ package anifire.component
 				{
 					if(this.charZip != null)
 					{
-						if((_loc8_ = this.charZip.getEntry(_loc4_)) != null)
+						var _loc8_:ZipEntry = this.charZip.getEntry(_loc4_);
+						if(_loc8_ != null)
 						{
 							_loc5_ = this.charZip.getInput(_loc8_);
 						}
@@ -476,7 +512,8 @@ package anifire.component
 				}
 				if(_loc5_ != null)
 				{
-					(_loc9_ = new Object())["part"] = String(_loc3_.@type);
+					var _loc9_:Object = new Object();
+					_loc9_["part"] = String(_loc3_.@type);
 					_loc7_.extraData = _loc9_;
 					_loc6_.addEventDispatcher(_loc7_.contentLoaderInfo,Event.COMPLETE);
 					_loc7_.contentLoaderInfo.addEventListener(Event.COMPLETE,this.onLoadStyleDone);
@@ -590,21 +627,21 @@ package anifire.component
 		
 		private function requestImage() : void
 		{
-			var _loc2_:ExtraDataLoader = null;
-			var _loc3_:XML = null;
-			var _loc4_:Object = null;
-			var _loc5_:String = null;
-			var _loc6_:AssetImageLibraryObject = null;
-			var _loc7_:String = null;
-			var _loc8_:ByteArray = null;
-			var _loc9_:Number = NaN;
-			var _loc10_:ZipEntry = null;
-			var _loc11_:Object = null;
-			var _loc12_:String = null;
 			var _loc1_:UtilLoadMgr = new UtilLoadMgr();
 			_loc1_.addEventListener(LoadMgrEvent.ALL_COMPLETE,this.onBodyImageRequested);
 			if(this._useImageLibrary)
 			{
+				var _loc2_:ExtraDataLoader;
+				var _loc3_:XML;
+				var _loc4_:Object;
+				var _loc5_:String;
+				var _loc6_:AssetImageLibraryObject;
+				var _loc7_:String;
+				var _loc8_:ByteArray;
+				var _loc9_:Number;
+				var _loc10_:ZipEntry;
+				var _loc11_:Object;
+				var _loc12_:String;
 				if(this.charXML)
 				{
 					for each(_loc3_ in this.charXML.child(CcLibConstant.NODE_LIBRARY))
@@ -804,8 +841,8 @@ package anifire.component
 				return;
 			}
 			this._sDate = new Date();
-			var _loc8_:CcActionLoader;
-			(_loc8_ = CcActionLoader.getActionLoader(param7)).addEventListener(Event.COMPLETE,this.onCcActionLoadedByCam);
+			var _loc8_:CcActionLoader = CcActionLoader.getActionLoader(param7);
+			_loc8_.addEventListener(Event.COMPLETE,this.onCcActionLoadedByCam);
 			_loc8_.addEventListener(IOErrorEvent.IO_ERROR,this.onCcActionFailed);
 			_loc8_.loadCcComponentsByCam(param1,param4,this.ver);
 		}
@@ -817,8 +854,8 @@ package anifire.component
 				return;
 			}
 			this._sDate = new Date();
-			var _loc8_:CcActionLoader;
-			(_loc8_ = CcActionLoader.getActionLoader(param7)).addEventListener(Event.COMPLETE,this.onCcActionLoaded);
+			var _loc8_:CcActionLoader = CcActionLoader.getActionLoader(param7);
+			_loc8_.addEventListener(Event.COMPLETE,this.onCcActionLoaded);
 			_loc8_.addEventListener(IOErrorEvent.IO_ERROR,this.onCcActionFailed);
 			_loc8_.loadCcComponents(param1,param2,param3,param4,this.ver,param6);
 		}
@@ -829,8 +866,8 @@ package anifire.component
 			{
 				return;
 			}
-			var _loc5_:CcActionLoader;
-			(_loc5_ = new CcActionLoader()).addEventListener(Event.COMPLETE,this.onCcActionLoaded);
+			var _loc5_:CcActionLoader = new CcActionLoader();
+			_loc5_.addEventListener(Event.COMPLETE,this.onCcActionLoaded);
 			_loc5_.addEventListener(IOErrorEvent.IO_ERROR,this.onCcActionFailed);
 			_loc5_.loadCcComponents(param1,param2,param3,null,this.ver);
 		}
@@ -854,16 +891,13 @@ package anifire.component
 			dispatchEvent(new IOErrorEvent(IOErrorEvent.IO_ERROR));
 		}
 		
-		private function onCcActionLoadedByCam(param1:Event) : void
+		private function onCcActionLoadedByCam(e:Event) : void
 		{
-			var cDate:Date;
-			var loader:CcActionLoader = null;
-			var e:Event = param1;
 			(e.target as IEventDispatcher).removeEventListener(e.type,this.onCcActionLoadedByCam);
-			cDate = new Date();
+			var cDate:Date = new Date();
 			try
 			{
-				loader = CcActionLoader(e.target);
+				var loader:CcActionLoader = CcActionLoader(e.target);
 				if(loader.imageData)
 				{
 					this.initBySwfCam(loader.imageData["cam"] as CCCharacterActionModel,loader.imageData["imageData"] as UtilHashBytes);
@@ -876,16 +910,13 @@ package anifire.component
 			}
 		}
 		
-		private function onCcActionLoaded(param1:Event) : void
+		private function onCcActionLoaded(e:Event) : void
 		{
-			var cDate:Date;
-			var loader:CcActionLoader = null;
-			var e:Event = param1;
 			(e.target as IEventDispatcher).removeEventListener(e.type,this.onCcActionLoaded);
-			cDate = new Date();
+			var cDate:Date = new Date();
 			try
 			{
-				loader = CcActionLoader(e.target);
+				var loader:CcActionLoader = CcActionLoader(e.target);
 				loader.removeEventListener(e.type,this.onCcActionLoaded);
 				if(loader.imageData)
 				{
@@ -899,85 +930,65 @@ package anifire.component
 			}
 		}
 		
-		private function loadAllComponentsByCam(param1:Event) : void
+		private function loadAllComponentsByCam(e:Event) : void
 		{
-			var _loc3_:XML = null;
-			var _loc5_:String = null;
-			var _loc6_:ExtraDataLoader = null;
 			if(!this._myActionModel)
 			{
 				return;
 			}
 			var _loc2_:Date = new Date();
+			var _loc3_:XML;
 			this._decoArray = new Array();
-			var _loc4_:UtilLoadMgr;
-			(_loc4_ = new UtilLoadMgr()).addEventListener(LoadMgrEvent.ALL_COMPLETE,this.onBodyLoadedByCam);
+			var _loc4_:UtilLoadMgr = new UtilLoadMgr();
+			_loc4_.addEventListener(LoadMgrEvent.ALL_COMPLETE,this.onBodyLoadedByCam);
+			var _loc5_:String;
 			for(_loc5_ in this._myActionModel.components)
 			{
 				if(CcLibConstant.ALL_BODY_COMPONENT_TYPES.indexOf(_loc5_) > -1)
 				{
-					_loc6_ = this.updateComponentImageData(_loc5_,null,null,_loc4_,null,this._myActionModel.getComponentByType(_loc5_).path);
+					var _loc6_:ExtraDataLoader = this.updateComponentImageData(_loc5_,null,null,_loc4_,null,this._myActionModel.getComponentByType(_loc5_).path);
 				}
 			}
 			_loc4_.commit();
 		}
 		
-		private function loadAllComponents(param1:Event) : void
+		private function loadAllComponents(e:Event) : void
 		{
-			var _loc3_:XML = null;
-			var _loc5_:ExtraDataLoader = null;
 			var _loc2_:Date = new Date();
+			var _loc3_:XML;
 			this._decoArray = new Array();
-			var _loc4_:UtilLoadMgr;
-			(_loc4_ = new UtilLoadMgr()).addEventListener(LoadMgrEvent.ALL_COMPLETE,this.onBodyLoaded);
+			var _loc4_:UtilLoadMgr = new UtilLoadMgr();
+			_loc4_.addEventListener(LoadMgrEvent.ALL_COMPLETE,this.onBodyLoaded);
 			for each(_loc3_ in this.charXML.child(this.NODE_COMPONENT))
 			{
 				if(CcLibConstant.ALL_BODY_COMPONENT_TYPES.indexOf(String(_loc3_.@type)) >= 0)
 				{
-					_loc5_ = this.updateComponentImageData(_loc3_.@type,null,null,_loc4_,null,_loc3_.@id,_loc3_);
+					var _loc5_:ExtraDataLoader = this.updateComponentImageData(_loc3_.@type,null,null,_loc4_,null,_loc3_.@id,_loc3_);
 				}
 			}
 			_loc4_.commit();
 		}
 		
-		public function updateComponentImageData(param1:String, param2:ByteArray, param3:Object, param4:UtilLoadMgr, param5:Array = null, param6:String = "", param7:XML = null) : ExtraDataLoader
+		public function updateComponentImageData(componentType:String, swfByteArray:ByteArray, properties:Object, loadMgr:UtilLoadMgr, colors:Array = null, id:String = "", node:XML = null) : ExtraDataLoader
 		{
-			var loader:ExtraDataLoader;
-			var assetImageId:Number;
-			var decoIndex:Number;
-			var clipName:String = null;
-			var key:String = null;
-			var model:CcComponentModel = null;
-			var cacm:CCCharActionComponentModel = null;
-			var colorNames:Object = null;
-			var swfkey:String = null;
-			var tmpByteArray:ByteArray = null;
-			var decryptEngine:UtilCrypto = null;
-			var loaderContext:LoaderContext = null;
-			var componentType:String = param1;
-			var swfByteArray:ByteArray = param2;
-			var properties:Object = param3;
-			var loadMgr:UtilLoadMgr = param4;
-			var colors:Array = param5;
-			var id:String = param6;
-			var node:XML = param7;
 			if(CcLibConstant.ALL_BODY_COMPONENT_TYPES.indexOf(componentType) < 0)
 			{
 				if(!this._head)
 				{
 					this._head = new CcHeadComponent();
 				}
-				model = CcComponentModel.createModelByType(componentType);
+				var model:CcComponentModel = CcComponentModel.createModelByType(componentType);
 				model.initProperties(id,componentType,properties.x,properties.y,properties.xscale,properties.yscale,properties.rotation,properties.offset,properties.split);
 				model.initColors(colors);
 				this._head.addEventListener(Event.COMPLETE,this.onHeadLoaded);
 				this._head.setComponent(model,swfByteArray);
 				return null;
 			}
-			loader = new ExtraDataLoader();
-			assetImageId = 0;
+			var loader:ExtraDataLoader = new ExtraDataLoader();
+			var assetImageId:Number = 0;
 			if(this._useImageLibrary)
 			{
+				var key:String;
 				if(node)
 				{
 					key = node.@theme_id + "." + node.@type + "." + node.@path + "." + node.@file;
@@ -1003,6 +1014,7 @@ package anifire.component
 					}
 				}
 			}
+			var clipName:String;
 			switch(componentType)
 			{
 				case this.SKELETON:
@@ -1025,7 +1037,7 @@ package anifire.component
 				default:
 					clipName = this.DEFAULTHEAD;
 			}
-			decoIndex = -1;
+			var decoIndex:Number = -1;
 			if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(componentType) == -1)
 			{
 				loader.name = componentType;
@@ -1051,34 +1063,30 @@ package anifire.component
 				}
 				if(this._myActionModel)
 				{
-					cacm = this._myActionModel.getComponentByType(componentType) as CCCharActionComponentModel;
+					var cacm:CCCharActionComponentModel = this._myActionModel.getComponentByType(componentType) as CCCharActionComponentModel;
 					properties = {
 						"x":cacm.x,
-							"y":cacm.y,
-							"xscale":cacm.xscale,
-							"yscale":cacm.yscale,
-							"offset":cacm.offset,
-							"rotation":cacm.rotation,
-							"split":cacm.split
+						"y":cacm.y,
+						"xscale":cacm.xscale,
+						"yscale":cacm.yscale,
+						"offset":cacm.offset,
+						"rotation":cacm.rotation,
+						"split":cacm.split
 					};
 				}
 			}
 			if(colors == null)
 			{
+				var colorNames:Object;
 				if(node)
 				{
 					colorNames = CcLibConstant.COLORS_BY_COMPONENT(node.@type);
 					if(colorNames)
 					{
-						colors = (colorNames as Array).map(function(param1:String, param2:int, param3:Array):Object
+						colors = (colorNames as Array).map(function(item:String, index:int, array:Array):Object
 						{
-							var colorXMLNode:* = undefined;
-							var colorObj:* = undefined;
-							var item:String = param1;
-							var index:int = param2;
-							var array:Array = param3;
-							colorXMLNode = charXML.color.(@r == item);
-							colorObj = {
+							var colorXMLNode:* = charXML.color.(@r == item);
+							var colorObj:* = {
 								"colorReference":String(colorXMLNode.@r),
 								"originalColor":(String(colorXMLNode.@oc).length == 0 ? uint.MAX_VALUE : uint(colorXMLNode.@oc)),
 								"colorValue":uint(colorXMLNode.text()),
@@ -1093,7 +1101,7 @@ package anifire.component
 					colorNames = CcLibConstant.COLORS_BY_COMPONENT(componentType);
 					if(colorNames)
 					{
-						colors = (colorNames as Array).map(function(param1:String, param2:int, param3:Array):Object
+						colors = (colorNames as Array).map(function(item:String, index:int, array:Array):Object
 						{
 							var _loc4_:* = _myActionModel.getColor(componentType);
 							return {
@@ -1115,6 +1123,7 @@ package anifire.component
 			};
 			if(swfByteArray == null)
 			{
+				var swfkey:String;
 				if(node)
 				{
 					if(node.@type != CcLibConstant.COMPONENT_TYPE_MOUTH)
@@ -1142,17 +1151,17 @@ package anifire.component
 			{
 				if(this.should_decrypt)
 				{
-					tmpByteArray = new ByteArray();
+					var tmpByteArray:ByteArray = new ByteArray();
 					swfByteArray.readBytes(tmpByteArray);
 					tmpByteArray.position = 0;
 					swfByteArray.position = 0;
-					decryptEngine = new UtilCrypto();
+					var decryptEngine:UtilCrypto = new UtilCrypto();
 					decryptEngine.decrypt(tmpByteArray);
 					loader.loadBytes(tmpByteArray);
 				}
 				else
 				{
-					loaderContext = new LoaderContext();
+					var loaderContext:LoaderContext = new LoaderContext();
 					loaderContext.allowCodeImport = true;
 					swfByteArray.position = 0;
 					loader.loadBytes(swfByteArray,loaderContext);
@@ -1192,14 +1201,13 @@ package anifire.component
 		
 		private function doLoadImageData(param1:ExtraDataLoader) : void
 		{
-			var _loc8_:DisplayObjectContainer = null;
-			var _loc9_:int = 0;
 			var _loc2_:Object = param1.extraData;
 			var _loc3_:String = String(_loc2_["componentType"]);
 			var _loc4_:Object = _loc2_["properties"];
 			var _loc5_:Array = _loc2_["colors"];
 			var _loc6_:String = String(_loc2_["clipName"]);
 			var _loc7_:Number = Number(_loc2_["index"]);
+			var _loc8_:DisplayObjectContainer;
 			if(_loc6_ != "")
 			{
 				_loc8_ = UtilPlain.getInstance(this,_loc6_);
@@ -1216,7 +1224,7 @@ package anifire.component
 				}
 				else if(_loc6_ != this.DEFAULTHEAD)
 				{
-					_loc9_ = _loc8_.numChildren;
+					var _loc9_:int = _loc8_.numChildren;
 					while(_loc9_ > 0)
 					{
 						_loc8_.removeChildAt(_loc9_ - 1);
@@ -1247,13 +1255,12 @@ package anifire.component
 		
 		private function redoWaitingImageData() : void
 		{
-			var _loc2_:int = 0;
-			var _loc3_:ExtraDataLoader = null;
 			var _loc1_:DisplayObjectContainer = UtilPlain.getInstance(this,this.DEFAULTHEAD);
+			var _loc2_:int;
 			_loc2_ = 0;
 			while(_loc2_ < this.waiting.length)
 			{
-				_loc3_ = this.waiting[_loc2_] as ExtraDataLoader;
+				var _loc3_:ExtraDataLoader = this.waiting[_loc2_] as ExtraDataLoader;
 				this.doLoadImageData(_loc3_);
 				_loc2_++;
 			}
@@ -1268,8 +1275,6 @@ package anifire.component
 		
 		private function doLoadedComponent(param1:ExtraDataLoader) : void
 		{
-			var _loc7_:int = 0;
-			var _loc8_:Object = null;
 			var _loc2_:DisplayObjectContainer = UtilPlain.getInstance(this,this.DEFAULTHEAD);
 			var _loc3_:Object = param1.extraData;
 			var _loc4_:String = String(_loc3_["componentType"]);
@@ -1279,10 +1284,10 @@ package anifire.component
 			{
 				if(_loc6_ != null)
 				{
-					_loc7_ = 0;
+					var _loc7_:int = 0;
 					while(_loc7_ < _loc6_.length)
 					{
-						_loc8_ = _loc6_[_loc7_] as Object;
+						var _loc8_:Object = _loc6_[_loc7_] as Object;
 						this.updateColor(_loc8_);
 						_loc7_++;
 					}
@@ -1330,18 +1335,15 @@ package anifire.component
 		
 		public function changeColorForShader(param1:UtilHashUint) : Number
 		{
-			var _loc2_:Number = NaN;
-			var _loc8_:int = 0;
-			var _loc9_:int = 0;
-			var _loc12_:Number = NaN;
-			var _loc13_:Number = NaN;
-			var _loc14_:Number = NaN;
+			var _loc2_:Number;
 			var _loc3_:Shader = new Shader();
 			_loc3_.byteCode = new this.GoColorMapShaderClass();
 			var _loc4_:Array = new Array();
 			var _loc5_:Array = new Array();
 			var _loc6_:Array = new Array();
 			var _loc7_:UtilHashUint = new UtilHashUint();
+			var _loc8_:int;
+			var _loc9_:int;
 			_loc8_ = 0;
 			while(_loc8_ < this._customColor.length)
 			{
@@ -1365,9 +1367,9 @@ package anifire.component
 			while(_loc9_ < _loc7_.length)
 			{
 				_loc6_.push(uint(_loc7_.getKey(_loc9_)));
-				_loc12_ = uint(_loc7_.getValueByIndex(_loc9_)) >> 16 & 255;
-				_loc13_ = uint(_loc7_.getValueByIndex(_loc9_)) >> 8 & 255;
-				_loc14_ = uint(_loc7_.getValueByIndex(_loc9_)) & 255;
+				var _loc12_:Number = uint(_loc7_.getValueByIndex(_loc9_)) >> 16 & 255;
+				var _loc13_:Number = uint(_loc7_.getValueByIndex(_loc9_)) >> 8 & 255;
+				var _loc14_:Number = uint(_loc7_.getValueByIndex(_loc9_)) & 255;
 				if(_loc9_ / 4 < 1)
 				{
 					_loc4_[_loc9_ * 4 + 0] = _loc12_ / 255;
@@ -1411,6 +1413,7 @@ package anifire.component
 		private function onBodyLoaded(param1:Event) : void
 		{
 			IEventDispatcher(param1.target).removeEventListener(param1.type,this.onBodyLoaded);
+			var _loc2_:Date = new Date();
 			if(this._loadHead)
 			{
 				this._head = new CcHeadComponent();
@@ -1427,6 +1430,7 @@ package anifire.component
 		private function onBodyLoadedByCam(param1:Event) : void
 		{
 			IEventDispatcher(param1.target).removeEventListener(param1.type,this.onBodyLoadedByCam);
+			var _loc2_:Date = new Date();
 			if(this._loadHead)
 			{
 				this._head2 = new CCHeadView();
@@ -1456,10 +1460,6 @@ package anifire.component
 		
 		public function onReady(param1:Event = null) : void
 		{
-			var _loc3_:SelectedColor = null;
-			var _loc4_:XML = null;
-			var _loc7_:String = null;
-			var _loc8_:CCColor = null;
 			if(param1 != null)
 			{
 				(param1.target as IEventDispatcher).removeEventListener(param1.type,this.onReady);
@@ -1476,6 +1476,8 @@ package anifire.component
 					_loc2_.addChild(this._head2);
 				}
 			}
+			var _loc3_:SelectedColor;
+			var _loc4_:XML;
 			var _loc5_:UtilHashUint = new UtilHashUint();
 			if(this.charXML)
 			{
@@ -1492,9 +1494,9 @@ package anifire.component
 			}
 			if(this._myActionModel)
 			{
-				for(_loc7_ in this._myActionModel.colorCodes)
+				for(var _loc7_:String in this._myActionModel.colorCodes)
 				{
-					_loc8_ = this._myActionModel.colorCodes[_loc7_];
+					var _loc8_:CCColor = this._myActionModel.colorCodes[_loc7_];
 					_loc3_ = new SelectedColor(_loc8_.type,_loc8_.oc,_loc8_.dest);
 					this.changeColor(_loc3_,!!_loc8_.targetComponent ? _loc8_.targetComponent : "");
 					if(_loc3_.orgColor != uint.MAX_VALUE)
@@ -1590,15 +1592,12 @@ package anifire.component
 		
 		private function updateHeadRect() : void
 		{
-			var _loc2_:Rectangle = null;
-			var _loc3_:Point = null;
-			var _loc4_:Number = NaN;
 			var _loc1_:DisplayObjectContainer = UtilPlain.getInstance(this,this.DEFAULTHEAD);
 			if(_loc1_)
 			{
-				_loc2_ = _loc1_.getBounds(this);
-				_loc3_ = new Point(_loc2_.x + _loc2_.width / 2,_loc2_.y + _loc2_.height / 2);
-				_loc4_ = CcLibConstant.PHOTO_SIZE;
+				var _loc2_:Rectangle = _loc1_.getBounds(this);
+				var _loc3_:Point = new Point(_loc2_.x + _loc2_.width / 2,_loc2_.y + _loc2_.height / 2);
+				var _loc4_:Number = CcLibConstant.PHOTO_SIZE;
 				this._headRect = new Rectangle(_loc3_.x - _loc4_ * 0.4,_loc3_.y - _loc4_ * 1 / 2,_loc4_,_loc4_);
 			}
 			this.updateEyesRect();
@@ -1606,19 +1605,6 @@ package anifire.component
 		
 		private function updateEyesRect() : void
 		{
-			var _loc3_:DisplayObjectContainer = null;
-			var _loc4_:DisplayObjectContainer = null;
-			var _loc5_:Rectangle = null;
-			var _loc6_:Rectangle = null;
-			var _loc7_:DisplayObjectContainer = null;
-			var _loc8_:Rectangle = null;
-			var _loc9_:Point = null;
-			var _loc10_:Number = NaN;
-			var _loc11_:Number = NaN;
-			var _loc12_:Number = NaN;
-			var _loc13_:Number = NaN;
-			var _loc14_:Point = null;
-			var _loc15_:Number = NaN;
 			var _loc1_:Boolean = false;
 			var _loc2_:DisplayObjectContainer = this._head;
 			if(!_loc2_)
@@ -1627,24 +1613,25 @@ package anifire.component
 			}
 			if(_loc2_)
 			{
-				_loc3_ = UtilPlain.getInstance(_loc2_,CcLibConstant.COMPONENT_TYPE_EYE + CcLibConstant.LEFT + this.MC);
-				_loc4_ = UtilPlain.getInstance(_loc2_,CcLibConstant.COMPONENT_TYPE_EYE + CcLibConstant.RIGHT + this.MC);
-				_loc5_ = _loc3_.getBounds(this);
-				_loc6_ = _loc4_.getBounds(this);
-				_loc8_ = (_loc7_ = UtilPlain.getInstance(_loc2_,CcLibConstant.COMPONENT_TYPE_NOSE + this.MC)).getBounds(this);
+				var _loc3_:DisplayObjectContainer = UtilPlain.getInstance(_loc2_,CcLibConstant.COMPONENT_TYPE_EYE + CcLibConstant.LEFT + this.MC);
+				var _loc4_:DisplayObjectContainer = UtilPlain.getInstance(_loc2_,CcLibConstant.COMPONENT_TYPE_EYE + CcLibConstant.RIGHT + this.MC);
+				var _loc5_:Rectangle = _loc3_.getBounds(this);
+				var _loc6_:Rectangle = _loc4_.getBounds(this);
+				var _loc7_:DisplayObjectContainer = UtilPlain.getInstance(_loc2_,CcLibConstant.COMPONENT_TYPE_NOSE + this.MC);
+				var _loc8_:Rectangle = _loc7_.getBounds(this);
 				if(_loc5_.width != 0 && _loc6_.width != 0)
 				{
-					_loc9_ = new Point((_loc5_.x + _loc6_.x + _loc5_.width) / 2,(_loc5_.y + _loc6_.y) / 2);
-					_loc10_ = 100;
-					_loc11_ = 100;
-					_loc12_ = 2 / 5;
-					_loc13_ = 2 / 5;
+					var _loc9_:Point = new Point((_loc5_.x + _loc6_.x + _loc5_.width) / 2,(_loc5_.y + _loc6_.y) / 2);
+					var _loc10_:Number = 100;
+					var _loc11_:Number = 100;
+					var _loc12_:Number = 2 / 5;
+					var _loc13_:Number = 2 / 5;
 					this._headRect = new Rectangle(_loc9_.x - _loc10_ * _loc12_,_loc9_.y - _loc11_ * _loc13_,_loc10_,_loc11_);
 				}
 				else if(_loc8_.width != 0)
 				{
-					_loc14_ = new Point(_loc8_.x,_loc8_.y);
-					_loc15_ = CcLibConstant.PHOTO_SIZE;
+					var _loc14_:Point = new Point(_loc8_.x,_loc8_.y);
+					var _loc15_:Number = CcLibConstant.PHOTO_SIZE;
 					this._headRect = new Rectangle(_loc14_.x - _loc15_ * 0.4,_loc14_.y - _loc15_ * 1 / 2,_loc15_,_loc15_);
 				}
 			}
@@ -1665,14 +1652,11 @@ package anifire.component
 		
 		public function updateLocation(param1:String, param2:Object, param3:String = "") : void
 		{
-			var _loc5_:DisplayObjectContainer = null;
-			var _loc6_:DisplayObjectContainer = null;
-			var _loc7_:String = null;
-			var _loc8_:CcComponent = null;
 			if(this._head)
 			{
-				_loc7_ = param3 == "" ? param1 : param3;
-				if((Boolean(_loc8_ = this._head.getComponent(_loc7_))) && Boolean(_loc8_.model))
+				var _loc7_:String = param3 == "" ? param1 : param3;
+				var _loc8_:CcComponent = this._head.getComponent(_loc7_);
+				if(Boolean(_loc8_) && Boolean(_loc8_.model))
 				{
 					_loc8_.model.x = Number(param2["x"]);
 					_loc8_.model.y = Number(param2["y"]);
@@ -1686,12 +1670,15 @@ package anifire.component
 					return;
 				}
 			}
-			var _loc4_:DisplayObjectContainer;
-			if((_loc4_ = UtilPlain.getInstance(this,this.DEFAULTHEAD)) != null)
+			var _loc4_:DisplayObjectContainer = UtilPlain.getInstance(this,this.DEFAULTHEAD);
+			var _loc5_:DisplayObjectContainer;
+			var _loc6_:DisplayObjectContainer;
+			if(_loc4_ != null)
 			{
 				if(this._componentOrder.indexOf(param1) == -1)
 				{
-					_loc6_ = (_loc5_ = UtilPlain.getInstance(_loc4_,param1 + this.LIB_RIGHT)).getChildAt(0) as DisplayObjectContainer;
+					_loc5_ = UtilPlain.getInstance(_loc4_,param1 + this.LIB_RIGHT);
+					_loc6_ = _loc5_.getChildAt(0) as DisplayObjectContainer;
 					_loc5_.x = Number(param2["x"]);
 					_loc5_.y = Number(param2["y"]);
 					_loc6_.scaleX = Number(param2["xscale"]);
@@ -1740,23 +1727,22 @@ package anifire.component
 		
 		public function highlightComponent(param1:String) : void
 		{
-			var _loc3_:DisplayObjectContainer = null;
-			var _loc4_:GlowFilter = null;
-			var _loc5_:Array = null;
 			var _loc2_:DisplayObjectContainer = UtilPlain.getInstance(this,this.DEFAULTHEAD);
+			var _loc3_:DisplayObjectContainer;
 			_loc3_ = UtilPlain.getInstance(_loc2_,param1);
 			if(_loc3_)
 			{
-				_loc4_ = new GlowFilter(16777215);
-				(_loc5_ = new Array()).push(_loc4_);
+				var _loc4_:GlowFilter = new GlowFilter(16777215);
+				var _loc5_:Array = new Array();
+				_loc5_.push(_loc4_);
 				_loc3_.filters = _loc5_;
 			}
 		}
 		
 		public function removeHighlight(param1:String) : void
 		{
-			var _loc3_:DisplayObjectContainer = null;
 			var _loc2_:DisplayObjectContainer = UtilPlain.getInstance(this,this.DEFAULTHEAD);
+			var _loc3_:DisplayObjectContainer;
 			_loc3_ = UtilPlain.getInstance(_loc2_,param1);
 			if(_loc3_ != null)
 			{
@@ -1766,14 +1752,13 @@ package anifire.component
 		
 		public function removeComponentById(param1:String) : void
 		{
-			var _loc3_:DisplayObjectContainer = null;
-			var _loc4_:DisplayObjectContainer = null;
-			var _loc5_:int = 0;
 			var _loc2_:DisplayObjectContainer = UtilPlain.getInstance(this,this.DEFAULTHEAD);
+			var _loc3_:DisplayObjectContainer;
 			_loc3_ = UtilPlain.getInstance(_loc2_,param1);
 			if(_loc3_)
 			{
-				_loc5_ = (_loc4_ = _loc3_.parent).numChildren - 1;
+				var _loc4_:DisplayObjectContainer = _loc3_.parent;
+				var _loc5_:int = _loc4_.numChildren - 1;
 				while(_loc5_ >= 0)
 				{
 					if(_loc4_.getChildAt(_loc5_).name == param1)
@@ -1805,11 +1790,11 @@ package anifire.component
 		
 		private function addPropClipToPropContainer(param1:DisplayObjectContainer, param2:DisplayObjectContainer) : void
 		{
-			var _loc4_:DisplayObjectContainer = null;
 			var _loc3_:DisplayObjectContainer = UtilPlain.getInstance(param2,UtilPlain.THE_CHAR);
 			if(_loc3_ != null)
 			{
-				if((_loc4_ = UtilPlain.getProp(_loc3_)) != null)
+				var _loc4_:DisplayObjectContainer = UtilPlain.getProp(_loc3_);
+				if(_loc4_ != null)
 				{
 					UtilPlain.removeAllSon(_loc4_);
 					_loc4_.addChild(param1);
@@ -1882,15 +1867,13 @@ package anifire.component
 		
 		public function resetHeadPos() : void
 		{
-			var _loc2_:int = 0;
-			var _loc3_:DisplayObject = null;
 			var _loc1_:DisplayObjectContainer = UtilPlain.getInstance(this,AnimeConstants.MOVIECLIP_THE_HEAD);
 			if(_loc1_ != null)
 			{
-				_loc2_ = 0;
+				var _loc2_:int = 0;
 				while(_loc2_ < _loc1_.numChildren)
 				{
-					_loc3_ = _loc1_.getChildAt(_loc2_);
+					var _loc3_:DisplayObject = _loc1_.getChildAt(_loc2_);
 					_loc3_.x = 0;
 					_loc3_.y = 0;
 					_loc2_++;
@@ -1900,15 +1883,13 @@ package anifire.component
 		
 		public function updateHeadPos(param1:Number, param2:Number) : void
 		{
-			var _loc4_:int = 0;
-			var _loc5_:DisplayObject = null;
 			var _loc3_:DisplayObjectContainer = UtilPlain.getInstance(this,AnimeConstants.MOVIECLIP_THE_HEAD);
 			if(_loc3_ != null)
 			{
-				_loc4_ = 0;
+				var _loc4_:int = 0;
 				while(_loc4_ < _loc3_.numChildren)
 				{
-					_loc5_ = _loc3_.getChildAt(_loc4_);
+					var _loc5_:DisplayObject = _loc3_.getChildAt(_loc4_);
 					_loc5_.x += param1;
 					_loc5_.y += param2;
 					_loc4_++;
@@ -1918,15 +1899,14 @@ package anifire.component
 		
 		public function updateHeadScale(param1:Number, param2:Number) : void
 		{
-			var _loc4_:int = 0;
-			var _loc5_:DisplayObject = null;
 			var _loc3_:DisplayObjectContainer = UtilPlain.getInstance(this,AnimeConstants.MOVIECLIP_THE_HEAD);
 			if(_loc3_ != null)
 			{
-				_loc4_ = 0;
+				var _loc4_:int = 0;
 				while(_loc4_ < _loc3_.numChildren)
 				{
-					(_loc5_ = _loc3_.getChildAt(_loc4_)).scaleX = param1;
+					var _loc5_:DisplayObject = _loc3_.getChildAt(_loc4_);
+					_loc5_.scaleX = param1;
 					_loc5_.scaleY = param2;
 					_loc4_++;
 				}
@@ -1991,15 +1971,10 @@ package anifire.component
 				colorNames = CcLibConstant.COLORS_BY_COMPONENT(node.@type);
 				if(colorNames)
 				{
-					colorArray = (colorNames as Array).map(function(param1:String, param2:int, param3:Array):Object
+					colorArray = (colorNames as Array).map(function(item:String, index:int, array:Array):Object
 					{
-						var colorXMLNode:* = undefined;
-						var colorObj:* = undefined;
-						var item:String = param1;
-						var index:int = param2;
-						var array:Array = param3;
-						colorXMLNode = charXML.color.(@r == item);
-						colorObj = {
+						var colorXMLNode:* = charXML.color.(@r == item);
+						var colorObj:Object = {
 							"colorReference":String(colorXMLNode.@r),
 							"originalColor":(String(colorXMLNode.@oc).length == 0 ? uint.MAX_VALUE : uint(colorXMLNode.@oc)),
 							"colorValue":uint(colorXMLNode.text()),

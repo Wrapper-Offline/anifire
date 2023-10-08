@@ -104,18 +104,15 @@ package anifire.models.creator
 		
 		public function parse(param1:XML) : void
 		{
-			var _loc2_:int = 0;
-			var _loc3_:String = null;
-			var _loc4_:String = null;
-			var _loc7_:CCBodyComponentModel = null;
-			var _loc8_:Vector.<CCBodyComponentModel> = null;
-			var _loc9_:CCColor = null;
+			var _loc2_:int;
+			var _loc3_:String;
+			var _loc4_:String;
 			var _loc5_:XMLList = param1.component;
 			var _loc6_:int = _loc5_.length();
 			_loc2_ = 0;
 			while(_loc2_ < _loc6_)
 			{
-				_loc7_ = new CCBodyComponentModel();
+				var _loc7_:CCBodyComponentModel = new CCBodyComponentModel();
 				_loc7_.parse(_loc5_[_loc2_]);
 				if(_loc7_.type == "bodyshape")
 				{
@@ -124,6 +121,7 @@ package anifire.models.creator
 				}
 				if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(_loc7_.type) > -1)
 				{
+					var _loc8_:Vector.<CCBodyComponentModel>;
 					if(!this.components[_loc7_.type])
 					{
 						_loc8_ = this.components[_loc7_.type] = new Vector.<CCBodyComponentModel>();
@@ -155,7 +153,7 @@ package anifire.models.creator
 			_loc2_ = 0;
 			while(_loc2_ < _loc6_)
 			{
-				_loc9_ = new CCColor();
+				var _loc9_:CCColor = new CCColor();
 				_loc9_.parse(_loc5_[_loc2_]);
 				if(_loc9_.targetComponent)
 				{

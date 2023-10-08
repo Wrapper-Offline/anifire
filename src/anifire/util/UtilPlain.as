@@ -153,9 +153,8 @@ package anifire.util
 		
 		public static function getAllShaderObj(param1:DisplayObject) : Array
 		{
-			var objArray:Array = null;
+			var objArray:Array = new Array();
 			var theObj:DisplayObject = param1;
-			objArray = new Array();
 			var treatment:Function = function(param1:DisplayObject):void
 			{
 				if(param1 != null)
@@ -172,9 +171,8 @@ package anifire.util
 		
 		public static function getLoaderItem(param1:DisplayObject) : Array
 		{
-			var objArray:Array = null;
+			var objArray:Array = new Array();
 			var theObj:DisplayObject = param1;
-			objArray = new Array();
 			var treatment:Function = function(param1:DisplayObject):void
 			{
 				if(param1 != null)
@@ -191,9 +189,8 @@ package anifire.util
 		
 		public static function getLoaderItemExcludeTheHeadTheHand(param1:DisplayObject) : Array
 		{
-			var objArray:Array = null;
+			var objArray:Array = new Array();
 			var theObj:DisplayObject = param1;
-			objArray = new Array();
 			var treatment:Function = function(param1:DisplayObject):void
 			{
 				if(param1 != null)
@@ -210,10 +207,9 @@ package anifire.util
 		
 		public static function getColorItem(param1:DisplayObject, param2:String = "") : Array
 		{
-			var objArray:Array = null;
+			var objArray:Array = new Array();
 			var theObj:DisplayObject = param1;
 			var spec:String = param2;
-			objArray = new Array();
 			var treatment:Function = function(param1:DisplayObject):void
 			{
 				var _loc2_:String = null;

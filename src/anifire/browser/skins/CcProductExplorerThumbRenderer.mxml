@@ -87,9 +87,9 @@
 			
 			protected function copyButtonHandler(param1:MouseEvent) : void
 			{
-				var _loc4_:String = null;
 				var _loc2_:String = this._dataSource.ccThemeId;
 				var _loc3_:String = !!this._dataSource.encryptId ? this._dataSource.encryptId : this._dataSource.id;
+				var _loc4_:String;
 				if(ServerConstants.IS_WIX)
 				{
 					_loc4_ = ServerConstants.HOST_PATH + "charactercreator/create/" + _loc2_ + "/" + _loc3_;

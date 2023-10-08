@@ -13,16 +13,16 @@ package anifire.browser.models
       
       protected var productKeys:Object;
       
-      protected var collections:Vector.<anifire.browser.models.ProductCollection>;
+      protected var collections:Vector.<ProductCollection>;
       
       public function ProductGroupCollection(param1:Array = null)
       {
          super(param1);
          this.productKeys = {};
-         this.collections = new Vector.<anifire.browser.models.ProductCollection>();
+         this.collections = new Vector.<ProductCollection>();
       }
       
-      public function addCollection(param1:anifire.browser.models.ProductCollection) : void
+      public function addCollection(param1:ProductCollection) : void
       {
          addItem(param1);
          this.collections.push(param1);
@@ -30,14 +30,13 @@ package anifire.browser.models
       
       public function addProduct(param1:ThumbModel, param2:Boolean = true) : Boolean
       {
-         var _loc6_:anifire.browser.models.ProductCollection = null;
-         var _loc7_:Boolean = false;
          var _loc3_:Boolean = false;
          var _loc4_:int = int(this.collections.length);
          var _loc5_:int = 0;
          while(_loc5_ < _loc4_)
          {
-            _loc7_ = (_loc6_ = this.collections[_loc5_]).isProperCollection;
+			var _loc6_:ProductCollection = this.collections[_loc5_];
+			var _loc7_:Boolean = _loc6_.isProperCollection;
             if(_loc6_.addProductIfAppropriate(param1,param2))
             {
                dispatchEvent(new Event(Event.CHANGE));
@@ -65,12 +64,11 @@ package anifire.browser.models
       
       public function removeAllProducts() : void
       {
-         var _loc3_:anifire.browser.models.ProductCollection = null;
          var _loc1_:int = int(this.collections.length);
          var _loc2_:int = 0;
          while(_loc2_ < _loc1_)
          {
-            _loc3_ = this.collections[_loc2_];
+			 var _loc3_:ProductCollection = this.collections[_loc2_];
             _loc3_.filterFunction = null;
             _loc3_.refresh();
             _loc3_.source = [];
@@ -83,12 +81,11 @@ package anifire.browser.models
       [Bindable(event="change")]
       public function get totalProducts() : int
       {
-         var _loc3_:anifire.browser.models.ProductCollection = null;
          var _loc1_:int = 0;
          var _loc2_:int = 0;
          while(_loc2_ < length)
          {
-            _loc3_ = getItemAt(_loc2_) as anifire.browser.models.ProductCollection;
+			 var _loc3_:ProductCollection = getItemAt(_loc2_) as ProductCollection;
             if(Boolean(_loc3_) && _loc3_.valid)
             {
                _loc1_ += _loc3_.properProductCount;
@@ -103,7 +100,7 @@ package anifire.browser.models
          this.productKeys[param1.id] = param1;
       }
       
-      protected function registerProductCollection(param1:ThumbModel, param2:anifire.browser.models.ProductCollection) : void
+      protected function registerProductCollection(param1:ThumbModel, param2:ProductCollection) : void
       {
       }
       
@@ -116,7 +113,7 @@ package anifire.browser.models
       {
          var _loc2_:int = 0;
          var _loc3_:int = 0;
-         var _loc4_:anifire.browser.models.ProductCollection = null;
+         var _loc4_:ProductCollection = null;
          if(this.productKeys[param1] != null)
          {
             _loc2_ = int(this.collections.length);
@@ -137,7 +134,7 @@ package anifire.browser.models
          return null;
       }
       
-      public function getCategoryByProductId(param1:String) : anifire.browser.models.ProductCollection
+      public function getCategoryByProductId(param1:String) : ProductCollection
       {
          return null;
       }

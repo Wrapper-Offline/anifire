@@ -41,9 +41,9 @@ package anifire.core
 		
 		public static function getLipSyncComponentItems(param1:XML, param2:String, param3:Number = 1) : UtilHashArray
 		{
-			var _loc5_:String = null;
-			var _loc6_:String = null;
 			var _loc4_:UtilHashArray = new UtilHashArray();
+			var _loc5_:String;
+			var _loc6_:String;
 			_loc5_ = getLipSyncMouthUrl(param1,param2,param3);
 			_loc6_ = param1.@theme_id + "." + param1.@type + "." + CCLipSyncController.LIPSYNC_LIB_ID;
 			_loc4_.push(_loc5_,_loc6_);
@@ -55,9 +55,9 @@ package anifire.core
 		
 		public static function getLipSyncComponentItemsByCam(param1:CCCharacterActionModel, param2:String, param3:String, param4:Number = 1) : Object
 		{
-			var _loc6_:String = null;
-			var _loc7_:String = null;
 			var _loc5_:Object = {};
+			var _loc6_:String;
+			var _loc7_:String;
 			_loc6_ = getLipSyncMouthUrlByCam(param1,param2,param3,param4);
 			_loc7_ = param1.themeId + "." + param2 + "." + CCLipSyncController.LIPSYNC_LIB_ID;
 			_loc5_[_loc6_] = _loc7_;
@@ -69,9 +69,9 @@ package anifire.core
 		
 		public static function getFileName(param1:Boolean, param2:String, param3:String, param4:String, param5:String, param6:String = "", param7:Number = 1) : String
 		{
-			var _loc9_:String = null;
-			var _loc10_:String = null;
-			var _loc8_:* = "";
+			var _loc8_:String = "";
+			var _loc9_:String;
+			var _loc10_:String;
 			if(param2.indexOf("_") > -1)
 			{
 				_loc10_ = String(param2).split("_")[0];
