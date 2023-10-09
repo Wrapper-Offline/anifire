@@ -60,7 +60,6 @@
     <classEntry path="anifire.browser.skins.PageNavigationButtonSkin"/>
     <classEntry path="anifire.browser.skins.CategoryDropDownButtonSkin"/>
     <classEntry path="anifire.browser.skins.CategoryDropDownListSkin"/>
-    <classEntry path="anifire.browser.components.ArrowTipContainer"/>
     <classEntry path="anifire.browser.components.PopUpAnchor"/>
     <classEntry path="anifire.browser.skins.CategoryDropDownListItemRenderer"/>
     <classEntry path="anifire.browser.skins.ArrowTipContainerSkin"/>
@@ -68,6 +67,10 @@
     <classEntry path="anifire.browser.components.CcProductExplorer"/>
     <classEntry path="anifire.browser.components.PageNavigation"/>
     <classEntry path="anifire.browser.skins.BusyIndicator"/>
+    <classEntry path="anifire.creator.components.ArrowTipContainer"/>
+    <classEntry path="anifire.creator.components.BodyShapeChooser"/>
+    <classEntry path="anifire.creator.components.BodyShapeMegaChooser"/>
+    <classEntry path="anifire.creator.components.BusyIndicator"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
