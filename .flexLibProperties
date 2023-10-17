@@ -71,6 +71,22 @@
     <classEntry path="anifire.creator.components.BodyShapeChooser"/>
     <classEntry path="anifire.creator.components.BodyShapeMegaChooser"/>
     <classEntry path="anifire.creator.components.BusyIndicator"/>
+    <classEntry path="anifire.creator.components.CCLoadingScreen"/>
+    <classEntry path="anifire.creator.components.CCPreloader"/>
+    <classEntry path="anifire.creator.components.CCTemplateCharThumb"/>
+    <classEntry path="anifire.creator.components.CcColorPickerElementSpark"/>
+    <classEntry path="anifire.creator.components.CcColorPickers"/>
+    <classEntry path="anifire.creator.components.CcComponentPropertyInspectorSpark"/>
+    <classEntry path="anifire.creator.components.CcComponentThumbDetailThumbnail"/>
+    <classEntry path="anifire.creator.components.CcComponentThumbThumbnail"/>
+    <classEntry path="anifire.creator.components.CharPreviewOption"/>
+    <classEntry path="anifire.creator.components.CharPreviewer"/>
+    <classEntry path="anifire.creator.components.ClothesChooser"/>
+    <classEntry path="anifire.creator.components.ColorDisplayGroup"/>
+    <classEntry path="anifire.creator.components.ColorPicker"/>
+    <classEntry path="anifire.creator.components.ColorPickerItemRenderer"/>
+    <classEntry path="anifire.creator.components.ComponentItemRenderer"/>
+    <classEntry path="anifire.creator.components.ComponentThumbChooserSpark"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
