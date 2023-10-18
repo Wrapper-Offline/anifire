@@ -7,20 +7,14 @@
 		[HostComponent("anifire.browser.components.PageNavigation")]
 	</fx:Metadata>
 
-	<fx:Script>
-		<![CDATA[
-			private static const lt:String = "<";
-		]]>
-	</fx:Script>
-
 	<mx:HBox verticalAlign="middle">
-		<s:Button id="btnFirst" skinClass="anifire.browser.skins.PageNavigationButtonSkin" label="{lt + lt}" enabled="false" buttonMode="true"/>
-		<s:Button id="btnPrev" skinClass="anifire.browser.skins.PageNavigationButtonSkin" label="{lt}" enabled="false" buttonMode="true"/>
+		<s:Button id="btnFirst" skinClass="anifire.browser.skins.PageNavigationButtonSkin" label="&lt;&lt;" enabled="false" buttonMode="true"/>
+		<s:Button id="btnPrev" skinClass="anifire.browser.skins.PageNavigationButtonSkin" label="&lt;" enabled="false" buttonMode="true"/>
 		<s:Label text="Page"/>
 		<s:TextInput id="currentPageTextInput" textAlign="center" restrict="0-9" maxChars="3" widthInChars="3" text="{hostComponent.currentPage}"/>
 		<s:Label text="of {hostComponent.totalPage}"/>
-		<s:Button id="btnNext" skinClass="anifire.browser.skins.PageNavigationButtonSkin" label=">" enabled="false" buttonMode="true"/>
-		<s:Button id="btnLast" skinClass="anifire.browser.skins.PageNavigationButtonSkin" label=">>" enabled="false" buttonMode="true"/>
+		<s:Button id="btnNext" skinClass="anifire.browser.skins.PageNavigationButtonSkin" label="&gt;" enabled="false" buttonMode="true"/>
+		<s:Button id="btnLast" skinClass="anifire.browser.skins.PageNavigationButtonSkin" label="&gt;&gt;" enabled="false" buttonMode="true"/>
 	</mx:HBox>
 
 </s:Skin>

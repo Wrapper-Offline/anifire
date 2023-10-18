@@ -134,7 +134,7 @@ package anifire.creator.models
             this.componentType = param2;
          }
          this.enable = param1.@enable == "N" ? false : true;
-         this.defaultColor = param1.@§default§;
+         this.defaultColor = param1.@default;
          if(param1.attribute("parent_component_type").length() > 0 && param1.attribute("parent_color_r").length() > 0)
          {
             this._parentComponentType = param1.@parent_component_type;

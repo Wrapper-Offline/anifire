@@ -366,7 +366,7 @@
 				<s:SolidColor color="0xFFFFFF" alpha="0.4"/>
 			</s:fill>
 		</s:Rect>
-		<cComponents:IconButton
+		<components:IconButton
 			id="upButt"
 			buttonMode="true"
 			enabled="true"
@@ -385,7 +385,7 @@
 				<s:SolidColor color="0xFFFFFF" alpha="0.4"/>
 			</s:fill>
 		</s:Rect>
-		<cComponents:IconButton
+		<components:IconButton
 			id="downButt"
 			buttonMode="true"
 			enabled="true"

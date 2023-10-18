@@ -87,6 +87,17 @@
     <classEntry path="anifire.creator.components.ColorPickerItemRenderer"/>
     <classEntry path="anifire.creator.components.ComponentItemRenderer"/>
     <classEntry path="anifire.creator.components.ComponentThumbChooserSpark"/>
+    <classEntry path="anifire.creator.components.DefaultPopUpContainer"/>
+    <classEntry path="anifire.creator.components.DecoThumbRenderer"/>
+    <classEntry path="anifire.creator.components.DecorationItemRenderer"/>
+    <classEntry path="anifire.creator.components.DecorationPanel"/>
+    <classEntry path="anifire.creator.components.DefaultDropDownListItemRenderer"/>
+    <classEntry path="anifire.creator.components.DirectionControlSpark"/>
+    <classEntry path="anifire.creator.components.LatestTemplateCharThumb"/>
+    <classEntry path="anifire.creator.components.LatestTemplates"/>
+    <classEntry path="anifire.creator.components.MenuItemList"/>
+    <classEntry path="anifire.creator.components.MenuItemRenderer"/>
+    <classEntry path="anifire.creator.components.ScaleChooserSpark"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

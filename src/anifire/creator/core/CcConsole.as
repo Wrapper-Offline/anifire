@@ -30,6 +30,7 @@ package anifire.creator.core
    import anifire.util.UtilSite;
    import anifire.util.UtilURLStream;
    import anifire.util.UtilUser;
+   import com.adobe.serialization.json.JSON;
    import flash.display.DisplayObjectContainer;
    import flash.events.Event;
    import flash.events.EventDispatcher;
@@ -520,7 +521,7 @@ package anifire.creator.core
                   {
                   }
                }
-               js = StringUtil.substitute("CCStandaloneBannerAdUI.gaLogTx.logCCPartsNormal({0}, {1}, {2})",event.assetId,JS0N.encode(event.gaTrackModel.parts.filter(function(param1:*, param2:int, param3:Array):Boolean
+               js = StringUtil.substitute("CCStandaloneBannerAdUI.gaLogTx.logCCPartsNormal({0}, {1}, {2})",event.assetId,com.adobe.serialization.json.JSON.encode(event.gaTrackModel.parts.filter(function(param1:*, param2:int, param3:Array):Boolean
                {
                   return (["GoUpper","GoLower","upper_body","lower_body","hair"] as Array).indexOf(param1.ctype) >= 0;
                })),isTemplate ? this.ccChar.templateId : "0");

@@ -277,8 +277,9 @@
 		bottom="27"
 		icon="@Embed('../images/propertyInspector/anchorIcon.png')"
 		iconOver="@Embed('../images/propertyInspector/anchorIcon_hover.png')"
-		click="moveUp.play()"/>
-	<s:Group id="yPad" y="105" alpha="0" mouseChildren="false">
+		click="moveUp.play()"
+		label="{UtilDict.toDisplay('go','Fine-tune size and position')}"/>
+	<s:Group id="yPad" y="105" x="{(this.width - yPad.width) / 2}" alpha="0" mouseChildren="false">
 		<s:Rect width="280" height="101" radiusX="5" radiusY="5">
 			<s:fill>
 				<s:SolidColor color="0x333333"/>
@@ -308,7 +309,8 @@
 			right="5"
 			icon="@Embed('../images/propertyInspector/closeIcon.png')"
 			iconOver="@Embed('../images/propertyInspector/closeIcon_hover.png')"
-			click="startHide()"/>
+			click="startHide()"
+			label="{UtilDict.toDisplay('go','Close')}"/>
 		<s:HGroup
 			width="100%"
 			horizontalCenter="0"
