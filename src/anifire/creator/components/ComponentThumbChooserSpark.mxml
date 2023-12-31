@@ -24,7 +24,6 @@
 			private var componentThumbs:UtilHashArray;
 			private var componentType:String;
 			private var currentPageNum:int = 0;
-			private var moneyMode:int;
 			private var timeoutId:int = -1;
 			private var _biggerHeight:Number;
 			private var _smallerHeight:Number;
@@ -75,7 +74,7 @@
 				this._smallerHeight = param1;
 			}
 			
-			public function init(param1:CcCharacter, param2:CcTheme, param3:String, param4:int, param5:Boolean) : void
+			public function init(param1:CcCharacter, param2:CcTheme, param3:String, param5:Boolean) : void
 			{
 				var _componentThumbs:Array;
 				var enabledComponentThumbs:UtilHashArray;
@@ -88,7 +87,6 @@
 				var ccChar:CcCharacter = param1;
 				var ccTheme:CcTheme = param2;
 				var componentType:String = param3;
-				var moneyMode:int = param4;
 				var shouldUseBiggerHeight:Boolean = param5;
 				this.doClearTimeOut();
 				if(shouldUseBiggerHeight)
@@ -102,7 +100,6 @@
 					this.thumbnailTileSpark.height = this._smallerHeight;
 				}
 				this.componentType = componentType;
-				this.moneyMode = moneyMode;
 				if(CcLibConstant.USER_CHOOSE_ABLE_HEAD_COMPONENT_TYPES.indexOf(componentType) >= 0)
 				{
 					this.componentThumbs = ccTheme.getComponentThumbByType(componentType);

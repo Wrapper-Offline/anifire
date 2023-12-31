@@ -18,7 +18,6 @@
 			private var thumbnailWidth:Number;
 			private var thumbnailHeight:Number;
 			private var bgStyleName:String;
-			private var moneyMode:int;
 			public var _componentType:String;
 			public var ccComponentThumbThumbnail:CcComponentThumbThumbnail;
 
@@ -32,28 +31,22 @@
 				return this.componentThumb == null ? true : false;
 			}
 			
-			public function showGoBuck(param1:Boolean) : void
+			public function initNullThumbnail(param1:CcComponentThumbThumbnail, param2:Number, param3:Number, param4:String, param5:String) : void
 			{
-				this.thumbnailDetailContainer.visible = param1;
-			}
-			
-			public function initNullThumbnail(param1:CcComponentThumbThumbnail, param2:Number, param3:Number, param4:String, param5:String, param6:int) : void
-			{
-				this.commonInit(param1,param2,param3,null,param4,param5,param6);
+				this.commonInit(param1,param2,param3,null,param4,param5);
 			}
 			
 			public function init(param1:CcComponentThumbThumbnail, param2:Number, param3:Number, param4:CcComponentThumb, param5:String, param6:int) : void
 			{
-				this.commonInit(param1,param2,param3,param4,param4.type,param5,param6);
+				this.commonInit(param1,param2,param3,param4,param4.type,param5);
 			}
 			
-			private function commonInit(param1:CcComponentThumbThumbnail, param2:Number, param3:Number, param4:CcComponentThumb, param5:String, param6:String, param7:int) : void
+			private function commonInit(param1:CcComponentThumbThumbnail, param2:Number, param3:Number, param4:CcComponentThumb, param5:String, param6:String) : void
 			{
 				this.componentThumb = param4;
 				this.thumbnailWidth = param2;
 				this.thumbnailHeight = param3;
 				this._componentType = param5;
-				this.moneyMode = param7;
 				this.setBgStyleName(param6);
 				this.ccComponentThumbThumbnail = param1;
 				if(this.initialized)
@@ -105,35 +98,6 @@
 				{
 					this.componentThumbnail.init(this,this.thumbnailWidth,this.thumbnailHeight,this.componentThumb);
 				}
-				if(this.moneyMode != CcLibConstant.MONEY_MODE_SCHOOL)
-				{
-					this.thumbnailDetailContainer.width = this.thumbnailWidth;
-					this.thumbnailDetailContainer.height = CcLibConstant.COMPONENT_THUMB_CHOOSER_DETAIL_PART_HEIGHT;
-					if(this.isNullThumbnail)
-					{
-						this.goBuckPoint.text = UtilDict.toDisplay("cc","cc_keyword_free");
-					}
-					else if(this.moneyMode != CcLibConstant.MONEY_MODE_NORMAL)
-					{
-						this.goBuckPoint.text = UtilDict.toDisplay("cc","cc_keyword_free");
-					}
-					else if(this.componentThumb.money > 0)
-					{
-						this.goBuckPoint.text = this.componentThumb.money.toString();
-					}
-					else if(this.componentThumb.sharingPoint > 0)
-					{
-						this.goBuckPoint.text = this.componentThumb.sharingPoint.toString();
-					}
-					else
-					{
-						this.goBuckPoint.text = UtilDict.toDisplay("cc","cc_keyword_free");
-					}
-				}
-				else
-				{
-					this.thumbnailDetailContainer.visible = false;
-				}
 			}
 			
 			public function setBgStyleName(param1:String) : void
@@ -153,8 +117,5 @@
 	</fx:Script>
 
 	<components:CcComponentThumbThumbnail id="componentThumbnail"/>
-	<mx:Canvas id="thumbnailDetailContainer">
-		<s:Label id="goBuckPoint" x="10" styleName="lblComponentThumbGoPoint"/>
-	</mx:Canvas>
 
 </mx:VBox>

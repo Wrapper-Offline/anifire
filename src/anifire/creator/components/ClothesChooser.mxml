@@ -12,7 +12,6 @@
 			import anifire.creator.models.CcCharacter;
 			import anifire.creator.models.CcTheme;
 
-			private var moneyMode:int;
 			private var _biggerHeight:Number;
 			private var _smallerHeight:Number;
 			private var _thumbChooserWidth:Number;
@@ -45,11 +44,11 @@
 				}
 			}
 			
-			public function init(param1:CcCharacter, param2:CcTheme, param3:String, param4:int, param5:Boolean) : void
+			public function init(param1:CcCharacter, param2:CcTheme, param3:String, param5:Boolean) : void
 			{
-				this.upperBodyChooser.init(param1,param2,CcLibConstant.COMPONENT_TYPE_UPPER_BODY,param4,param5);
+				this.upperBodyChooser.init(param1,param2,CcLibConstant.COMPONENT_TYPE_UPPER_BODY,param5);
 				this.upperBodyChooser.addEventListener(CcComponentThumbChooserEvent.COMPONENT_THUMB_CHOSEN,this.onComponentThumbChoosen);
-				this.lowerBodyChooser.init(param1,param2,CcLibConstant.COMPONENT_TYPE_LOWER_BODY,param4,param5);
+				this.lowerBodyChooser.init(param1,param2,CcLibConstant.COMPONENT_TYPE_LOWER_BODY,param5);
 				this.lowerBodyChooser.addEventListener(CcComponentThumbChooserEvent.COMPONENT_THUMB_CHOSEN,this.onComponentThumbChoosen);
 			}
 			

@@ -130,7 +130,6 @@ package anifire.models.creator
 			_loc1_.@path = this.basePath;
 			_loc1_.@name = this.id;
 			_loc1_.@thumb = "thumbnail.swf";
-			_loc1_.@money = "0";
 			_loc1_.@sharing = "0";
 			_loc1_.@enable = !!this.enable?"Y":"N";
 			_loc1_.@split = "N";

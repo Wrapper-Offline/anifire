@@ -25,7 +25,6 @@ package anifire.util
          _loc1_.push("player_errprocess","This movie is being processed.  It will be ready shortly.");
          _loc1_.push("player_buffering","buffering...");
          _loc1_.push("player_privated","Your animation is currently private");
-         _loc1_.push("player_shareit","Share it with others to earn GoPoints!");
          _loc1_.push("player_shareitnogp","Share it with others");
          _loc1_.push("player_privatesharing","*Only people you give the URL to can view your video");
          _loc1_.push("sharing_create","Create your own");

@@ -7,7 +7,6 @@ package anifire.creator.core
    import anifire.constant.ServerConstants;
    import anifire.creator.components.ConfirmPopUp;
    import anifire.creator.events.CcCoreEvent;
-   import anifire.creator.events.CcPointUpdateEvent;
    import anifire.creator.events.CcSaveCharEvent;
    import anifire.creator.interfaces.ICcCharEditorContainer;
    import anifire.creator.interfaces.ICcMainUiContainer;
@@ -81,23 +80,15 @@ package anifire.creator.core
       
       private var _ui_mainUiContainer:ICcMainUiContainer;
       
-      private var _moneyMode:int;
-      
-      private var _isUserLogined:Boolean;
-      
       private var _userLevel:int;
       
       private var _original_assetId:String;
-      
-      private var _coupon:int = 0;
-      
-      private var _upsellHookId:String;
       
       private var _expectedUserType:Number = -1;
       
       private var _serverConnector:ServerConnector;
       
-      private var _modeInEdit:Boolean = true;
+      private var _isEditing:Boolean = true;
       
       public function CcConsole(param1:ICcMainUiContainer, param2:ICcCharEditorContainer, param3:ICcPreviewAndSaveContainer)
       {
@@ -105,36 +96,22 @@ package anifire.creator.core
          this._ui_mainUiContainer = param1;
          this._eventDispatcher = new EventDispatcher();
          this._themes = new UtilHashArray();
-         var _loc4_:String;
-         if((_loc4_ = _configManager.getValue(ServerConstants.PARAM_THEME_ID)) == null || _loc4_.length <= 0)
-         {
+         var _loc4_:String = _configManager.getValue(ServerConstants.PARAM_THEME_ID);
+         if (_loc4_ == null || _loc4_.length <= 0) {
             _loc4_ = "family";
          }
          setThemeId(_loc4_);
+		 // are we copying an existing character?
          this.originalAssetId = _configManager.getValue("original_asset_id") as String;
-         if(this.originalAssetId == null || this.originalAssetId.length <= 0)
-         {
+         if (this.originalAssetId == null || this.originalAssetId.length <= 0) {
             this.originalAssetId = null;
-         }
-         var _loc5_:String;
-         if((_loc5_ = _configManager.getValue(ServerConstants.FLASHVAR_IS_USER_LOGIN_MODE) as String) == "Y")
-         {
-            this._isUserLogined = true;
-         }
-         else
-         {
-            this._isUserLogined = false;
-         }
+		 }
          this.addCallBacks();
-         var _loc6_:String = _configManager.getValue(ServerConstants.FLASHVAR_MONEY_MODE) as String;
-         this.initMoneyMode(_loc6_);
-         var _loc7_:String;
-         if((_loc7_ = _configManager.getValue(ServerConstants.FLASHVAR_IS_ADMIN) as String) == "1")
-         {
+		 // check if the user is an admin
+         var _loc7_:String = _configManager.getValue(ServerConstants.FLASHVAR_IS_ADMIN) as String;
+         if (_loc7_ == "1") {
             this._userLevel = CcLibConstant.USER_LEVEL_SUPER;
-         }
-         else
-         {
+         } else {
             this._userLevel = CcLibConstant.USER_LEVEL_NORMAL;
          }
          this._ccCharEditorController = new anifire.creator.core.CcCharEditorController();
@@ -150,10 +127,6 @@ package anifire.creator.core
          this.ccPreviewAndSaveController.addEventListener(CcCoreEvent.USER_WANT_TO_CONFIRM,this.onUserWantToConfirm);
          this.ccPreviewAndSaveController.addEventListener(CcCoreEvent.USER_WANT_TO_MODIFY,this.onUserWantToModify);
          this.ccPreviewAndSaveController.addEventListener(CcCoreEvent.USER_WANT_TO_SAVE,this.onUserWantToSave);
-         this._serverConnector = ServerConnector.instance;
-         this._serverConnector.addEventListener(StudioEvent.UPGRADE_PENDING,this.onUpgradePending);
-         this._serverConnector.addEventListener(StudioEvent.UPGRADE_COMPLETE,this.onUpgradeComplete);
-         this._serverConnector.addEventListener(StudioEvent.UPGRADE_ERROR,this.onUpgradeError);
          this.loadCcThemeList();
       }
       
@@ -190,11 +163,6 @@ package anifire.creator.core
          return _cfg;
       }
       
-      private function get coupon() : int
-      {
-         return this._coupon;
-      }
-      
       private function get originalAssetId() : String
       {
          return this._original_assetId;
@@ -203,17 +171,7 @@ package anifire.creator.core
       private function set originalAssetId(param1:String) : void
       {
          this._original_assetId = param1;
-      }
-      
-      private function get isUserLogined() : Boolean
-      {
-         return this._isUserLogined;
-      }
-      
-      private function get moneyMode() : int
-      {
-         return this._moneyMode;
-      }
+	  }
       
       private function get userLevel() : int
       {
@@ -243,51 +201,6 @@ package anifire.creator.core
       public function resetExpectedUserType() : void
       {
          this._expectedUserType = -1;
-         this._upsellHookId = null;
-      }
-      
-      private function initMoneyMode(param1:String) : void
-      {
-         if(param1 == "free")
-         {
-            this._moneyMode = CcLibConstant.MONEY_MODE_NORMAL;
-            this._coupon = CcLibConstant.COUPON_VALUE;
-         }
-         else if(param1 == "noneed")
-         {
-            this._moneyMode = CcLibConstant.MONEY_MODE_DONT_NEED_MONEY;
-         }
-         else if(param1 == "school")
-         {
-            this._moneyMode = CcLibConstant.MONEY_MODE_SCHOOL;
-         }
-         else
-         {
-            this._moneyMode = CcLibConstant.MONEY_MODE_NORMAL;
-         }
-      }
-      
-      private function onUpgradeComplete(param1:Event) : void
-      {
-         this.ccCharEditorController.updateTopButtonOnRole();
-         this.ccPreviewAndSaveController.updateTopButtonOnRole();
-      }
-      
-      private function onUpgradeError(param1:Event) : void
-      {
-         UtilErrorLogger.getInstance().appendCustomError("Failed to refresh user type: " + param1);
-      }
-      
-      private function onUpgradePending(param1:Event) : void
-      {
-         var _loc2_:ConfirmPopUp = new ConfirmPopUp();
-         _loc2_.message = UtilDict.toDisplay("go","Once you complete your purchase, please save this character.");
-         _loc2_.title = UtilDict.toDisplay("go","Refresh to Unlock Features");
-         _loc2_.confirmText = UtilDict.toDisplay("go","OK");
-         _loc2_.addEventListener(StudioEvent.POPUP_CONFIRM,this.onConfirmAlert);
-         _loc2_.showCancelButton = false;
-         _loc2_.showCloseButton = false;
-         _loc2_.open(FlexGlobals.topLevelApplication as DisplayObjectContainer,true);
       }
       
       private function onConfirmAlert(param1:Event) : void
@@ -391,12 +304,12 @@ package anifire.creator.core
       private function onUserWantToStart(param1:Event) : void
       {
          this.ccCharEditorController.initTheme(this.getTheme(this.getCurrentThemeId()));
-         this.ccCharEditorController.initMode(this.moneyMode,this.isUserLogined,this.userLevel,this.coupon);
+         this.ccCharEditorController.initMode(this.userLevel);
          this.ccCharEditorController.start(this.ccChar,!this.isCopyingChar());
          this.ccPreviewAndSaveController.initTheme(this.getTheme(this.getCurrentThemeId()));
          this.ccPreviewAndSaveController.initMode();
          this.ccPreviewAndSaveController.initChar(this.ccChar);
-         this._modeInEdit = true;
+         this._isEditing = true;
          if(_configManager.getValue(ServerConstants.FLASHVAR_CC_START_PAGE) == "save")
          {
             this.onUserWantToPreview(param1);
@@ -406,7 +319,7 @@ package anifire.creator.core
       
       private function onUserWantToModify(param1:Event) : void
       {
-         this._modeInEdit = true;
+         this._isEditing = true;
          this.ui_mainUiContainer.ui_main_ccCharEditor.visible = true;
          this.ui_mainUiContainer.ui_main_ccCharPreviewAndSaveScreen.visible = false;
          this.ccCharEditorController.proceedToShow();
@@ -414,45 +327,10 @@ package anifire.creator.core
       
       private function onUserWantToPreview(param1:Event) : void
       {
-         this._modeInEdit = false;
+         this._isEditing = false;
          this.ui_mainUiContainer.ui_main_ccCharEditor.visible = false;
          this.ui_mainUiContainer.ui_main_ccCharPreviewAndSaveScreen.visible = true;
          this.ccPreviewAndSaveController.proceedToShow();
-      }
-      
-      private function onUserWantToGoToStudio(param1:Event) : void
-      {
-         var _loc4_:Object = null;
-         if(UtilSite.siteId == UtilSite.YOUTUBE || UtilSite.siteId == UtilSite.SKOLETUBE)
-         {
-            ExternalLinkManager.instance.navigate(ServerConstants.YOUTUBE_CREATE_MOVIE_PATH);
-            return;
-         }
-         var _loc2_:CcTheme = this.getTheme(this.getCurrentThemeId());
-         var _loc3_:String = ServerConstants.STUDIO_PAGE_PATH;
-         if(_loc2_.studioThemeId)
-         {
-            LicenseConstants.visitStudioByTheme(_loc2_.studioThemeId);
-            return;
-         }
-         if(param1 is CcCoreEvent)
-         {
-            if((_loc4_ = (param1 as CcCoreEvent).getData()) != null && String(_loc4_) != "")
-            {
-               _loc3_ = String(_loc4_);
-            }
-         }
-         ExternalLinkManager.instance.navigateWithSession(_loc3_);
-      }
-      
-      private function doUpdatePreviewStatus(param1:CcPointUpdateEvent) : void
-      {
-         (param1.target as IEventDispatcher).removeEventListener(param1.type,this.doUpdatePreviewStatus);
-      }
-      
-      private function doUpdatePreviewStatusAndConfirm(param1:CcPointUpdateEvent) : void
-      {
-         (param1.target as IEventDispatcher).removeEventListener(param1.type,this.doUpdatePreviewStatusAndConfirm);
       }
       
       private function onUserWantToConfirm(param1:Event) : void
@@ -476,9 +354,8 @@ package anifire.creator.core
       private function onUserWantToSave(param1:Event) : void
       {
          this.addEventListener(CcSaveCharEvent.SAVE_CHAR_COMPLETE,this.doTellUserSaveStatus);
-         this.addEventListener(CcSaveCharEvent.SAVE_CHAR_NOT_ENOUGH_MONEY_POINT,this.doTellUserSaveStatus);
          this.addEventListener(CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR,this.doTellUserSaveStatus);
-         if(this._modeInEdit)
+         if(this._isEditing)
          {
             this.ccCharEditorController.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.doSave);
             this.ccCharEditorController.resetCCAction();
@@ -503,11 +380,10 @@ package anifire.creator.core
          var js:String = null;
          var event:CcSaveCharEvent = param1;
          this.removeEventListener(CcSaveCharEvent.SAVE_CHAR_COMPLETE,this.doTellUserSaveStatus);
-         this.removeEventListener(CcSaveCharEvent.SAVE_CHAR_NOT_ENOUGH_MONEY_POINT,this.doTellUserSaveStatus);
          this.removeEventListener(CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR,this.doTellUserSaveStatus);
          if(event.type == CcSaveCharEvent.SAVE_CHAR_COMPLETE)
          {
-            this.ccPreviewAndSaveController.proceedToSaveComplete(event.gopoint,event.gobuck,event.assetId);
+            this.ccPreviewAndSaveController.proceedToSaveComplete(event.assetId);
             try
             {
                isTemplate = false;
@@ -521,6 +397,7 @@ package anifire.creator.core
                   {
                   }
                }
+			   // a lot of yapping
                js = StringUtil.substitute("CCStandaloneBannerAdUI.gaLogTx.logCCPartsNormal({0}, {1}, {2})",event.assetId,com.adobe.serialization.json.JSON.encode(event.gaTrackModel.parts.filter(function(param1:*, param2:int, param3:Array):Boolean
                {
                   return (["GoUpper","GoLower","upper_body","lower_body","hair"] as Array).indexOf(param1.ctype) >= 0;
@@ -530,12 +407,7 @@ package anifire.creator.core
             catch(e:Error)
             {
             }
-         }
-         else if(event.type == CcSaveCharEvent.SAVE_CHAR_NOT_ENOUGH_MONEY_POINT)
-         {
-            this.ccPreviewAndSaveController.proceedToSaveNotEnoughMoney(event.gopoint,event.gobuck);
-         }
-         else if(event.type == CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR)
+         } else if(event.type == CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR)
          {
             this.ccPreviewAndSaveController.proceedToSaveError();
          }
@@ -683,7 +555,7 @@ package anifire.creator.core
          var _loc4_:Base64Encoder = null;
          NativeCursorManager.instance.setBusyCursor();
          AmplitudeAnalyticsManager.instance.log(AmplitudeAnalyticsManager.EVENT_NAME_CREATED_CHARACTER);
-         if(this._modeInEdit)
+         if(this._isEditing)
          {
             _loc1_ = this._ccCharEditorController.saveSnapShot();
             _loc3_ = this._ccCharEditorController.saveSnapShot(true);

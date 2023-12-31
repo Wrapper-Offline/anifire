@@ -56,7 +56,6 @@ package anifire.creator.models
             _loc6_ = new anifire.creator.models.CcLibrary();
             if(_loc8_ = this.currentTheme.getComponentThumbByInternalId(anifire.creator.models.CcComponentThumb.generateInternalId(_loc3_.@type,_loc3_.@component_id)))
             {
-               _loc3_.@money = _loc8_.money;
                _loc3_.@sharing = _loc8_.sharingPoint;
             }
             _loc6_.deserialize(_loc3_);

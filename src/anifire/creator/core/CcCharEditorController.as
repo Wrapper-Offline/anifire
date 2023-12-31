@@ -44,10 +44,6 @@ package anifire.creator.core
       
       private var _currentCommandIndex:Number = -1;
       
-      private var _moneyMode:int;
-      
-      private var _isUserLogined:Boolean;
-      
       private var _ui_ce_container:ICcCharEditorContainer;
       
       private var _userLevel:int;
@@ -59,8 +55,6 @@ package anifire.creator.core
       private var isNewCharInsteadOfExistingChar:Boolean;
       
       private var _cfg:IConfiguration;
-      
-      private var _coupon:int;
       
       public function CcCharEditorController(param1:IEventDispatcher = null)
       {
@@ -76,11 +70,6 @@ package anifire.creator.core
       public function set configuration(param1:IConfiguration) : void
       {
          this._cfg = param1;
-      }
-      
-      private function get coupon() : int
-      {
-         return this._coupon;
       }
       
       private function get currentComponentType() : String
@@ -106,16 +95,6 @@ package anifire.creator.core
       private function get ui_ce_container() : ICcCharEditorContainer
       {
          return this._ui_ce_container;
-      }
-      
-      private function get isUserLogined() : Boolean
-      {
-         return this._isUserLogined;
-      }
-      
-      private function get moneyMode() : int
-      {
-         return this._moneyMode;
       }
       
       private function get userLevel() : int
@@ -497,16 +476,14 @@ package anifire.creator.core
       
       public function start(param1:CcCharacter, param2:Boolean) : void
       {
-         //this.ui_ce_container.ui_ce_bodyShapeChooser.init(this.currentTheme,this.moneyMode,param2);
          this.initChar(param1);
          this.isNewCharInsteadOfExistingChar = param2;
          if(this.isNewCharInsteadOfExistingChar)
          {
-            //this.ui_ce_container.ui_ce_bodyShapeChooser.addEventListener(CcBodyShapeChooserEvent.BODY_SHAPE_CHOSEN,this.onUserChooseBodyShapeAtFirstTime);
+            // todo add bodyshape chooser mayyybeeee???
          }
          else
          {
-            //this.ui_ce_container.ui_ce_bodyShapeChooser.addEventListener(CcBodyShapeChooserEvent.BODY_SHAPE_CHOSEN,this.onUserChooseBodyShape);
             this.ccCharCopyForReset = this._ccChar.clone();
             this.addCommand(this.ccChar);
             this.propagateNewCharToUi(this.ccChar);
@@ -520,21 +497,9 @@ package anifire.creator.core
          this._ccChar = param1;
       }
       
-      public function initMode(param1:int, param2:Boolean, param3:int, param4:int = 0) : void
+      public function initMode(param1:int) : void
       {
-         this._isUserLogined = param2;
-         this._moneyMode = param1;
-         this._userLevel = param3;
-         this._coupon = param4;
-         try
-         {
-            if(this.moneyMode != CcLibConstant.MONEY_MODE_SCHOOL)
-            {
-            }
-         }
-         catch(e:Error)
-         {
-         }
+         this._userLevel = param1;
       }
       
       private function onUserChooseBodyShapeAtFirstTime(param1:CcBodyShapeChooserEvent) : void
@@ -630,13 +595,13 @@ package anifire.creator.core
             {
                _loc5_.push(CcLibConstant.COMPONENT_TYPE_UPPER_BODY);
                _loc5_.push(CcLibConstant.COMPONENT_TYPE_LOWER_BODY);
-               this.ui_ce_container.ui_ce_clothesChooser.init(this.ccChar,this.currentTheme,param1,this.moneyMode,false);
+               this.ui_ce_container.ui_ce_clothesChooser.init(this.ccChar,this.currentTheme,param1,false);
                this.ui_ce_container.ui_ce_thumbPropertyInspector.destroy();
             }
             else
             {
                _loc5_.push(param1);
-               this.ui_ce_container.ui_ce_componentThumbChooser.init(this.ccChar,this.currentTheme,param1,this.moneyMode,CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(param1) > -1 ? false : true);
+               this.ui_ce_container.ui_ce_componentThumbChooser.init(this.ccChar,this.currentTheme,param1,CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(param1) > -1 ? false : true);
                this.ui_ce_container.ui_ce_thumbPropertyInspector.destroy();
             }
          }
@@ -747,7 +712,6 @@ package anifire.creator.core
          _loc2_.type = param1.componentThumb.type;
          _loc2_.theme_id = param1.componentThumb.themeId;
          _loc2_.component_id = param1.componentThumb.componentId;
-         _loc2_.money = param1.componentThumb.money;
          _loc2_.sharingPoint = param1.componentThumb.sharingPoint;
          return _loc2_;
       }

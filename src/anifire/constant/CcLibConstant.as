@@ -99,14 +99,6 @@ package anifire.constant
 		
 		public static const SHOULD_DECRYPT:Boolean = true;
 		
-		public static const MONEY_MODE_NORMAL:int = 0;
-		
-		public static const MONEY_MODE_FREE:int = 1;
-		
-		public static const MONEY_MODE_DONT_NEED_MONEY:int = 2;
-		
-		public static const MONEY_MODE_SCHOOL:int = 3;
-		
 		public static const USER_LEVEL_NORMAL:int = 0;
 		
 		public static const USER_LEVEL_SUPER:int = 999;
@@ -124,8 +116,6 @@ package anifire.constant
 		public static const RIGHT:String = "Right";
 		
 		public static const LEFT:String = "Left";
-		
-		public static const COUPON_VALUE:Number = 100;
 		
 		public static const MODE_SAVE:int = 0;
 		

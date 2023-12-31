@@ -119,15 +119,10 @@ package anifire.creator.core
          this.ui_ps_container.ui_ps_charPreviewer.initByCcChar(this.ccChar,param1.action_id,param1.facial_id);
       }
       
-      public function proceedToSaveComplete(param1:Number, param2:Number, param3:String) : void
+      public function proceedToSaveComplete(param1:String) : void
       {
-         this._assetId = param3;
-         this._lastSavedAssetId = param3;
-      }
-      
-      public function proceedToSaveNotEnoughMoney(param1:Number, param2:Number) : void
-      {
-         var _loc3_:String = UtilDict.toDisplay("cc","<p ><font size=\'16\'><b><font color=\'#FF0000\'>Hey!</font></b><br><font size=\'14\'>You need {0} more GoBucks to get me.</font></p>");
+         this._assetId = param1;
+         this._lastSavedAssetId = param1;
       }
       
       public function proceedToSaveError() : void

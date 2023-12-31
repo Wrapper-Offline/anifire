@@ -456,51 +456,6 @@ package anifire.creator.models
          return this.currentTheme.getFacialById(param1);
       }
       
-      public function calculateGobuck() : Number
-      {
-         var _loc1_:anifire.creator.models.CcComponent = null;
-         var _loc2_:anifire.creator.models.CcLibrary = null;
-         var _loc3_:Number = 0;
-         var _loc4_:int = 0;
-         _loc4_ = 0;
-         while(_loc4_ < this.getUserChosenComponentSize())
-         {
-            _loc1_ = this.getUserChosenComponentByIndex(_loc4_);
-            _loc3_ += _loc1_.componentThumb.money;
-            _loc4_++;
-         }
-         _loc4_ = 0;
-         while(_loc4_ < this.getUserChosenLibraryNum())
-         {
-            _loc2_ = this.getUserChosenLibraryByIndex(_loc4_);
-            _loc3_ += _loc2_.money;
-            _loc4_++;
-         }
-         return _loc3_;
-      }
-      
-      public function calculateGoPoint() : Number
-      {
-         var _loc1_:anifire.creator.models.CcComponent = null;
-         var _loc2_:anifire.creator.models.CcLibrary = null;
-         var _loc3_:Number = 0;
-         var _loc4_:int = 0;
-         while(_loc4_ < this.getUserChosenComponentSize())
-         {
-            _loc1_ = this.getUserChosenComponentByIndex(_loc4_);
-            _loc3_ += _loc1_.componentThumb.sharingPoint;
-            _loc4_++;
-         }
-         _loc4_ = 0;
-         while(_loc4_ < this.getUserChosenLibraryNum())
-         {
-            _loc2_ = this.getUserChosenLibraryByIndex(_loc4_);
-            _loc3_ += _loc2_.sharingPoint;
-            _loc4_++;
-         }
-         return _loc3_;
-      }
-      
       private function addBodyShapeThumb() : void
       {
       }
@@ -772,7 +727,6 @@ package anifire.creator.models
                (_loc8_ = new anifire.creator.models.CcLibrary()).type = _loc4_.type;
                _loc8_.theme_id = _loc4_.themeId;
                _loc8_.component_id = _loc4_.componentId;
-               _loc8_.money = _loc4_.money;
                _loc8_.sharingPoint = _loc4_.sharingPoint;
                this.addUserChosenLibrary(_loc8_);
             }
@@ -885,7 +839,6 @@ package anifire.creator.models
             _loc6_ = new anifire.creator.models.CcLibrary();
             if(_loc12_ = this.currentTheme.getComponentThumbByInternalId(anifire.creator.models.CcComponentThumb.generateInternalId(_loc3_.@type,_loc3_.@component_id)))
             {
-               _loc3_.@money = _loc12_.money;
                _loc3_.@sharing = _loc12_.sharingPoint;
             }
             _loc6_.deserialize(_loc3_);

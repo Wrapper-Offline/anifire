@@ -169,7 +169,6 @@ package anifire.models.creator
 			}
 			_loc2_.@enable = !!this.enable?"Y":"N";
 			_loc2_.@sharing = "0";
-			_loc2_.@money = "0";
 			for(var _loc3_:String in this.tags)
 			{
 				if(this.tags[_loc3_] && this.shouldIncludeTag(param1,_loc3_))

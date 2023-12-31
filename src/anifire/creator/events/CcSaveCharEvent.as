@@ -10,13 +10,6 @@ package anifire.creator.events
       
       public static const SAVE_CHAR_ERROR_OCCUR:String = "save_char_error_occur";
       
-      public static const SAVE_CHAR_NOT_ENOUGH_MONEY_POINT:String = "save_char_not_enough_money_point";
-       
-      
-      public var gopoint:Number;
-      
-      public var gobuck:Number;
-      
       public var assetId:String;
       
       public var gaTrackModel:Object = null;
@@ -29,8 +22,6 @@ package anifire.creator.events
       override public function clone() : Event
       {
          var _loc1_:CcSaveCharEvent = new CcSaveCharEvent(this.type,this.getEventCreater(),this.getData(),this.bubbles,this.cancelable);
-         _loc1_.gopoint = this.gopoint;
-         _loc1_.gobuck = this.gobuck;
          _loc1_.assetId = this.assetId;
          _loc1_.gaTrackModel = this.gaTrackModel;
          return _loc1_;

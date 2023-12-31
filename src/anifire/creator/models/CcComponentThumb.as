@@ -33,8 +33,6 @@ package anifire.creator.models
       
       private var _thumbnailFilename:String;
       
-      private var _money:Number;
-      
       private var _sharingPoint:Number;
       
       private var _enable:Boolean;
@@ -86,7 +84,6 @@ package anifire.creator.models
          _loc2_._path = param1.id;
          _loc2_._name = param1.name;
          _loc2_._thumbnailFilename = param1.thumbnailPath;
-         _loc2_._money = 0;
          _loc2_._sharingPoint = 0;
          _loc2_._enable = false;
          _loc2_._is_randomable = true;
@@ -154,11 +151,6 @@ package anifire.creator.models
       public function get thumbnailFilename() : String
       {
          return this._thumbnailFilename;
-      }
-      
-      public function get money() : Number
-      {
-         return this._money;
       }
       
       public function get sharingPoint() : Number
@@ -265,7 +257,6 @@ package anifire.creator.models
          this._path = param1.@path;
          this._name = param1.@name;
          this._thumbnailFilename = param1.@thumb;
-         this._money = Number(param1.@money);
          this._sharingPoint = Number(param1.@sharing);
          this._enable = param1.@enable == "Y" ? true : false;
          this._is_randomable = param1.@random_able == "N" ? false : true;
