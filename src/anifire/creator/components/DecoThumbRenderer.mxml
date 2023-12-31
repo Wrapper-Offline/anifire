@@ -12,7 +12,6 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import anifire.constant.LicenseConstants;
 			import anifire.creator.events.CcComponentLoadEvent;
 			import anifire.creator.models.CcComponentThumb;
 			import anifire.util.UtilUser;
@@ -21,11 +20,11 @@
 			private var thumb:CcComponentThumb;
 			[Bindable]
 			public var isNull:Boolean = false;
-			protected var _loader:Loader;
+			protected var _loader:Loader = new Loader();
 			protected var _bitmapData:BitmapData;
 			protected var _displayWidth:Number = 105;
 			protected var _displayHeight:Number = 105;
-			protected var _displayMatrix:Matrix;
+			protected var _displayMatrix:Matrix = new Matrix();
 			
 			override public function set data(param1:Object) : void
 			{
@@ -56,7 +55,7 @@
 				{
 					this.imageDisplay.source = null;
 				}
-				if(UtilUser.hasAdminFeatures || LicenseConstants.isThumbnailTestHost())
+				if(UtilUser.hasAdminFeatures)
 				{
 					this.toolTip = this.cid;
 				}
@@ -109,15 +108,11 @@
 	<s:states>
 		<s:State name="normal"/>
 		<s:State name="hovered"/>
-		<s:State name="selected"/>
-		<s:State name="normalAndShowsCaret"/>
-		<s:State name="hoveredAndShowsCaret"/>
-		<s:State name="selectedAndShowsCaret"/>
 	</s:states>
 	
 	<s:Group id="nullIcon" visible="false" horizontalCenter="0" verticalCenter="0">
-		<s:Image source="@Embed('../images/componentThumbs/nullIcon.png')" visible="true" visible.hovered="false"/>
-		<s:Image source="@Embed('../images/componentThumbs/nullIcon_hover.png')" visible="false" visible.hovered="true"/>
+		<s:Image source="@Embed('../images/componentIcons/nullIcon.png')" visible="true" visible.hovered="false"/>
+		<s:Image source="@Embed('../images/componentIcons/nullIcon_hover.png')" visible="false" visible.hovered="true"/>
 	</s:Group>
 	<components:BusyIndicator id="_loading" horizontalCenter="0" verticalCenter="0" visible="false" symbolColor="0"/>
 	<s:BitmapImage
@@ -131,7 +126,7 @@
 		verticalCenter="0"
 		smoothingQuality="high"
 		smooth="true"/>
-	<s:Rect top="0" right="0" bottom="0" left="0" visible="false" visible.hovered="true" visible.selectedAndShowsCaret="true">
+	<s:Rect top="0" right="0" bottom="0" left="0" visible="false" visible.hovered="true">
 		<s:stroke>
 			<s:SolidColorStroke color="0x21BBA6" weight="1" alpha="1"/>
 		</s:stroke>

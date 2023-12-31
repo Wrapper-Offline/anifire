@@ -10,9 +10,9 @@
 		<![CDATA[
 			import anifire.component.CCThumb;
 			import anifire.creator.models.CcCharacter;
+			import flash.filters.GlowFilter;
 			import mx.core.UIComponent;
 
-			private var __moduleFactoryInitialized:Boolean = false;
 			private var _thumb:CCThumb = null;
 			private var _char:CcCharacter = null;
 
@@ -22,7 +22,7 @@
 				{
 					if(this._thumb)
 					{
-						this._thumb.filters = [new GlowFilter(16777215,1,8,8,3)];
+						this._thumb.filters = [new flash.filters.GlowFilter(16777215,1,8,8,3)];
 					}
 				}
 				else if(param1.type == MouseEvent.ROLL_OUT)

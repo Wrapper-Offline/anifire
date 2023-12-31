@@ -61,7 +61,7 @@ package anifire.creator.components
 			return this._previewColor;
 		}
 		
-		private function set previewColor(color:uint) : void
+		public function set previewColor(color:uint) : void
 		{
 			this._previewColor = color;
 		}
@@ -72,7 +72,7 @@ package anifire.creator.components
 			return this._allowTransparent;
 		}
 		
-		private function set allowTransparent(param1:Boolean) : void
+		public function set allowTransparent(param1:Boolean) : void
 		{
 			if(this._allowTransparent != param1)
 			{

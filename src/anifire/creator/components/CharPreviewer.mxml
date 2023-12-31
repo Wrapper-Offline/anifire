@@ -6,10 +6,11 @@
 	width="300"
 	verticalScrollPolicy="off"
 	clipContent="false"
-	creationComplete="">
+	creationComplete="this.CharPreview()">
 
 	<fx:Declarations>
-		<mx:Blur id="fadeIn" blurXFrom="10" blurXTo="0" blurYFrom="10" blurYTo="0" duration="300"/>
+		<mx:Blur id="fadeIn" blurXFrom="10" blurXTo="0" blurYFrom="10" blurYTo="0" duration="300" target="{this}"/>
+		<s:Scale id="scaleeffect" scaleXFrom="1" scaleXTo="1.5" scaleYFrom="1" scaleYTo="1.5" duration="3000" target="{this}"/>
 	</fx:Declarations>
 
 	<fx:Script>
@@ -412,6 +413,7 @@
 					this._isRandom = false;
 				}
 				this.dispatchEvent(new LoadEmbedMovieEvent(LoadEmbedMovieEvent.COMPLETE_EVENT));
+				this.scaleeffect.play();
 			}
 			
 			private function onReadyComponent(param1:LoadMgrEvent) : void

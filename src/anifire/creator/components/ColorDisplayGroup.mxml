@@ -10,14 +10,16 @@
 		<![CDATA[
 			public var _color:uint;
 
-			public function set color(color:uint) {
+			public function set color(color:uint) : void
+			{
 				if(this._color != color)
 				{
 					this._color = color;
 				}
 			}
 			[Bindable]
-			public function get color() {
+			public function get color() : uint
+			{
 				return this._color;
 			}
 		]]>
@@ -36,6 +38,6 @@
 		right="0"
 		top="0"
 		bottom="0"
-		source="@Embed('../images/nocolor.png')"/>
+		source="@Embed('../../images/colorPicker/nocolor.png')"/>
 
 </s:Group>

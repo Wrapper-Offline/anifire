@@ -63,8 +63,8 @@
 		]]>
 	</fx:Script>
 
-	<s:states>
+	<mx:states>
 		<s:State name="selected"/>
-	</s:states>
+	</mx:states>
 
 </mx:Canvas>

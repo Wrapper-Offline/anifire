@@ -645,7 +645,7 @@ package anifire.component
       
       protected function eyeDropperButton_clickHandler(param1:MouseEvent) : void
       {
-         var _loc2_:anifire.component.EyeDropperScreenOverlay = anifire.component.EyeDropperScreenOverlay.instance;
+         var _loc2_:EyeDropperScreenOverlay = anifire.component.EyeDropperScreenOverlay.instance;
          if(!_loc2_)
          {
             return;
@@ -659,7 +659,7 @@ package anifire.component
       
       protected function eyeDropperScreenCap_eyeDropperCompletedHandler(param1:EyeDropperEvent) : void
       {
-         var _loc2_:anifire.component.EyeDropperScreenOverlay = anifire.component.EyeDropperScreenOverlay.instance;
+         var _loc2_:EyeDropperScreenOverlay = anifire.component.EyeDropperScreenOverlay.instance;
          if(!_loc2_)
          {
             return;

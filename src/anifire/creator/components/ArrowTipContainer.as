@@ -26,7 +26,7 @@ package anifire.creator.components
 		{
 			return this._tipPosition;
 		}
-		private function set tipPosition(param1:String) : void
+		public function set tipPosition(param1:String) : void
 		{
 			if(this._tipPosition != param1)
 			{

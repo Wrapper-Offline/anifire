@@ -101,7 +101,7 @@ package anifire.browser.components
 		
 		use namespace mx_internal;
 		
-		public function determinePosition(placement:String, popUpWidth:Number, popUpHeight:Number, matrix:Matrix, registrationPoint:Point, bounds:Rectangle):void
+		/*public function determinePosition(placement:String, popUpWidth:Number, popUpHeight:Number, matrix:Matrix, registrationPoint:Point, bounds:Rectangle):void
 		{
 			switch(placement)
 			{
@@ -124,6 +124,6 @@ package anifire.browser.components
 			bounds.width = _loc9_.x;
 			bounds.height = _loc9_.y;
 			return;
-		}
+		}*/
 	}
 }

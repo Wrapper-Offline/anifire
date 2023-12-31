@@ -35,6 +35,7 @@
 			import anifire.constant.CcLibConstant;
 			import anifire.creator.events.CcThumbPropertyEvent;
 			import anifire.creator.models.CcComponent;
+			import anifire.util.UtilDict;
 
 			private var _component:CcComponent;
 			private var _timer:Timer;

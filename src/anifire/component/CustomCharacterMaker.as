@@ -158,7 +158,7 @@ package anifire.component
 		
 		public function CustomCharacterMaker()
 		{
-			this.GoColorMapShaderClass = CustomCharacterMaker_GoColorMapShaderClass;
+			this.GoColorMapShaderClass = GoColorMapShaderClass;
 			this._charXML = new XML("");
 			this._componentOrder = CcLibConstant.ALL_BODY_COMPONENT_TYPES.concat(CcLibConstant.GET_COMPONENT_ORDER_IN_HEAD);
 			this._componentQueue = new Array();

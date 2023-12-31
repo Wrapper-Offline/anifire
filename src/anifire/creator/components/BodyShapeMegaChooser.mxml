@@ -7,8 +7,7 @@
 	horizontalScrollPolicy="off"
 	verticalScrollPolicy="off"
 	styleName="bgTemplateMain"
-	styleName.preview="bgTemplatePreviewer"
-	selectedChild.preview="{vs}">
+	styleName.preview="bgTemplatePreviewer">
 
 	<fx:Script>
 		<![CDATA[
@@ -22,6 +21,7 @@
 			import anifire.util.UtilPager;
 			import mx.collections.ArrayCollection;
 			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
 			
 			[Bindable]
 			public var _selectedCCChar:CcCharacter = null;
@@ -76,13 +76,12 @@
 			
 			public function init() : void
 			{
-				var _self:anifire.creator.components.BodyShapeMegaChooser = null;
 				var _numCCTotal:int = 0;
 				var _numCC:int = 0;
 				var _destroyHandler:Boolean = false;
 				var _handlerEach:Function = null;
 				var _handler:Function = null;
-				_self = this;
+				var _self:anifire.creator.components.BodyShapeMegaChooser = this;
 				_numCCTotal = 9999;
 				_numCC = 0;
 				_destroyHandler = false;
@@ -151,7 +150,6 @@
 			private function updateCategory(param1:String) : void
 			{
 				var x:Object;
-				var self:anifire.creator.components.BodyShapeMegaChooser = null;
 				var xx:Function = null;
 				var cat:String = param1;
 				if(this._pager == null || this.normalizeCategory(this.templateSelector.category) != cat)
@@ -165,7 +163,7 @@
 				this.topTabs.selectedIndex = x[cat];
 				if(this._selectedCCChar == null)
 				{
-					self = this;
+					var self:anifire.creator.components.BodyShapeMegaChooser = this;
 					xx = function(param1:Event):void
 					{
 						CcConsole.getCcConsole().removeEventListener(CcCoreEvent.LOAD_CHARACTER_THUMB_ALL_COMPLETE,xx);
@@ -196,7 +194,7 @@
 
 	<mx:Canvas width="100%" x="0" y="5" verticalScrollPolicy="off">
 		<mx:TabBar
-			id="toptabs"
+			id="topTabs"
 			firstTabStyleName="topButtonTabFirst"
 			tabStyleName="topButtonTab"
 			horizontalGap="2"
@@ -206,10 +204,10 @@
 			dataProvider.preview_professions=""/>
 	</mx:Canvas>
 
-	<mx:ViewStack id="vs" width="100%" height="100%">
+	<mx:ViewStack id="vs" width="100%" height="100%" selectedChild.preview="{previewer}">
 		<mx:Canvas horizontalScrollPolicy="off" verticalScrollPolicy="off">
 			<cComponents:BodyShapeChooser id="_ce_bodyShapeChooser" x="0" y="38" width="100%" height="235"/>
-			<mx:Canvas id="mc" x="3" y="{height}" width="{width - 6}" height="238">
+			<mx:Canvas id="mc" x="3" y="{height}" width="{width - 6}" height="218">
 				<cComponents:LatestTemplates id="templates" percentWidth="100" verticalCenter="-20"/>
 			</mx:Canvas>
 		</mx:Canvas>
@@ -218,7 +216,7 @@
 			horizontalScrollPolicy="off"
 			verticalScrollPolicy="off">
 			<cComponents:CharPreviewer id="charPreviewer" x="-20" y="65" width="428" height="329"/>
-			<cComponents:TemplateCcSelector id="templateSelector" x="250" y="55"/>
+			<cComponents:TemplateCCSelector id="templateSelector" x="450" y="55"/>
 			<mx:HBox verticalAlign="middle" horizontalGap="25" y="450" horizontalCenter="-280" visible="{_selectedCCChar != null}">
 				<s:Button
 					id="btnModify"
@@ -230,10 +228,10 @@
 		</mx:Canvas>
 	</mx:ViewStack>
 
-	<s:states>
+	<mx:states>
 		<s:State name="preview" enterState="updatePreviewer(event)"/>
 		<s:State name="preview_celebrities" basedOn="preview" enterState="updateCategory('celebrities')"/>
 		<s:State name="preview_professions" basedOn="preview" enterState="updateCategory('professions')"/>
-	</s:states>
+	</mx:states>
 
 </mx:Canvas>

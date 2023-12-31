@@ -2,7 +2,8 @@
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		 xmlns:s="library://ns.adobe.com/flex/spark" 
 		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%"
-		 creationComplete="this.init" resize="mouseUpHandler" mouseUp="mouseUpHandler" mouseDown="mouseDownHandler">
+		 creationComplete="this.init()" resize="this.resizeHandler(event)" mouseUp="this.mouseUpHandler(event)" mouseDown="this.mouseDownHandler(event)"
+		 autoLayout="false" mouseEnabled="true" mouseChildren="false" mouseEnabledWhereTransparent="true">
 	
 	<fx:Script>
 		<![CDATA[
@@ -20,6 +21,8 @@
 			
 			public static const DRAW_AREA_OFFSET:Number = 4;
 			
+			public static var instance:EyeDropperScreenOverlay;
+			
 			protected var _requiresUpdate:Boolean;
 			
 			protected var _screenBitmapData:BitmapData;
@@ -36,6 +39,7 @@
 
 			protected function init() : void
 			{
+				instance = this;
 				visible = false;
 				this._requiresUpdate = true;
 				this._magnifiedBitmapData = new BitmapData(MAGNIFIED_SIZE,MAGNIFIED_SIZE);
@@ -154,7 +158,7 @@
 		]]>
 	</fx:Script>
 	
-	<s:Group id="eyeDropperCursor">
+	<s:Group id="eyeDropperCursor" visible="false">
 		<s:Ellipse width="90" height="90" x="-45" y="-45">
 			<s:fill>
 				<mx:BitmapFill id="magnifiedImage"/>

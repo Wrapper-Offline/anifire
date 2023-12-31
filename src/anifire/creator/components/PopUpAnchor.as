@@ -97,9 +97,7 @@ package anifire.creator.components
 			this.displayPopUp = false;
 		}
 		
-		use namespace mx_internal;
-		
-		public function determinePosition(placement:String, popUpWidth:Number, popUpHeight:Number, matrix:Matrix, registrationPoint:Point, bounds:Rectangle):void
+		/*override mx_internal function determinePosition(placement:String, popUpWidth:Number, popUpHeight:Number, matrix:Matrix, registrationPoint:Point, bounds:Rectangle):void
 		{
 			switch(placement)
 			{
@@ -124,6 +122,6 @@ package anifire.creator.components
 			}
 			super.mx_internal::determinePosition(placement,popUpWidth,popUpHeight,matrix,registrationPoint,bounds);
 			return;
-		}
+		}*/
 	}
 }

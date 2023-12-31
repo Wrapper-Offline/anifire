@@ -20,7 +20,6 @@
     <classEntry path="anifire.constant.LicenseConstants"/>
     <classEntry path="anifire.managers.ExternalLinkManager"/>
     <classEntry path="anifire.event.ServerRequestEvent"/>
-    <classEntry path="anifire.component.EyeDropperScreenOverlay"/>
     <classEntry path="anifire.component.CcActionLoader"/>
     <classEntry path="anifire.component.ProcessRegulator"/>
     <classEntry path="anifire.component.CcComponentLoader"/>
@@ -98,6 +97,19 @@
     <classEntry path="anifire.creator.components.MenuItemList"/>
     <classEntry path="anifire.creator.components.MenuItemRenderer"/>
     <classEntry path="anifire.creator.components.ScaleChooserSpark"/>
+    <classEntry path="anifire.creator.components.TemplateCCSelector"/>
+    <classEntry path="anifire.creator.components.TopButtons"/>
+    <classEntry path="anifire.creator.components.TypeChooserSpark"/>
+    <classEntry path="anifire.skins.ColorInputPanelHueSliderSkin"/>
+    <classEntry path="anifire.skins.ColorInputPanelHueSliderThumbSkin"/>
+    <classEntry path="anifire.skins.ColorInputPanelHueSliderTrackSkin"/>
+    <classEntry path="anifire.skins.ColorInputPanelSkin"/>
+    <classEntry path="anifire.skins.EyeDropperButtonSkin"/>
+    <classEntry path="anifire.creator.components.facePreview"/>
+    <classEntry path="anifire.creator.skins.ConfirmPopUpSkin"/>
+    <classEntry path="anifire.creator.skins.ActionDropDownListSkin"/>
+    <classEntry path="anifire.creator.skins.ColorPickerOpenButtonSkin"/>
+    <classEntry path="anifire.creator.skins.ConfirmPanelSkin"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

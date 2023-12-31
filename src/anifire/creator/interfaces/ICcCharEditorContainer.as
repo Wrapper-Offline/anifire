@@ -1,7 +1,7 @@
 package anifire.creator.interfaces
 {
    import anifire.creator.components.BodyShapeChooser;
-   import anifire.creator.components.BodyShapeMegaChooser;
+   //import anifire.creator.components.BodyShapeMegaChooser;
    import anifire.creator.components.CcColorPickers;
    import anifire.creator.components.CcComponentPropertyInspectorSpark;
    import anifire.creator.components.CharPreviewer;
@@ -43,8 +43,8 @@ package anifire.creator.interfaces
       
       function get ui_ce_charScaleChooser() : ScaleChooserSpark;
       
-      function get ui_ce_bodyShapeMegaChooser() : BodyShapeMegaChooser;
+      //function get ui_ce_bodyShapeMegaChooser() : BodyShapeMegaChooser;
       
-      function get ui_ce_bodyShapeChooser() : BodyShapeChooser;
+      //function get ui_ce_bodyShapeChooser() : BodyShapeChooser;
    }
 }

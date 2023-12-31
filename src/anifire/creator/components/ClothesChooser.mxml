@@ -69,7 +69,7 @@
 		]]>
 	</fx:Script>
 
-	<cComponents:ComponentThumbChooserSpark id="upperBodyChooser" creationComplete="this.initComponentThumbChooser(this)"/>
-	<cComponents:ComponentThumbChooserSpark id="lowerBodyChooser" creationComplete="this.initComponentThumbChooser(this)"/>
+	<cComponents:ComponentThumbChooserSpark id="upperBodyChooser" creationComplete="this.initComponentThumbChooser(this.upperBodyChooser)"/>
+	<cComponents:ComponentThumbChooserSpark id="lowerBodyChooser" creationComplete="this.initComponentThumbChooser(this.lowerBodyChooser)"/>
 
 </mx:Tile>

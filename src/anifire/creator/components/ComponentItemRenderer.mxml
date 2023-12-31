@@ -21,11 +21,11 @@
 			private var thumb:CcComponentThumb;
 			[Bindable]
 			public var isNull:Boolean = false;
-			protected var _loader:Loader;
+			protected var _loader:Loader = new Loader();;
 			protected var _bitmapData:BitmapData;
 			protected var _displayWidth:Number = 105;
 			protected var _displayHeight:Number = 105;
-			protected var _displayMatrix:Matrix;
+			protected var _displayMatrix:Matrix = new Matrix();
 
 			override public function set data(param1:Object) : void
 			{
@@ -116,8 +116,8 @@
 	</s:states>
 
 	<s:Group id="nullIcon" visible="false" horizontalCenter="0" verticalCenter="0">
-		<s:Image source="@Embed('../images/componentThumbs/nullIcon.png')" visible="true" visible.hovered="false"/>
-		<s:Image source="@Embed('../images/componentThumbs/nullIcon_hover.png')" visible="false" visible.hovered="true"/>
+		<s:Image source="@Embed('../images/componentIcons/nullIcon.png')" visible="true" visible.hovered="false"/>
+		<s:Image source="@Embed('../images/componentIcons/nullIcon_hover.png')" visible="false" visible.hovered="true"/>
 	</s:Group>
 	<components:BusyIndicator id="_loading" horizontalCenter="0" verticalCenter="0" visible="false" symbolColor="0"/>
 	<s:BitmapImage

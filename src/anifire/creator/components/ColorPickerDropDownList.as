@@ -7,7 +7,9 @@ package anifire.creator.components
 	import mx.events.FlexEvent;
 	import spark.components.DropDownList;
 	import spark.events.DropDownEvent;
-	
+
+	[Event(name="colorChange", type="anifire.creator.events.ColorPickerDropDownListEvent")]
+	[Event(name="colorCommit", type="anifire.creator.events.ColorPickerDropDownListEvent")]
 	public class ColorPickerDropDownList extends DropDownList
 	{
 		

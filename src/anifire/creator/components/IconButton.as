@@ -2,6 +2,9 @@ package anifire.creator.components
 {
 	import spark.components.Button;
 	
+	[Style(name="iconOver", inherit="yes", type="Class")]
+	[Style(name="iconDisabled", inherit="yes", type="Class")]
+	[Style(name="iconDown", inherit="yes", type="Class")]
 	public class IconButton extends Button
 	{
 		

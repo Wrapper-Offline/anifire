@@ -7,7 +7,8 @@ package anifire.creator.components
 	import mx.core.IVisualElement;
 	import spark.components.List;
 	import spark.events.RendererExistenceEvent;
-	
+
+	[Event(name="itemClick", type="anifire.creator.events.MenuItemEvent")]
 	public class MenuItemList extends List implements IMenuItemOwner
 	{
 		

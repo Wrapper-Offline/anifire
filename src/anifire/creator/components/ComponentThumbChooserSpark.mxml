@@ -348,7 +348,7 @@
 		borderVisible="false"
 		contentBackgroundAlpha="0"
 		dataProvider="{this._thumbnailSource}">
-		<s:layout>
+		<components:layout>
 			<s:TileLayout
 				paddingTop="60"
 				paddingRight="60"
@@ -358,7 +358,7 @@
 				horizontalGap="0"
 				columnAlign="justifyUsingGap"
 				orientation="rows"/>
-		</s:layout>
+		</components:layout>
 	</components:ThumbList>
 	<s:Group id="upLayer" height="45" width="639" top="0">
 		<s:Rect width="100%" height="100%">

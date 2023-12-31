@@ -60,7 +60,7 @@ package anifire.creator.models
 			return this._subMenu;
 		}
 		
-		private function set subMenu(param1:ArrayCollection) : void
+		public function set subMenu(param1:ArrayCollection) : void
 		{
 			var _loc2_:int = 0;
 			var _loc3_:MenuItemModel = null;

@@ -153,8 +153,8 @@
 	</fx:Script>
 	
 	<s:states>
-		<s:State name="keep_pro"/>
-		<s:State name="no_pro"/>
+		<s:State name="normal"/>
+		<s:State name="isPlus"/>
 	</s:states>
 
 	<s:Group id="yPad" y="105" x="{(this.width - yPad.width) / 2}" alpha="0" mouseChildren="false">
@@ -200,7 +200,7 @@
 			left="15"
 			right="15">
 			<s:VGroup verticalCenter="0">
-				<s:Group height="33" alpha="1" mouseChildren="true">
+				<s:Group height="33" alpha="1" alpha.normal="0.5" mouseChildren="true" mouseChildren.normal="false">
 					<s:Image source="@Embed('../images/bodyDetails/bodyScaleSmall.png')" width="29" height="33"/>
 					<s:HSlider
 						id="sliderBody" 
@@ -213,7 +213,7 @@
 						changeEnd="changeBodySize()"/>
 					<s:Image source="@Embed('../images/bodyDetails/bodyScaleBig.png')" x="65" width="29" height="33"/>
 				</s:Group>
-				<s:Group height="33" alpha="1" mouseChildren="true">
+				<s:Group height="33" alpha="1" alpha.normal="0.5" mouseChildren="true" mouseChildren.normal="false">
 					<s:Image source="@Embed('../images/bodyDetails/headScaleSmall.png')" width="29" height="33"/>
 					<s:HSlider
 						id="sliderHead" 
@@ -235,30 +235,30 @@
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/tallIcon.png')"
 						iconOver="@Embed('../images/bodyDetails/tallIcon_hover.png')"
-						click="onScaleIconClick(event)"/>
+						click="onScaleButtonClick(event)"/>
 					<cComponents:IconButton
 						id="btnType02"
 						buttonMode="true"
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/normalIcon.png')"
 						iconOver="@Embed('../images/bodyDetails/normalIcon_hover.png')"
-						click="onScaleIconClick(event)"/>
+						click="onScaleButtonClick(event)"/>
 					<cComponents:IconButton
 						id="btnType03"
 						buttonMode="true"
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/kidIcon.png')"
 						iconOver="@Embed('../images/bodyDetails/kidIcon_hover.png')"
-						click="onScaleIconClick(event)"/>
+						click="onScaleButtonClick(event)"/>
 					<cComponents:IconButton
 						id="btnType04"
 						buttonMode="true"
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/littleKidIcon.png')"
 						iconOver="@Embed('../images/bodyDetails/littleKidIcon_hover.png')"
-						click="onScaleIconClick(event)"/>
+						click="onScaleButtonClick(event)"/>
 				</s:HGroup>
-				<s:HGroup verticalCenter="0" alpha="1" mouseChildren="true">
+				<s:HGroup verticalCenter="0" alpha="1" alpha.normal="0.5" mouseChildren="true" mouseChildren.normal="false">
 					<cComponents:IconButton
 						id="btnArrowLeft"
 						buttonMode="true"
@@ -278,7 +278,7 @@
 						buttonMode="true"
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/arrowUpIcon.png')"
-						iconOver="@Embed('../images/bodyDetails/arowUpIcon_hover.png')"
+						iconOver="@Embed('../images/bodyDetails/arrowUpIcon_hover.png')"
 						click="dispatchEvent(new CcThumbPropertyEvent(CcThumbPropertyEvent.CCPROP_RIGHT_BUTTON_CLICK,this))"/>
 					<cComponents:IconButton
 						id="btnArrowDown"

@@ -3,7 +3,7 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
-	xmlns:cComponents="*"
+	xmlns:components="anifire.creator.components.*"
 	verticalGap="2">
 
 	<fx:Script>
@@ -20,6 +20,7 @@
 			private var bgStyleName:String;
 			private var moneyMode:int;
 			public var _componentType:String;
+			public var ccComponentThumbThumbnail:CcComponentThumbThumbnail;
 
 			public function get componentType() : String
 			{
@@ -151,7 +152,7 @@
 		]]>
 	</fx:Script>
 
-	<cComponents:CcComponentThumbThumbnail id="componentThumbnail"/>
+	<components:CcComponentThumbThumbnail id="componentThumbnail"/>
 	<mx:Canvas id="thumbnailDetailContainer">
 		<s:Label id="goBuckPoint" x="10" styleName="lblComponentThumbGoPoint"/>
 	</mx:Canvas>

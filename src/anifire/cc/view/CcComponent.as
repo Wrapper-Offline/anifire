@@ -23,7 +23,7 @@ package anifire.cc.view
 	public class CcComponent extends MovieClip implements IRegulatedProcess
 	{
 		 
-		
+		[Embed(source="./CcComponent_GoColorMapShaderClass.bin", mimeType="application/octet-stream")]
 		private var GoColorMapShaderClass:Class;
 		
 		private var _loader:Loader;
@@ -34,7 +34,6 @@ package anifire.cc.view
 		
 		public function CcComponent()
 		{
-			this.GoColorMapShaderClass = CcComponent_GoColorMapShaderClass;
 			this._customColor = new UtilHashArray();
 			super();
 		}

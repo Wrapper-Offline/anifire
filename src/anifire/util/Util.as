@@ -209,7 +209,7 @@ package anifire.util
 			(function():void
 			{
 				var counter:* = 2;
-				var _callback:* = function(param1:Event):void
+				var _callback:* = function():void
 				{
 					if(--counter == 0)
 					{

@@ -497,16 +497,16 @@ package anifire.creator.core
       
       public function start(param1:CcCharacter, param2:Boolean) : void
       {
-         this.ui_ce_container.ui_ce_bodyShapeChooser.init(this.currentTheme,this.moneyMode,param2);
+         //this.ui_ce_container.ui_ce_bodyShapeChooser.init(this.currentTheme,this.moneyMode,param2);
          this.initChar(param1);
          this.isNewCharInsteadOfExistingChar = param2;
          if(this.isNewCharInsteadOfExistingChar)
          {
-            this.ui_ce_container.ui_ce_bodyShapeChooser.addEventListener(CcBodyShapeChooserEvent.BODY_SHAPE_CHOSEN,this.onUserChooseBodyShapeAtFirstTime);
+            //this.ui_ce_container.ui_ce_bodyShapeChooser.addEventListener(CcBodyShapeChooserEvent.BODY_SHAPE_CHOSEN,this.onUserChooseBodyShapeAtFirstTime);
          }
          else
          {
-            this.ui_ce_container.ui_ce_bodyShapeChooser.addEventListener(CcBodyShapeChooserEvent.BODY_SHAPE_CHOSEN,this.onUserChooseBodyShape);
+            //this.ui_ce_container.ui_ce_bodyShapeChooser.addEventListener(CcBodyShapeChooserEvent.BODY_SHAPE_CHOSEN,this.onUserChooseBodyShape);
             this.ccCharCopyForReset = this._ccChar.clone();
             this.addCommand(this.ccChar);
             this.propagateNewCharToUi(this.ccChar);

@@ -10,14 +10,15 @@ package anifire.managers
 	{
 		
 		private static var _instance:NativeCursorManager;
-		
-		private static const imgCursor1:Class = NativeCursorManager_imgCursor1;
-		
-		private static const imgCursor2:Class = NativeCursorManager_imgCursor2;
-		
-		private static const imgCursor3:Class = NativeCursorManager_imgCursor3;
-		
-		private static const imgCursor4:Class = NativeCursorManager_imgCursor4;
+
+		[Embed(source="../images/loadingCursor/img1.png")]
+		private static const imgCursor1:Class;
+		[Embed(source="../images/loadingCursor/img2.png")]
+		private static const imgCursor2:Class;
+		[Embed(source="../images/loadingCursor/img3.png")]
+		private static const imgCursor3:Class;
+		[Embed(source="../images/loadingCursor/img4.png")]
+		private static const imgCursor4:Class;
 		 
 		
 		public function NativeCursorManager()

@@ -72,9 +72,9 @@
 					}
 					_loc8_++;
 				}
-				var _loc9_:SortField;
-				(_loc9_ = new SortField()).name = "label";
-				_loc9_.caseInsensitive = true;
+				var _loc9_:SortField = new SortField();
+				_loc9_.name = "label";
+				//_loc9_.caseInsensitive = true;
 				var _loc10_:Sort;
 				(_loc10_ = new Sort()).fields = [_loc9_];
 				_loc4_.sort = _loc10_;
@@ -221,7 +221,7 @@
 			top="10"
 			bottom="5"
 			width="300"
-			skinClass="anifire.cretor.skins.ActionDropDownListSkin"
+			skinClass="anifire.creator.skins.ActionDropDownListSkin"
 			change="actionSelected(event)">
 			<s:layout>
 				<s:VerticalLayout requestedMaxRowCount="-1" horizontalAlign="contentJustify" gap="0"/>
@@ -246,7 +246,7 @@
 			top="10"
 			bottom="5"
 			width="200"
-			skinClass="anifire.cretor.skins.ActionDropDownListSkin"
+			skinClass="anifire.creator.skins.ActionDropDownListSkin"
 			change="facialSelected(event)">
 			<s:layout>
 				<s:VerticalLayout requestedMaxRowCount="-1" horizontalAlign="contentJustify" gap="0"/>
