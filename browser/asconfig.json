@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"output": "bin-debug/browser.swf",
+		"accessible": true,
+		"source-path": [
+			"src"
+		],
+		"library-path": [
+			"../anifire/bin/anifire.swc"
+		]
+	},
+	"files": [
+		"src/browser.mxml"
+	],
+	"copySourcePathAssets": true,
+	"htmlTemplate": "html-template",
+	"additionalOptions": "-locale en_US"
+}

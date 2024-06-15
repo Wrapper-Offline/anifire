@@ -5,7 +5,7 @@ package anifire.managers
 	
 	public class AppConfigManager
 	{
-		private static var __instance:anifire.managers.AppConfigManager;
+		private static var __instance:AppConfigManager;
 
 		protected var _properties:Object;
 
@@ -15,11 +15,11 @@ package anifire.managers
 			this.init();
 		}
 
-		public static function get instance() : anifire.managers.AppConfigManager
+		public static function get instance() : AppConfigManager
 		{
 			if(!__instance)
 			{
-				__instance = new anifire.managers.AppConfigManager();
+				__instance = new AppConfigManager();
 			}
 			return __instance;
 		}
@@ -39,7 +39,7 @@ package anifire.managers
 		public function setParamters(param1:Object) : void
 		{
 			var key:String = null;
-			for(key in param1)
+			for (key in param1)
 			{
 				this._properties[key] = param1[key];
 			}
@@ -64,7 +64,7 @@ package anifire.managers
 		public function createURLVariables() : URLVariables
 		{
 			var _loc1_:URLVariables = new URLVariables();
-			for(var _loc2_:String in this._properties)
+			for (var _loc2_:String in this._properties)
 			{
 				_loc1_[_loc2_] = this._properties[_loc2_];
 			}
@@ -74,7 +74,7 @@ package anifire.managers
 		public function appendURLVariables(param1:URLVariables) : void
 		{
 			var _loc2_:String = null;
-			for(_loc2_ in this._properties)
+			for (_loc2_ in this._properties)
 			{
 				param1[_loc2_] = this._properties[_loc2_];
 			}
