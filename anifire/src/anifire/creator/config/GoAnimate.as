@@ -19,17 +19,14 @@ package anifire.creator.config
          super();
       }
       
-      private static function goTagFilter(param1:CcComponentThumb) : Boolean
+      private static function goTagFilter(thumb:CcComponentThumb) : Boolean
       {
-         var _loc2_:int = parseInt(_configManager.getValue("ut"));
-         var _loc3_:String = _configManager.getValue("siteId");
-         var _loc4_:String = _configManager.getValue("userId");
-         var _loc5_:String = _configManager.getValue("ft");
-         if(!param1)
-         {
+         if (!thumb) {
             return false;
          }
-         return (_loc2_ >= 60 || !param1.hasTag("_userrole_admin")) && (!_loc5_ || param1.hasTag(_loc5_));
+         var userRank:int = parseInt(_configManager.getValue("ut"));
+         var filter:String = _configManager.getValue("ft");
+         return (userRank >= 60 || !thumb.hasTag("_userrole_admin")) && (!filter || thumb.hasTag(filter));
       }
       
       public function scalingCharacterEnabled() : Boolean

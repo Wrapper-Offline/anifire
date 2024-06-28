@@ -85,7 +85,7 @@
 								{
 									if(CcComponentThumb(_loc10_.getValueByIndex(_loc12_)).enable)
 									{
-										if((_loc13_ = CcConsole.getCcConsole().configuration.defaultThumbFilter.filter)(CcComponentThumb(_loc10_.getValueByIndex(_loc12_))))
+										if((_loc13_ = CcConsole.instance.configuration.defaultThumbFilter.filter)(CcComponentThumb(_loc10_.getValueByIndex(_loc12_))))
 										{
 											_loc11_.push(_loc10_.getKey(_loc12_),_loc10_.getValueByIndex(_loc12_));
 										}

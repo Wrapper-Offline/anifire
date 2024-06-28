@@ -1,4 +1,4 @@
-package anifire.creator.components
+package anifire.creator.components.editor
 {
 	import anifire.creator.skins.ConfirmPopUpSkin;
 	import anifire.event.StudioEvent;
@@ -20,11 +20,11 @@ package anifire.creator.components
 		public static const CONFIRM_POPUP_INFO:int = 1;
 		public static const CONFIRM_POPUP_ALERT:int = 2;
 		public static const CONFIRM_POPUP_ERROR:int = 3;
-		[Embed(source="../../images/popup/imgAlert.png")]
+		[Embed(source="../../../images/popup/imgAlert.png")]
 		public static const imgAlert:Class;
-		[Embed(source="../../images/popup/imgConfirm.png")]
+		[Embed(source="../../../images/popup/imgConfirm.png")]
 		public static const imgConfirm:Class;
-		[Embed(source="../../images/popup/imgError.png")]
+		[Embed(source="../../../images/popup/imgError.png")]
 		public static const imgError:Class;
 		
 		

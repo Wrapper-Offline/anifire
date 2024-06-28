@@ -230,38 +230,6 @@ package anifire.creator.models
          _loc2_.load(_loc3_);
       }
       
-      public function initCcThemePreMadeChar() : void
-      {
-         var _loc1_:URLLoader = new URLLoader();
-         _loc1_.dataFormat = URLLoaderDataFormat.TEXT;
-         var _loc2_:URLRequest = UtilNetwork.getGetCcThemePreMadeCharRequest(this.id);
-         _loc1_.addEventListener(Event.COMPLETE,this.onLoadCcThemePreMadeCharComplete);
-         _loc1_.load(_loc2_);
-      }
-      
-      private function onLoadCcThemePreMadeCharComplete(param1:Event) : void
-      {
-         var _loc5_:XML = null;
-         var _loc6_:CcCoreEvent = null;
-         var _loc7_:anifire.creator.models.CcCharacter = null;
-         var _loc8_:UtilHashArray = null;
-         (param1.target as IEventDispatcher).removeEventListener(param1.type,this.onLoadCcThemePreMadeCharComplete);
-         var _loc2_:URLLoader = param1.target as URLLoader;
-         var _loc3_:* = _loc2_.data as String;
-         _loc3_ = "<?xml version=\"1.0\"?><chars>" + _loc3_ + "</chars>";
-         var _loc4_:XML = new XML(_loc3_);
-         this._preMadeChars = new Array();
-         for each(_loc5_ in _loc4_.child(anifire.creator.models.CcCharacter.XML_NODE_NAME))
-         {
-            _loc7_ = new anifire.creator.models.CcCharacter();
-            (_loc8_ = new UtilHashArray()).push(this.id,this);
-            _loc7_.deserialize(_loc5_,_loc8_);
-            this._preMadeChars.push(_loc7_);
-         }
-         _loc6_ = new CcCoreEvent(CcCoreEvent.LOAD_PRE_MADE_CHARACTER_COMPLETE,this);
-         this.dispatchEvent(_loc6_);
-      }
-      
       public function initCcThemeByXml(param1:String) : void
       {
          var _loc2_:XML = new XML(param1);

@@ -4,7 +4,8 @@ package anifire.creator.events
    
    public class CcCoreEvent extends ExtraDataEvent
    {
-      
+
+    public static const DESERIALIZE_THEME_COMPLETE:String = "deserialize_theme_complete";  
       public static const LOAD_THEME_COMPLETE:String = "load_theme_complete";
       
       public static const LOAD_EXISTING_CHAR_COMPLETE:String = "load_existing_char_complete";

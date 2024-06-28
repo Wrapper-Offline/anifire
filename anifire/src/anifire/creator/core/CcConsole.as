@@ -1,708 +1,450 @@
 package anifire.creator.core
 {
-	import anifire.component.CCThumb;
 	import anifire.constant.CcLibConstant;
-	import anifire.constant.CcServerConstant;
-	import anifire.constant.LicenseConstants;
 	import anifire.constant.ServerConstants;
-	import anifire.creator.components.ConfirmPopUp;
 	import anifire.creator.events.CcCoreEvent;
-	import anifire.creator.events.CcSaveCharEvent;
-	import anifire.creator.interfaces.ICcCharEditorContainer;
 	import anifire.creator.interfaces.ICcMainUiContainer;
-	import anifire.creator.interfaces.ICcPreviewAndSaveContainer;
+	import anifire.creator.components.browser.BrowseView;
+	import anifire.creator.components.editor.EditView;
 	import anifire.creator.interfaces.IConfiguration;
 	import anifire.creator.models.CcCharacter;
 	import anifire.creator.models.CcTheme;
-	import anifire.event.LoadEmbedMovieEvent;
-	import anifire.event.StudioEvent;
-	import anifire.managers.AmplitudeAnalyticsManager;
+	import anifire.creator.theme.Theme;
 	import anifire.managers.AppConfigManager;
-	import anifire.managers.ExternalLinkManager;
-	import anifire.managers.NativeCursorManager;
 	import anifire.managers.ServerConnector;
-	import anifire.util.UtilCrypto;
-	import anifire.util.UtilDict;
-	import anifire.util.UtilErrorLogger;
 	import anifire.util.UtilHashArray;
-	import anifire.util.UtilNetwork;
-	import anifire.util.UtilSite;
-	import anifire.util.UtilURLStream;
-	import anifire.util.UtilUser;
-	import com.adobe.serialization.json.JSON;
-	import flash.display.DisplayObjectContainer;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
-	import flash.events.IOErrorEvent;
-	import flash.events.SecurityErrorEvent;
-	import flash.external.ExternalInterface;
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.net.URLRequestMethod;
-	import flash.net.URLStream;
 	import flash.net.URLVariables;
-	import flash.utils.ByteArray;
-	import flash.utils.setTimeout;
-	import mx.core.FlexGlobals;
-	import mx.core.IFlexDisplayObject;
-	import mx.utils.Base64Encoder;
-	import mx.utils.StringUtil;
-	import nochump.util.zip.ZipEntry;
-	import spark.events.PopUpEvent;
 	
-	public class CcConsole implements IEventDispatcher
+	public class CcConsole extends EventDispatcher
 	{
-		
-		private static var _cc_console:anifire.creator.core.CcConsole;
-		
-		private static var _themeId:String = "";
-		
+
+		private static var _instance:anifire.creator.core.CcConsole;
+
 		private static var _cfg:IConfiguration;
-		
+
 		private static var _configManager:AppConfigManager = AppConfigManager.instance;
-		
-		private static var _updatePopUp:IFlexDisplayObject;
-		 
-		
-		private var _eventDispatcher:EventDispatcher;
-		
-		private var _ccCharEditorController:anifire.creator.core.CcCharEditorController;
-		
-		private var _ccPreviewAndSaveController:anifire.creator.core.CcPreviewAndSaveController;
-		
+
 		private var _ccChar:CcCharacter;
-		
-		private var _themes:UtilHashArray;
-		
-		private var _currentThemeId:String;
-		
+
+		private var _theme:Theme;
+		private var _ccTheme:CcTheme;
+		private var _themeId:String = "";
+		private var _ccThemeId:String = "";
+
 		private var _ui_mainUiContainer:ICcMainUiContainer;
-		
+		private var _ui_browseView:BrowseView;
+
 		private var _userLevel:int;
-		
+
 		private var _original_assetId:String;
-		
-		private var _expectedUserType:Number = -1;
-		
-		private var _serverConnector:ServerConnector;
-		
+
 		private var _isEditing:Boolean = true;
-		
-		public function CcConsole(param1:ICcMainUiContainer, param2:ICcCharEditorContainer, param3:ICcPreviewAndSaveContainer)
+
+		public function CcConsole(mainUi:ICcMainUiContainer, browseView:BrowseView, editView:EditView)
 		{
 			super();
-			this._ui_mainUiContainer = param1;
-			this._eventDispatcher = new EventDispatcher();
-			this._themes = new UtilHashArray();
-			var _themeId:String = _configManager.getValue(ServerConstants.PARAM_THEME_ID);
-			if (_themeId == null || themeId.length <= 0) {
-				_themeId = "family";
+			this._ui_mainUiContainer = mainUi;
+			this._ui_browseView = browseView;
+			var themeId:String = _configManager.getValue(ServerConstants.PARAM_THEME_ID);
+			if (themeId == null || themeId.length <= 0)
+			{
+				themeId = "family";
 			}
+			this._themeId = themeId;
 			// are we copying an existing character?
 			this.originalAssetId = _configManager.getValue("original_asset_id") as String;
-			if (this.originalAssetId == null || this.originalAssetId.length <= 0) {
+			if (this.originalAssetId == null || this.originalAssetId.length <= 0)
+			{
 				this.originalAssetId = null;
 			}
-			this.addCallBacks();
 			// check if the user is an admin
 			var isAdmin:String = _configManager.getValue(ServerConstants.FLASHVAR_IS_ADMIN) as String;
-			if (isAdmin == "1") {
-				this._userLevel = CcLibConstant.USER_LEVEL_SUPER;
-			} else {
-				this._userLevel = CcLibConstant.USER_LEVEL_NORMAL;
+			this._userLevel = isAdmin == "1" ?
+				CcLibConstant.USER_LEVEL_SUPER :
+				CcLibConstant.USER_LEVEL_NORMAL;
+
+			this.addEventListener(CcCoreEvent.LOAD_THEME_COMPLETE, this.doLoadPreMadeChar);
+			this.loadTheme(this._themeId);
+		}
+
+		public static function setConfiguration(config:IConfiguration) : void
+		{
+			_cfg = config;
+		}
+
+		public static function init(mainUi:ICcMainUiContainer, browseView:BrowseView, editView:EditView) : CcConsole
+		{
+			if (_instance == null)
+			{
+				_instance = new CcConsole(mainUi, browseView, editView);
 			}
-			this._ccCharEditorController = new anifire.creator.core.CcCharEditorController();
-			this.ccCharEditorController.configuration = _cfg;
-			this.ccCharEditorController.initUi(param2);
-			this.ccCharEditorController.addEventListener(CcCoreEvent.USER_WANT_TO_PREVIEW,this.onUserWantToPreview);
-			this.ccCharEditorController.addEventListener(CcCoreEvent.USER_WANT_TO_SAVE,this.onUserWantToSave);
-			this._ccPreviewAndSaveController = new anifire.creator.core.CcPreviewAndSaveController();
-			this._ccPreviewAndSaveController.configuration = _cfg;
-			this.ccPreviewAndSaveController.initUi(param3);
-			this.ccPreviewAndSaveController.addEventListener(CcCoreEvent.USER_WANT_TO_MODIFY,this.onUserWantToModify);
-			this.ccPreviewAndSaveController.addEventListener(CcCoreEvent.USER_WANT_TO_SAVE,this.onUserWantToSave);
-			this.initialize();
+			return _instance;
 		}
-		
-		public static function setConfiguration(param1:IConfiguration) : void
+
+		public static function get instance() : CcConsole
 		{
-			_cfg = param1;
-		}
-		
-		public static function initializeCcConsole(param1:ICcMainUiContainer, param2:ICcCharEditorContainer, param3:ICcPreviewAndSaveContainer) : CcConsole
-		{
-			if (_cc_console == null) {
-				_cc_console = new CcConsole(param1,param2,param3);
-			}
-			return _cc_console;
-		}
-		
-		public static function getCcConsole() : CcConsole
-		{
-			if (_cc_console != null) {
-				return _cc_console;
+			if (_instance != null)
+			{
+				return _instance;
 			}
 			throw new Error("CcConsole must be intialized first");
 		}
-		
+
 		public function get configuration() : IConfiguration
 		{
 			return _cfg;
 		}
-		
+
 		private function get originalAssetId() : String
 		{
 			return this._original_assetId;
 		}
-		
+
 		private function set originalAssetId(param1:String) : void
 		{
 			this._original_assetId = param1;
 		}
-		
+
 		private function get userLevel() : int
 		{
 			return this._userLevel;
 		}
-		
+
 		private function get ui_mainUiContainer() : ICcMainUiContainer
 		{
 			return this._ui_mainUiContainer;
 		}
-		
-		private function get ccCharEditorController() : anifire.creator.core.CcCharEditorController
-		{
-			return this._ccCharEditorController;
-		}
-		
-		private function get ccPreviewAndSaveController() : anifire.creator.core.CcPreviewAndSaveController
-		{
-			return this._ccPreviewAndSaveController;
-		}
-		
+
 		private function get ccChar() : CcCharacter
 		{
 			return this._ccChar;
 		}
-		
-		public function resetExpectedUserType() : void
-		{
-			this._expectedUserType = -1;
-		}
-		
+
 		private function onConfirmAlert(param1:Event) : void
 		{
 			ServerConnector.instance.refreshUserType();
 		}
-		
-		private function addCallBacks() : void
-		{
-			if(ExternalInterface.available)
-			{
-				ExternalInterface.addCallback("ccUpgradePending",this.onUpgradeActived);
-			}
-		}
-		
-		private function addTheme(param1:CcTheme) : void
-		{
-			this._themes.push(param1.id,param1);
-		}
-		
-		private function getTheme(param1:String) : CcTheme
-		{
-			return this._themes.getValueByKey(param1) as CcTheme;
-		}
-		
+
 		public function isCopyingChar() : Boolean
 		{
 			return this.originalAssetId == null ? false : true;
 		}
 
-		private function initialize() {
-			this._currentThemeId = _themeId;
-			this.addEventListener(CcCoreEvent.LOAD_THEME_COMPLETE,this.doLoadPreMadeChar);
-			this.loadCcTheme(this._currentThemeId);
-		}
-		
-		public function getTemplateCCPreMadeChars() : Array
+		private function switchToBrowser() : void
 		{
-			var _loc1_:CcTheme = this.getTheme(this._currentThemeId);
-			return _loc1_.preMadeChars;
-		}
-		
-		public function refreshTemplateCCSelector(param1:Array, param2:String = "default") : void
-		{
-			var _console:anifire.creator.core.CcConsole = null;
-			var char:CcCharacter = null;
-			var chars:Array = param1;
-			var tag:String = param2;
-			_console = this;
-			var _numCC:int = int(chars.length);
-			var numCCStarted:int = 0;
-			if(chars.length == 0)
+			if (_configManager.getValue(ServerConstants.FLASHVAR_CC_START_PAGE) == "editor")
 			{
-				return;
+				//init editor
+				//this.onUserWantToPreview(param1);
+				//return
 			}
-			for each(char in chars)
-			{
-				(function():void
-				{
-					var _ccChar:* = undefined;
-					var stream:* = undefined;
-					var request:* = undefined;
-					var _ccActionHandler:* = undefined;
-					_ccChar = char;
-					stream = new UtilURLStream();
-					_ccActionHandler = function(param1:Event):void
-					{
-						stream.removeEventListener(Event.COMPLETE,_ccActionHandler);
-						parseCCActionZipEventHandler({
-							"char":_ccChar,
-							"streamEvent":param1,
-							"tag":tag
-						});
-					};
-					request = UtilNetwork.getGetCcActionRequest(char.assetId,char.thumbnailActionId + ".zip");
-					stream.addEventListener(Event.COMPLETE,_ccActionHandler);
-					addEventListener(CcCoreEvent.LOAD_CHARACTER_THUMB_COMPLETE,function(param1:CcCoreEvent):void
-					{
-						if(--_numCC <= 0)
-						{
-							_console.dispatchEvent(new CcCoreEvent(CcCoreEvent.LOAD_CHARACTER_THUMB_ALL_COMPLETE,_console,{
-								"tag":tag,
-								"total":chars.length
-							}));
-						}
-					});
-					stream.load(request);
-				})();
-			}
+			this._ui_browseView.init()
+			this.dispatchEvent(new CcCoreEvent(CcCoreEvent.LOAD_EVERYTHING_COMPLETE, this));
 		}
-		
-		private function onUserWantToStart(param1:Event) : void
+
+		// private function switchToEditor() : void
+		// {
+		// 	this.ccEditUiController.initTheme(this._theme);
+		// 	this.ccEditUiController.initMode(this.userLevel);
+		// 	this.ccEditUiController.start(this.ccChar,!this.isCopyingChar());
+		// 	this.ccPreviewAndSaveController.initTheme(this._theme);
+		// 	this.ccPreviewAndSaveController.initMode();
+		// 	this.ccPreviewAndSaveController.initChar(this.ccChar);
+		// 	this._isEditing = true;
+		// 	if(_configManager.getValue(ServerConstants.FLASHVAR_CC_START_PAGE) == "save")
+		// 	{
+		// 		this.onUserWantToPreview(param1);
+		// 	}
+		// 	this.dispatchEvent(new CcCoreEvent(CcCoreEvent.LOAD_EVERYTHING_COMPLETE,this));
+		// }
+
+		// private function onUserWantToModify() : void
+		// {
+		// 	this._isEditing = true;
+		// 	this.ui_mainUiContainer.ui_main_ccCharEditor.visible = true;
+		// 	this.ui_mainUiContainer.ui_main_ccCharPreviewAndSaveScreen.visible = false;
+		// 	this.ccEditUiController.proceedToShow();
+		// }
+
+		// private function onUserWantToPreview() : void
+		// {
+		// 	this._isEditing = false;
+		// 	this.ui_mainUiContainer.ui_main_ccCharEditor.visible = false;
+		// 	this.ui_mainUiContainer.ui_main_ccCharPreviewAndSaveScreen.visible = true;
+		// 	this.ccPreviewAndSaveController.proceedToShow();
+		// }
+
+		// private function onUserWantToSave(param1:Event) : void
+		// {
+		// 	this.addEventListener(CcSaveCharEvent.SAVE_CHAR_COMPLETE,this.doTellUserSaveStatus);
+		// 	this.addEventListener(CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR,this.doTellUserSaveStatus);
+		// 	if(this._isEditing)
+		// 	{
+		// 		this.ccEditUiController.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.doSave);
+		// 		this.ccEditUiController.resetCCAction();
+		// 	}
+		// 	else
+		// 	{
+		// 		this.ccPreviewAndSaveController.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.doSave);
+		// 		this.ccPreviewAndSaveController.resetCCAction();
+		// 	}
+		// }
+
+		// private function doSave(param1:Event) : void
+		// {
+		// 	NativeCursorManager.instance.setBusyCursor();
+		// 	FlexGlobals.topLevelApplication.enabled = false;
+		// 	setTimeout(this.save, 5000);
+		// }
+
+		// private function doTellUserSaveStatus(param1:CcSaveCharEvent) : void
+		// {
+		// 	var isTemplate:Boolean = false;
+		// 	var js:String = null;
+		// 	var event:CcSaveCharEvent = param1;
+		// 	this.removeEventListener(CcSaveCharEvent.SAVE_CHAR_COMPLETE,this.doTellUserSaveStatus);
+		// 	this.removeEventListener(CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR,this.doTellUserSaveStatus);
+		// 	if(event.type == CcSaveCharEvent.SAVE_CHAR_COMPLETE)
+		// 	{
+		// 		this.ccPreviewAndSaveController.proceedToSaveComplete(event.assetId);
+		// 		try
+		// 		{
+		// 			isTemplate = false;
+		// 			if(this.ccChar.copiedFromTemplate)
+		// 			{
+		// 				try
+		// 				{
+		// 					isTemplate = !this.ccChar.isTemplateModified();
+		// 				}
+		// 				catch(e2:Error)
+		// 				{
+		// 				}
+		// 			}
+		// 		// a lot of yapping
+		// 			js = StringUtil.substitute("CCStandaloneBannerAdUI.gaLogTx.logCCPartsNormal({0}, {1}, {2})",event.assetId,com.adobe.serialization.json.JSON.encode(event.gaTrackModel.parts.filter(function(param1:*, param2:int, param3:Array):Boolean
+		// 			{
+		// 				return (["GoUpper","GoLower","upper_body","lower_body","hair"] as Array).indexOf(param1.ctype) >= 0;
+		// 			})),isTemplate ? this.ccChar.templateId : "0");
+		// 			ExternalInterface.call(js);
+		// 		}
+		// 		catch(e:Error)
+		// 		{
+		// 		}
+		// 	} else if(event.type == CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR)
+		// 	{
+		// 		this.ccPreviewAndSaveController.proceedToSaveError();
+		// 	}
+		// }
+
+		private function doEnableUserToStartUseCC() : void
 		{
-			this.ccCharEditorController.initTheme(this.getTheme(this._currentThemeId));
-			this.ccCharEditorController.initMode(this.userLevel);
-			this.ccCharEditorController.start(this.ccChar,!this.isCopyingChar());
-			this.ccPreviewAndSaveController.initTheme(this.getTheme(this._currentThemeId));
-			this.ccPreviewAndSaveController.initMode();
-			this.ccPreviewAndSaveController.initChar(this.ccChar);
-			this._isEditing = true;
-			if(_configManager.getValue(ServerConstants.FLASHVAR_CC_START_PAGE) == "save")
+			var self:CcConsole = this;
+			var proceedHandler:Function = function proceedHandler(e:CcCoreEvent):void
 			{
-				this.onUserWantToPreview(param1);
-			}
-			this.dispatchEvent(new CcCoreEvent(CcCoreEvent.LOAD_EVERYTHING_COMPLETE,this));
-		}
-		
-		private function onUserWantToModify(param1:Event) : void
-		{
-			this._isEditing = true;
-			this.ui_mainUiContainer.ui_main_ccCharEditor.visible = true;
-			this.ui_mainUiContainer.ui_main_ccCharPreviewAndSaveScreen.visible = false;
-			this.ccCharEditorController.proceedToShow();
-		}
-		
-		private function onUserWantToPreview(param1:Event) : void
-		{
-			this._isEditing = false;
-			this.ui_mainUiContainer.ui_main_ccCharEditor.visible = false;
-			this.ui_mainUiContainer.ui_main_ccCharPreviewAndSaveScreen.visible = true;
-			this.ccPreviewAndSaveController.proceedToShow();
-		}
-		
-		private function onUserWantToSave(param1:Event) : void
-		{
-			this.addEventListener(CcSaveCharEvent.SAVE_CHAR_COMPLETE,this.doTellUserSaveStatus);
-			this.addEventListener(CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR,this.doTellUserSaveStatus);
-			if(this._isEditing)
+				self.removeEventListener(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, proceedHandler);
+				switchToBrowser();
+			};
+			if (this.originalAssetId != null)
 			{
-				this.ccCharEditorController.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.doSave);
-				this.ccCharEditorController.resetCCAction();
-			}
-			else
-			{
-				this.ccPreviewAndSaveController.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.doSave);
-				this.ccPreviewAndSaveController.resetCCAction();
-			}
-		}
-		
-		private function doSave(param1:Event) : void
-		{
-			NativeCursorManager.instance.setBusyCursor();
-			FlexGlobals.topLevelApplication.enabled = false;
-			setTimeout(this.save,5000);
-		}
-		
-		private function doTellUserSaveStatus(param1:CcSaveCharEvent) : void
-		{
-			var isTemplate:Boolean = false;
-			var js:String = null;
-			var event:CcSaveCharEvent = param1;
-			this.removeEventListener(CcSaveCharEvent.SAVE_CHAR_COMPLETE,this.doTellUserSaveStatus);
-			this.removeEventListener(CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR,this.doTellUserSaveStatus);
-			if(event.type == CcSaveCharEvent.SAVE_CHAR_COMPLETE)
-			{
-				this.ccPreviewAndSaveController.proceedToSaveComplete(event.assetId);
-				try
-				{
-					isTemplate = false;
-					if(this.ccChar.copiedFromTemplate)
-					{
-						try
-						{
-							isTemplate = !this.ccChar.isTemplateModified();
-						}
-						catch(e2:Error)
-						{
-						}
-					}
-				// a lot of yapping
-					js = StringUtil.substitute("CCStandaloneBannerAdUI.gaLogTx.logCCPartsNormal({0}, {1}, {2})",event.assetId,com.adobe.serialization.json.JSON.encode(event.gaTrackModel.parts.filter(function(param1:*, param2:int, param3:Array):Boolean
-					{
-						return (["GoUpper","GoLower","upper_body","lower_body","hair"] as Array).indexOf(param1.ctype) >= 0;
-					})),isTemplate ? this.ccChar.templateId : "0");
-					ExternalInterface.call(js);
-				}
-				catch(e:Error)
-				{
-				}
-			} else if(event.type == CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR)
-			{
-				this.ccPreviewAndSaveController.proceedToSaveError();
-			}
-		}
-		
-		private function loadLatestPreMadeChars(param1:Event) : void
-		{
-			var preMadeChars:Array;
-			var e:Event = param1;
-			(e.currentTarget as CcTheme).removeEventListener(CcCoreEvent.LOAD_PRE_MADE_CHARACTER_COMPLETE,this.loadLatestPreMadeChars);
-			preMadeChars = (e.currentTarget as CcTheme).preMadeChars.slice().filter(function(param1:CcCharacter, param2:int, param3:Array):Boolean
-			{
-				return "professions" == param1.category;
-			});
-			preMadeChars.sortOn("createDateTime",Array.DESCENDING);
-			this.refreshTemplateCCSelector(preMadeChars.slice(0,6),"latest");
-		}
-		
-		private function loadRandomPreMadeChars(param1:Event) : void
-		{
-			var preMadeChars:Array;
-			var randCharList:Array;
-			var idx:int = 0;
-			var e:Event = param1;
-			(e.currentTarget as CcTheme).removeEventListener(CcCoreEvent.LOAD_PRE_MADE_CHARACTER_COMPLETE,this.loadRandomPreMadeChars);
-			preMadeChars = (e.currentTarget as CcTheme).preMadeChars.slice().filter(function(param1:CcCharacter, param2:int, param3:Array):Boolean
-			{
-				return "professions" == param1.category;
-			});
-			randCharList = [];
-			if(preMadeChars.length <= 6)
-			{
-				randCharList = preMadeChars.slice(0,6);
+				this.addEventListener(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, proceedHandler);
 			}
 			else
 			{
-				while(randCharList.length < 6)
-				{
-					idx = int(Math.random() * preMadeChars.length);
-					if(randCharList.indexOf(preMadeChars[idx]) < 0)
-					{
-						randCharList.push(preMadeChars[idx]);
-					}
-				}
+				this.switchToBrowser();
 			}
-			this.refreshTemplateCCSelector(randCharList,"latest");
 		}
-		
+
 		private function doLoadPreMadeChar(param1:Event) : void
 		{
-			(param1.target as IEventDispatcher).removeEventListener(param1.type,this.doLoadPreMadeChar);
-			var _loc2_:CcTheme = this.getTheme(this._currentThemeId);
-			if(this.originalAssetId != null)
+			(param1.target as IEventDispatcher).removeEventListener(param1.type, this.doLoadPreMadeChar);
+			if (this.originalAssetId != null)
 			{
-				_loc2_.addEventListener(CcCoreEvent.LOAD_PRE_MADE_CHARACTER_COMPLETE,this.doLoadExistingCcChar);
+				this.loadCharXml(_configManager.getValue("original_asset_id") as String);
 			}
 			else
 			{
-				_loc2_.addEventListener(CcCoreEvent.LOAD_PRE_MADE_CHARACTER_COMPLETE,this.doPrepareCcChar);
+				this.doPrepareCcChar();
 			}
-			_loc2_.addEventListener(CcCoreEvent.LOAD_PRE_MADE_CHARACTER_COMPLETE,this.doEnableUserToStartUseCC);
-			if(_cfg.loadPreMadeCharsEnabled())
-			{
-				_loc2_.addEventListener(CcCoreEvent.LOAD_PRE_MADE_CHARACTER_COMPLETE,this.loadLatestPreMadeChars);
-				_loc2_.initCcThemePreMadeChar();
-			}
-			else
-			{
-				_loc2_.dispatchEvent(new CcCoreEvent(CcCoreEvent.LOAD_PRE_MADE_CHARACTER_COMPLETE,this,null));
-			}
+			this.doEnableUserToStartUseCC();
 		}
-		
-		private function doEnableUserToStartUseCC(param1:Event) : void
+
+		private function doPrepareCcChar() : void
 		{
-			var self:anifire.creator.core.CcConsole = null;
-			var proceedHandler:Function = null;
-			var event:Event = param1;
-			(event.target as IEventDispatcher).removeEventListener(event.type,this.doEnableUserToStartUseCC);
-			self = this;
-			proceedHandler = function yeahyeahJustgiveitatitle(param1:CcCoreEvent):void
-			{
-				self.removeEventListener(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE,proceedHandler);
-				onUserWantToStart(event);
-			};
-			if(this.originalAssetId != null)
-			{
-				this.addEventListener(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE,proceedHandler);
-			}
-			else
-			{
-				this.onUserWantToStart(event);
-			}
-		}
-		
-		private function doPrepareCcChar(param1:Event) : void
-		{
-			(param1.target as IEventDispatcher).removeEventListener(param1.type,this.doPrepareCcChar);
 			this._ccChar = new CcCharacter();
-			if(_themeId == "cc2" || _themeId == "chibi" || _themeId == "ninja")
+			if (_themeId == "cc2" || _themeId == "chibi" || _themeId == "ninja")
 			{
 				this._ccChar.ver = 2;
 			}
-			var _loc2_:CcTheme = this.getTheme(this._currentThemeId);
-			var _loc3_:Array = _loc2_.getBodyShapeTypes();
-			var _loc4_:String = _loc3_[int(Math.floor(Math.random() * _loc2_.getBodyShapeTypes().length))] as String;
+			var ccTheme:CcTheme = this._theme;
+			var bodyshapes:Array = ccTheme.getBodyShapeTypes();
+			var randomBodyshape:String = bodyshapes[int(Math.floor(Math.random() * bodyshapes.length))] as String;
 		}
-		
-		private function doLoadExistingCcChar(param1:Event) : void
+
+		private function loadCharXml(param1:String) : void
 		{
-			(param1.target as IEventDispatcher).removeEventListener(param1.type,this.doLoadExistingCcChar);
-			this.addEventListener(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE,this.doPrepareExistingCcChar);
-			this.loadExistingCharCompositionXml(_configManager.getValue("original_asset_id") as String);
+			var request:URLRequest = new URLRequest(ServerConstants.ACTION_GET_CC_CHAR_COMPOSITION_XML);
+			request.method = URLRequestMethod.POST;
+			var variables:URLVariables = new URLVariables();
+			_configManager.appendURLVariables(variables);
+			variables["assetId"] = param1;
+			request.data = variables;
+			var loader:URLLoader = new URLLoader();
+			loader.dataFormat = URLLoaderDataFormat.TEXT;
+			loader.addEventListener(Event.COMPLETE, this.onLoadCharXmlComplete);
+			loader.load(request);
 		}
-		
+
+		private function onLoadCharXmlComplete(param1:Event) : void
+		{
+			(param1.target as IEventDispatcher).removeEventListener(param1.type, this.onLoadCharXmlComplete);
+			var loader:URLLoader = param1.target as URLLoader;
+			var responseText:String = loader.data as String;
+			if (responseText.charAt(0) == "0")
+			{
+				var charData:String = responseText.substr(1);
+				var loadEvent = new CcCoreEvent(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, this, charData);
+				this.dispatchEvent(loadEvent);
+				this.prepareExistingCcChar(charData);
+			}
+		}
+
 		private function prepareExistingCcChar(param1:String) : void
 		{
 			this._ccChar = new CcCharacter();
-			var _loc2_:UtilHashArray = new UtilHashArray();
-			_loc2_.push(this._currentThemeId,this.getTheme(this._currentThemeId));
-			this._ccChar.deserialize(new XML(param1),_loc2_);
+			var themeArray:UtilHashArray = new UtilHashArray();
+			themeArray.push(this._themeId, this._theme);
+			this._ccChar.deserialize(new XML(param1), themeArray);
 		}
-		
-		private function doPrepareExistingCcChar(param1:CcCoreEvent) : void
-		{
-			(param1.target as IEventDispatcher).removeEventListener(param1.type,this.doPrepareExistingCcChar);
-			this.prepareExistingCcChar(param1.getData() as String);
-		}
-		
-		private function save() : void
-		{
-			var _loc1_:ByteArray = null;
-			var _loc2_:Base64Encoder = null;
-			var _loc3_:ByteArray = null;
-			var _loc4_:Base64Encoder = null;
-			NativeCursorManager.instance.setBusyCursor();
-			AmplitudeAnalyticsManager.instance.log(AmplitudeAnalyticsManager.EVENT_NAME_CREATED_CHARACTER);
-			if(this._isEditing)
-			{
-				_loc1_ = this._ccCharEditorController.saveSnapShot();
-				_loc3_ = this._ccCharEditorController.saveSnapShot(true);
-			}
-			else
-			{
-				_loc1_ = this._ccPreviewAndSaveController.saveSnapShot();
-				_loc3_ = this._ccPreviewAndSaveController.saveSnapShot(true);
-			}
-			_loc2_ = new Base64Encoder();
-			_loc2_.encodeBytes(_loc1_);
-			(_loc4_ = new Base64Encoder()).encodeBytes(_loc3_);
-			var _loc5_:URLLoader = new URLLoader();
-			var _loc6_:URLRequest = new URLRequest(CcServerConstant.ACTION_SAVE_CC_CHAR);
-			var _loc7_:URLVariables = new URLVariables();
-			_configManager.appendURLVariables(_loc7_);
-			_loc7_["body"] = this.serialize();
-			_loc7_["title"] = "Untitled";
-			_loc7_["imagedata"] = _loc2_.flush();
-			_loc7_["thumbdata"] = _loc4_.flush();
-			if(this.ccChar.assetId != "")
-			{
-				_loc7_["assetId"] = this.ccChar.assetId;
-			}
-			_loc6_.data = _loc7_;
-			_loc6_.method = URLRequestMethod.POST;
-			_loc5_.dataFormat = URLLoaderDataFormat.TEXT;
-			_loc5_.addEventListener(Event.COMPLETE,this.saveCharacter_completeHandler);
-			_loc5_.addEventListener(IOErrorEvent.IO_ERROR,this.saveCharacter_errorHandler);
-			_loc5_.addEventListener(SecurityErrorEvent.SECURITY_ERROR,this.saveCharacter_errorHandler);
-			_loc5_.load(_loc6_);
-		}
-		
-		private function saveCharacter_completeHandler(param1:Event) : void
-		{
-			NativeCursorManager.instance.removeBusyCursor();
-			var _loc2_:URLLoader = param1.target as URLLoader;
-			var _loc3_:String = _loc2_.data as String;
-			_loc2_.removeEventListener(Event.COMPLETE,this.saveCharacter_completeHandler);
-			_loc2_.removeEventListener(IOErrorEvent.IO_ERROR,this.saveCharacter_errorHandler);
-			_loc2_.removeEventListener(SecurityErrorEvent.SECURITY_ERROR,this.saveCharacter_errorHandler);
-			var _loc4_:String = _loc3_.slice(0,1);
-			var _loc5_:String = _loc3_.slice(1);
-			if(_loc4_ == "1" && _loc5_ == ServerConstants.ERROR_CODE_LOGGED_OUT)
-			{
-				this.showLoggedOutPopUp();
-			}
-			else if(ExternalInterface.available)
-			{
-				ExternalInterface.call("characterSaved",_loc5_);
-			}
-		}
-		
-		private function saveCharacter_errorHandler(param1:Event) : void
-		{
-			var _loc2_:URLLoader = param1.target as URLLoader;
-			_loc2_.removeEventListener(Event.COMPLETE,this.saveCharacter_completeHandler);
-			_loc2_.removeEventListener(IOErrorEvent.IO_ERROR,this.saveCharacter_errorHandler);
-			_loc2_.removeEventListener(SecurityErrorEvent.SECURITY_ERROR,this.saveCharacter_errorHandler);
-			this.dispatchEvent(new CcSaveCharEvent(CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR,this));
-		}
-		
-		private function showLoggedOutPopUp() : void
-		{
-			var _loc1_:ConfirmPopUp = new ConfirmPopUp();
-			_loc1_.title = UtilDict.translate("Logged out");
-			_loc1_.message = UtilDict.translate("Login again to continue.\nUnsaved changes may have been lost.");
-			_loc1_.confirmText = UtilDict.translate("Login");
-			_loc1_.iconType = ConfirmPopUp.CONFIRM_POPUP_NO_ICON;
-			_loc1_.showCancelButton = false;
-			_loc1_.showCloseButton = false;
-			_loc1_.addEventListener(PopUpEvent.CLOSE,this.loggedOutPopUp_closeHandler);
-			_loc1_.open(FlexGlobals.topLevelApplication as DisplayObjectContainer,true);
-		}
-		
-		private function loggedOutPopUp_closeHandler(param1:PopUpEvent) : void
-		{
-			ExternalLinkManager.instance.navigate(ServerConstants.LOGIN_PAGE_PATH);
-		}
-		
+
+		// private function save() : void
+		// {
+		// 	var _loc1_:ByteArray = null;
+		// 	var _loc2_:Base64Encoder = null;
+		// 	var _loc3_:ByteArray = null;
+		// 	var _loc4_:Base64Encoder = null;
+		// 	NativeCursorManager.instance.setBusyCursor();
+		// 	AmplitudeAnalyticsManager.instance.log(AmplitudeAnalyticsManager.EVENT_NAME_CREATED_CHARACTER);
+		// 	if(this._isEditing)
+		// 	{
+		// 		_loc1_ = this._ccEditUiController.saveSnapShot();
+		// 		_loc3_ = this._ccEditUiController.saveSnapShot(true);
+		// 	}
+		// 	else
+		// 	{
+		// 		_loc1_ = this._ccPreviewAndSaveController.saveSnapShot();
+		// 		_loc3_ = this._ccPreviewAndSaveController.saveSnapShot(true);
+		// 	}
+		// 	_loc2_ = new Base64Encoder();
+		// 	_loc2_.encodeBytes(_loc1_);
+		// 	(_loc4_ = new Base64Encoder()).encodeBytes(_loc3_);
+		// 	var _loc5_:URLLoader = new URLLoader();
+		// 	var _loc6_:URLRequest = new URLRequest(CcServerConstant.ACTION_SAVE_CC_CHAR);
+		// 	var _loc7_:URLVariables = new URLVariables();
+		// 	_configManager.appendURLVariables(_loc7_);
+		// 	_loc7_["body"] = this.serialize();
+		// 	_loc7_["title"] = "Untitled";
+		// 	_loc7_["imagedata"] = _loc2_.flush();
+		// 	_loc7_["thumbdata"] = _loc4_.flush();
+		// 	if(this.ccChar.assetId != "")
+		// 	{
+		// 		_loc7_["assetId"] = this.ccChar.assetId;
+		// 	}
+		// 	_loc6_.data = _loc7_;
+		// 	_loc6_.method = URLRequestMethod.POST;
+		// 	_loc5_.dataFormat = URLLoaderDataFormat.TEXT;
+		// 	_loc5_.addEventListener(Event.COMPLETE,this.saveCharacter_completeHandler);
+		// 	_loc5_.addEventListener(IOErrorEvent.IO_ERROR,this.saveCharacter_errorHandler);
+		// 	_loc5_.addEventListener(SecurityErrorEvent.SECURITY_ERROR,this.saveCharacter_errorHandler);
+		// 	_loc5_.load(_loc6_);
+		// }
+
+		// private function saveCharacter_completeHandler(param1:Event) : void
+		// {
+		// 	NativeCursorManager.instance.removeBusyCursor();
+		// 	var _loc2_:URLLoader = param1.target as URLLoader;
+		// 	var _loc3_:String = _loc2_.data as String;
+		// 	_loc2_.removeEventListener(Event.COMPLETE,this.saveCharacter_completeHandler);
+		// 	_loc2_.removeEventListener(IOErrorEvent.IO_ERROR,this.saveCharacter_errorHandler);
+		// 	_loc2_.removeEventListener(SecurityErrorEvent.SECURITY_ERROR,this.saveCharacter_errorHandler);
+		// 	var _loc4_:String = _loc3_.slice(0,1);
+		// 	var _loc5_:String = _loc3_.slice(1);
+		// 	if(_loc4_ == "1" && _loc5_ == ServerConstants.ERROR_CODE_LOGGED_OUT)
+		// 	{
+		// 		this.showLoggedOutPopUp();
+		// 	}
+		// 	else if(ExternalInterface.available)
+		// 	{
+		// 		ExternalInterface.call("characterSaved",_loc5_);
+		// 	}
+		// }
+
+		// private function saveCharacter_errorHandler(param1:Event) : void
+		// {
+		// 	var _loc2_:URLLoader = param1.target as URLLoader;
+		// 	_loc2_.removeEventListener(Event.COMPLETE,this.saveCharacter_completeHandler);
+		// 	_loc2_.removeEventListener(IOErrorEvent.IO_ERROR,this.saveCharacter_errorHandler);
+		// 	_loc2_.removeEventListener(SecurityErrorEvent.SECURITY_ERROR,this.saveCharacter_errorHandler);
+		// 	this.dispatchEvent(new CcSaveCharEvent(CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR,this));
+		// }
+
+		// private function showLoggedOutPopUp() : void
+		// {
+		// 	var _loc1_:ConfirmPopUp = new ConfirmPopUp();
+		// 	_loc1_.title = UtilDict.translate("Logged out");
+		// 	_loc1_.message = UtilDict.translate("Login again to continue.\nUnsaved changes may have been lost.");
+		// 	_loc1_.confirmText = UtilDict.translate("Login");
+		// 	_loc1_.iconType = ConfirmPopUp.CONFIRM_POPUP_NO_ICON;
+		// 	_loc1_.showCancelButton = false;
+		// 	_loc1_.showCloseButton = false;
+		// 	_loc1_.addEventListener(PopUpEvent.CLOSE,this.loggedOutPopUp_closeHandler);
+		// 	_loc1_.open(FlexGlobals.topLevelApplication as DisplayObjectContainer,true);
+		// }
+
+		// private function loggedOutPopUp_closeHandler(param1:PopUpEvent) : void
+		// {
+		// 	ExternalLinkManager.instance.navigate(ServerConstants.LOGIN_PAGE_PATH);
+		// }
+
 		private function serialize() : String
 		{
 			return "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + this.ccChar.serialize();
 		}
-		
-		private function loadCcTheme(param1:String) : void
+
+		private function loadTheme(themeId:String) : void
 		{
-			var _loc2_:CcTheme = new CcTheme();
-			_loc2_.id = param1;
-			this.addTheme(_loc2_);
-			_loc2_.addEventListener(CcCoreEvent.LOAD_THEME_COMPLETE,this.onLoadCcThemeComplete);
-			_loc2_.initCcThemeByLoadThemeFile(param1);
+			var theme:Theme = new Theme();
+			this._theme = theme;
+			theme.addEventListener(CcCoreEvent.DESERIALIZE_THEME_COMPLETE, this.onLoadThemeComplete);
+			theme.initThemeByLoadThemeFile(themeId);
 		}
-		
-		private function onLoadCcThemeComplete(param1:Event) : void
+
+		private function onLoadThemeComplete(event:Event) : void
 		{
-			(param1.target as IEventDispatcher).removeEventListener(param1.type,this.onLoadCcThemeComplete);
-			this.dispatchEvent(new CcCoreEvent(CcCoreEvent.LOAD_THEME_COMPLETE,this));
+			var theme = event.target as Theme;
+			this._ccThemeId = theme.ccThemeId;
+			this.loadCcTheme(this._ccThemeId);
 		}
-		
-		private function loadExistingCharCompositionXml(param1:String) : void
+
+		private function loadCcTheme(ccThemeId:String) : void
 		{
-			var _loc2_:URLRequest = null;
-			var _loc3_:URLLoader = null;
-			_loc2_ = new URLRequest(ServerConstants.ACTION_GET_CC_CHAR_COMPOSITION_XML);
-			_loc2_.method = URLRequestMethod.POST;
-			var _loc4_:URLVariables = new URLVariables();
-			_configManager.appendURLVariables(_loc4_);
-			_loc4_["assetId"] = param1;
-			_loc2_.data = _loc4_;
-			_loc3_ = new URLLoader();
-			_loc3_.dataFormat = URLLoaderDataFormat.TEXT;
-			_loc3_.addEventListener(Event.COMPLETE,this.onLoadExistingCharCompositionXmlComplete);
-			_loc3_.load(_loc2_);
+			var ccTheme:CcTheme = new CcTheme();
+			ccTheme.id = ccThemeId;
+			this._ccTheme = ccTheme;
+			ccTheme.addEventListener(CcCoreEvent.LOAD_THEME_COMPLETE, this.onLoadCcThemeComplete);
+			ccTheme.initCcThemeByLoadThemeFile(ccThemeId);
 		}
-		
-		private function onLoadExistingCharCompositionXmlComplete(param1:Event) : void
+
+		private function onLoadCcThemeComplete(event:Event) : void
 		{
-			var _loc4_:String = null;
-			var _loc5_:CcCoreEvent = null;
-			(param1.target as IEventDispatcher).removeEventListener(param1.type,this.onLoadExistingCharCompositionXmlComplete);
-			var _loc2_:URLLoader = param1.target as URLLoader;
-			var _loc3_:String = _loc2_.data as String;
-			if(_loc3_.charAt(0) == "0")
-			{
-				_loc4_ = _loc3_.substr(1);
-				_loc5_ = new CcCoreEvent(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE,this,_loc4_);
-				this.dispatchEvent(_loc5_);
-			}
-		}
-		
-		public function parseCCActionZipEventHandler(param1:Object) : void
-		{
-			var ccChar:CcCharacter = null;
-			var decryptEngine:UtilCrypto = null;
-			var swfBytes:ByteArray = null;
-			var j:int = 0;
-			var ccZipEntry:ZipEntry = null;
-			var args:Object = null;
-			var thumb:CCThumb = null;
-			var ccConsole:anifire.creator.core.CcConsole = null;
-			var data:Object = param1;
-			ccChar = data.char as CcCharacter;
-			var event:Event = data.streamEvent as Event;
-			var stream:URLStream = URLStream(event.target);
-			swfBytes = new ByteArray();
-			stream.readBytes(swfBytes,0,stream.bytesAvailable);
-			try
-			{
-				args = new Object();
-				thumb = new CCThumb();
-				ccConsole = this;
-				thumb.cellWidth = thumb.cellHeight = CcLibConstant.TEMPLATE_CCTHUMB_WIDTH;
-				thumb.initByXml(XML(swfBytes));
-			}
-			catch(e:Error)
-			{
-				thumb.initByXml(XML(swfBytes));
-			}
-			thumb.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,function(param1:Event):void
-			{
-				ccConsole.dispatchEvent(new CcCoreEvent(CcCoreEvent.LOAD_CHARACTER_THUMB_COMPLETE,this,{
-					"char":ccChar,
-					"thumbnail":thumb,
-					"tag":data.tag
-				}));
-			});
-		}
-		
-		public function addEventListener(param1:String, param2:Function, param3:Boolean = false, param4:int = 0, param5:Boolean = false) : void
-		{
-			this._eventDispatcher.addEventListener(param1,param2,param3,param4,param5);
-		}
-		
-		public function dispatchEvent(param1:Event) : Boolean
-		{
-			return this._eventDispatcher.dispatchEvent(param1);
-		}
-		
-		public function hasEventListener(param1:String) : Boolean
-		{
-			return this._eventDispatcher.hasEventListener(param1);
-		}
-		
-		public function removeEventListener(param1:String, param2:Function, param3:Boolean = false) : void
-		{
-			return this._eventDispatcher.removeEventListener(param1,param2,param3);
-		}
-		
-		public function willTrigger(param1:String) : Boolean
-		{
-			return this._eventDispatcher.willTrigger(param1);
-		}
-		
-		private function onUpgradeActived(param1:Event = null) : void
-		{
+			(event.target as IEventDispatcher).removeEventListener(event.type, this.onLoadCcThemeComplete);
+			this.dispatchEvent(new CcCoreEvent(CcCoreEvent.LOAD_THEME_COMPLETE, this));
 		}
 	}
 }

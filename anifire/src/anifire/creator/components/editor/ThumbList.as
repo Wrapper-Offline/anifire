@@ -1,4 +1,4 @@
-package anifire.creator.components
+package anifire.creator.components.editor
 {
 	import flash.events.KeyboardEvent;
 	import spark.components.List;

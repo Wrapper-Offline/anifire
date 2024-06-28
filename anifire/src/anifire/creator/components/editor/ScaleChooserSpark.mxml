@@ -3,7 +3,7 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
-	xmlns:cComponents="anifire.creator.components.*"
+	xmlns:components="anifire.creator.components.*"
 	width="300"
 	height="100">
 	
@@ -179,7 +179,7 @@
 			right="0"
 			top="0"
 			bottom="0"/>
-		<cComponents:IconButton
+		<components:IconButton
 			id="btnClose"
 			buttonMode="true"
 			enabled="true"
@@ -229,28 +229,28 @@
 			</s:VGroup>
 			<s:VGroup verticalCenter="0" height="100%" verticalAlign="middle">
 				<s:HGroup verticalCenter="0">
-					<cComponents:IconButton
+					<components:IconButton
 						id="btnType01"
 						buttonMode="true"
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/tallIcon.png')"
 						iconOver="@Embed('../images/bodyDetails/tallIcon_hover.png')"
 						click="onScaleButtonClick(event)"/>
-					<cComponents:IconButton
+					<components:IconButton
 						id="btnType02"
 						buttonMode="true"
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/normalIcon.png')"
 						iconOver="@Embed('../images/bodyDetails/normalIcon_hover.png')"
 						click="onScaleButtonClick(event)"/>
-					<cComponents:IconButton
+					<components:IconButton
 						id="btnType03"
 						buttonMode="true"
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/kidIcon.png')"
 						iconOver="@Embed('../images/bodyDetails/kidIcon_hover.png')"
 						click="onScaleButtonClick(event)"/>
-					<cComponents:IconButton
+					<components:IconButton
 						id="btnType04"
 						buttonMode="true"
 						enabled="true"
@@ -259,28 +259,28 @@
 						click="onScaleButtonClick(event)"/>
 				</s:HGroup>
 				<s:HGroup verticalCenter="0" alpha="1" alpha.normal="0.5" mouseChildren="true" mouseChildren.normal="false">
-					<cComponents:IconButton
+					<components:IconButton
 						id="btnArrowLeft"
 						buttonMode="true"
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/arrowLeftIcon.png')"
 						iconOver="@Embed('../images/bodyDetails/arrowLeftIcon_hover.png')"
 						click="dispatchEvent(new CcThumbPropertyEvent(CcThumbPropertyEvent.CCPROP_RIGHT_BUTTON_CLICK,this))"/>
-					<cComponents:IconButton
+					<components:IconButton
 						id="btnArrowRight"
 						buttonMode="true"
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/arrowRightIcon.png')"
 						iconOver="@Embed('../images/bodyDetails/arrowRightIcon_hover.png')"
 						click="dispatchEvent(new CcThumbPropertyEvent(CcThumbPropertyEvent.CCPROP_RIGHT_BUTTON_CLICK,this))"/>
-					<cComponents:IconButton
+					<components:IconButton
 						id="btnArrowUp"
 						buttonMode="true"
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/arrowUpIcon.png')"
 						iconOver="@Embed('../images/bodyDetails/arrowUpIcon_hover.png')"
 						click="dispatchEvent(new CcThumbPropertyEvent(CcThumbPropertyEvent.CCPROP_RIGHT_BUTTON_CLICK,this))"/>
-					<cComponents:IconButton
+					<components:IconButton
 						id="btnArrowDown"
 						buttonMode="true"
 						enabled="true"

@@ -1,0 +1,51 @@
+<s:Group
+    xmlns:fx="http://ns.adobe.com/mxml/2009"
+    xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:editor="anifie.creator.components.editor.*"
+    implements="anifire.creator.interfaces.ICcEditUiContainer"
+    width="100%"
+    height="100%"
+    clipAndEnableScrolling="true">
+
+    <fx:Script>
+        <![CDATA[
+            public function get ui_EditView_bitch() {
+
+            }
+        ]]>
+    </fx:Script>
+		
+    <s:Group id="previewer" width="100%" height="100%" visible="false">
+        <editor:CharPreviewer
+            id="charPreview" width="300" height="200" scaleX="1.5" scaleY="1.5" clipContent="false"
+            horizontalCenter="0" verticalCenter="20"/>
+    </s:Group>
+
+    <s:HGroup id="slidingPanel" width="675" height="600" styleName="bgCharEditor">
+        <s:VGroup id="componentPanel" top="68" left="0" width="625" height="532">
+            <editor:TypeChooserSpark
+                id="componentTypeChooser" left="4" top="0" width="100%" height="68"/>
+            <s:HGroup id="componentSettings" width="100%" height="100%">
+                <s:Group id="componentChooser">
+                    <editor:ComponentThumbChooserSpark
+                        id="componentThumbChooser" biggerHeight="532" width="100%" height="532"
+                        smallerHeight="{532 - _ce_selectedDecoration.height}"/>
+                    <editor:ClothesChooser
+                        id="clothesChooser" y="10" width="100%" height="250" visible="false"
+                        clipContent="false" thumbChooserWidth="463" biggerHeight="70" smallerHeight="70"
+                        creationPolicy="all" verticalGap="50"/>
+                    <editor:DecorationPanel id="_ce_selectedDecoration" left="0" bottom="0" width="654" height="90"/>
+                    <editor:ScaleChooserSpark id="_ce_charScaleChooser" bottom="0" right="0"/>
+                </s:Group>
+                <s:VGroup id="componentTuner">
+                    <editor:CcColorPickers
+                        id="colorPicker" bottom="10" right="45" width="248" height="62"
+                        biggerElementWidth="248" smallerElementWidth="248"/>
+                    <editor:CcComponentPropertyInspectorSpark
+                        id="propertyInspector" bottom="0" right="0"/>
+                </s:VGroup>
+            </s:HGroup>
+        </s:VGroup>
+        <editor:TopButtons id="sidebar" right="0" width="300" height="68"/>
+    </s:HGroup>
+</s:Group>
