@@ -22,22 +22,13 @@ package anifire.component
 	
 	public class CcActionLoader extends EventDispatcher
 	{
-		
 		private static var _loaders:UtilHashActionLoader = new UtilHashActionLoader();
-		
 		private static var _configManager:AppConfigManager;
-		
-		
 		private const STATE_NULL:String = "STATE_NULL";
-		
 		private const STATE_LOADING:String = "STATE_LOADING";
-		
 		private const STATE_LOADED:String = "STATE_LOADED";
-		
 		private var _imageData:Object;
-		
-		private var _regulator:anifire.component.ProcessRegulator;
-		
+		private var _regulator:ProcessRegulator;
 		private var _state:String = "STATE_NULL";
 		
 		public function CcActionLoader()
@@ -46,45 +37,51 @@ package anifire.component
 			_configManager = AppConfigManager.instance;
 		}
 		
-		public static function getActionLoader(param1:String) : CcActionLoader
+		public static function getActionLoader(filename:String) : CcActionLoader
 		{
-			var _loc2_:CcActionLoader = null;
-			if(Boolean(param1) && param1 != "")
+			if (Boolean(filename) && filename != "")
 			{
-				_loc2_ = _loaders.getValueByKey(param1) as CcActionLoader;
-				if(!_loc2_)
+				var loader:CcActionLoader = _loaders.getValueByKey(filename) as CcActionLoader;
+				if (!loader)
 				{
-					_loc2_ = new CcActionLoader();
-					_loaders.push(param1,_loc2_);
+					loader = new CcActionLoader();
+					_loaders.push(filename, loader);
 				}
-				return _loc2_;
+				return loader;
 			}
 			return new CcActionLoader();
 		}
-		
-		public static function getStoreUrl(param1:String, param2:String = "", param3:Number = 1) : String
+
+		/**
+		 * returns a full asset url from its path after the store/cc_store folder
+		 */
+		public static function getStoreUrl(path:String, themeIdUnused:String = "", ver:Number = 1) : String
 		{
-			var _loc4_:String;
-			switch(param3)
+			var ccStore:String;
+			switch (ver)
 			{
 				case 3:
-					_loc4_ = "";
+					ccStore = "";
 					break;
 				default:
-					_loc4_ = "cc_store/";
+					ccStore = "cc_store/";
 			}
-			var _loc5_:String = _configManager.getValue(ServerConstants.FLASHVAR_STORE_PATH);
-			if(_loc5_ == "" || _loc5_ == null)
+			var root:String = _configManager.getValue(ServerConstants.FLASHVAR_STORE_PATH);
+			if (root == "" || root == null)
 			{
-				_loc5_ = _configManager.getValue(ServerConstants.FLASHVAR_APISERVER);
-				_loc5_ += "static/store/" + _loc4_ + param1;
+				// default to the apiserver if no store path is specified
+				root = _configManager.getValue(ServerConstants.FLASHVAR_APISERVER);
+				if (root.charAt(root.length - 1) !== "/") {
+					root += "/";
+				}
+				root += "static/store/" + ccStore + path;
 			}
 			else
 			{
-				var _loc6_:RegExp = new RegExp(ServerConstants.FLASHVAR_STORE_PLACEHOLDER,"g");
-				_loc5_ = _loc5_.replace(_loc6_,_loc4_ + param1);
+				var placeholder:RegExp = new RegExp(ServerConstants.FLASHVAR_STORE_PLACEHOLDER, "g");
+				root = root.replace(placeholder, ccStore + path);
 			}
-			return _loc5_;
+			return root;
 		}
 		
 		public function get imageData() : Object
@@ -117,17 +114,40 @@ package anifire.component
 		{
 			try
 			{
-				IEventDispatcher(e.target).removeEventListener(e.type,this.onXmlLoaded);
+				IEventDispatcher(e.target).removeEventListener(e.type, this.onXmlLoaded);
 				var stream:URLStream = URLStream(e.target);
 				var bytes:ByteArray = new ByteArray();
 				stream.readBytes(bytes);
 				var xmlCC:XML = XML(bytes);
 				this.loadCcComponents(xmlCC);
 			}
-			catch(e:Error)
+			catch (e:Error)
 			{
 				dispatchEvent(new IOErrorEvent(IOErrorEvent.IO_ERROR));
-				UtilErrorLogger.getInstance().appendCustomError("CcActionLoader:onXmlLoaded:",e);
+				UtilErrorLogger.getInstance().appendCustomError("CcActionLoader:onXmlLoaded:", e);
+			}
+		}
+
+		/**
+		 * initializes the imagedata object
+		 */
+		private function initImageData(imageData:UtilHashBytes, xml:XML = null, cam:CCCharacterActionModel = null) : void
+		{
+			if (!this._imageData)
+			{
+				this._imageData = new Object();
+			}
+			if (!this._imageData["imageData"])
+			{
+				this._imageData["imageData"] = !!imageData ? imageData : new UtilHashBytes();
+			}
+			if (xml)
+			{
+				this._imageData["xml"] = xml;
+			}
+			if (cam)
+			{
+				this._imageData["cam"] = cam;
 			}
 		}
 		
@@ -142,192 +162,157 @@ package anifire.component
 			var _loc16_:String = null;
 			var _loc17_:String = null;
 			var _loc18_:String = null;
-			if(this._state == this.STATE_LOADED)
+			if (this._state == this.STATE_LOADED)
 			{
 				this.dispatchEvent(new Event(Event.COMPLETE));
 			}
-			else if(this._state == this.STATE_LOADING)
+			else if (this._state == this.STATE_LOADING)
 			{
 				return;
 			}
 			this._state = this.STATE_LOADING;
 			try
 			{
-				if(param1)
+				if (param1)
 				{
 					_loc14_ = _configManager.getValue(ServerConstants.FLASHVAR_IS_VIDEO_RECORD_MODE);
-					this._imageData = new Object();
-					this._imageData["imageData"] = !!param4 ? param4 : new UtilHashBytes();
-					this._imageData["xml"] = param1;
-					this._regulator = new anifire.component.ProcessRegulator();
+					this.initImageData(param4, param1);
+					this._regulator = new ProcessRegulator();
 					for each(_loc12_ in param1..library)
 					{
 						_loc17_ = String(_loc12_.@theme_id);
 						_loc18_ = _loc12_.@type;
-						if(param5 == 3)
+						if (param5 == 3)
 						{
-							if(_loc12_.@type == CcLibConstant.COMPONENT_TYPE_MOUTH)
+							if (_loc12_.@type == CcLibConstant.COMPONENT_TYPE_MOUTH)
 							{
-								this.doLoadExtraComponent(_loc12_,param8,param5);
+								this.doLoadExtraComponent(_loc12_, param8, param5);
 								continue;
 							}
-							_loc11_ = getStoreUrl(_loc17_ + "/charparts" + "/" + _loc18_ + "/" + _loc12_.@path + ".swf",_loc17_,param5);
+							_loc11_ = getStoreUrl(_loc17_ + "/charparts" + "/" + _loc18_ + "/" + _loc12_.@path + ".swf", _loc17_, param5);
 							_loc18_ = CcLibConstant.LIBRARY_TYPE_GOHANDS;
 						}
 						else
 						{
-							_loc11_ = getStoreUrl(_loc17_ + "/" + _loc18_ + "/" + _loc12_.@path + ".swf",_loc17_);
+							_loc11_ = getStoreUrl(_loc17_ + "/" + _loc18_ + "/" + _loc12_.@path + ".swf", _loc17_);
 						}
 						_loc15_ = _loc17_ + "." + _loc18_ + "." + _loc12_.@path + ".swf";
-						if(UtilHashBytes(this._imageData["imageData"]).getValueByKey(_loc15_) == null)
+						if (UtilHashBytes(this._imageData["imageData"]).getValueByKey(_loc15_) == null)
 						{
-							(_loc13_ = CcComponentLoader.getComponentLoader(_loc15_,_loc11_)).addEventListener(Event.COMPLETE,this.onCcComponentLoaded);
-							_loc13_.addEventListener(IOErrorEvent.IO_ERROR,this.onCcComponentFailed);
-							this._regulator.addProcess(_loc13_,Event.COMPLETE);
+							(_loc13_ = CcComponentLoader.getComponentLoader(_loc15_, _loc11_)).addEventListener(Event.COMPLETE, this.onCcComponentLoaded);
+							_loc13_.addEventListener(IOErrorEvent.IO_ERROR, this.onCcComponentFailed);
+							this._regulator.addProcess(_loc13_, Event.COMPLETE);
 						}
 					}
 					_loc16_ = "default";
 					for each(_loc12_ in param1..component)
 					{
-						if(_loc12_.@type == "bodyshape")
+						if (_loc12_.@type == "bodyshape")
 						{
 							_loc16_ = _loc12_.@path;
 						}
 					}
 					for each(_loc12_ in param1..component)
 					{
-						if(_loc12_.hasOwnProperty("@file"))
+						if (_loc12_.hasOwnProperty("@file"))
 						{
 							_loc11_ = getStoreUrl(_loc12_.@theme_id + "/" + _loc12_.@type + "/" + _loc12_.@path + "/" + _loc12_.@file);
 						}
 						else
 						{
-							if(!(_loc12_.@type == "freeaction" && _loc12_.@path != "default" && !param9))
+							if (!(_loc12_.@type == "freeaction" && _loc12_.@path != "default" && !param9))
 							{
 								continue;
 							}
-							if(_loc16_ == _loc12_.@path)
+							if (_loc16_ == _loc12_.@path)
 							{
 								continue;
 							}
 							_loc11_ = getStoreUrl(_loc12_.@theme_id + "/" + _loc12_.@type + "/" + _loc16_ + "/" + _loc12_.@path + ".swf");
 						}
 						_loc15_ = _loc12_.@theme_id + "." + _loc12_.@type + "." + _loc12_.@path + ".swf";
-						if(UtilHashBytes(this._imageData["imageData"]).getValueByKey(_loc15_) == null)
+						if (UtilHashBytes(this._imageData["imageData"]).getValueByKey(_loc15_) == null)
 						{
-							(_loc13_ = CcComponentLoader.getComponentLoader(_loc15_,_loc11_)).addEventListener(Event.COMPLETE,this.onCcComponentLoaded);
-							_loc13_.addEventListener(IOErrorEvent.IO_ERROR,this.onCcComponentFailed);
-							this._regulator.addProcess(_loc13_,Event.COMPLETE);
+							(_loc13_ = CcComponentLoader.getComponentLoader(_loc15_, _loc11_)).addEventListener(Event.COMPLETE, this.onCcComponentLoaded);
+							_loc13_.addEventListener(IOErrorEvent.IO_ERROR, this.onCcComponentFailed);
+							this._regulator.addProcess(_loc13_, Event.COMPLETE);
 						}
 						this.doLoadExtraComponent(_loc12_);
 					}
 					this._regulator.startProcess();
-					if(this._regulator.numProcess == 0)
+					if (this._regulator.numProcess == 0)
 					{
 						this._state = this.STATE_LOADED;
 						this.dispatchEvent(new Event(Event.COMPLETE));
 					}
 				}
 			}
-			catch(e:Error)
+			catch (e:Error)
 			{
 			}
 		}
 		
-		public function loadCcComponentsByCam(param1:CCCharacterActionModel, param2:UtilHashBytes = null, param3:Number = 1) : void
+		public function loadCcComponentsByCam(cam:CCCharacterActionModel, imageData:UtilHashBytes = null, ver:Number = 1) : void
 		{
-			var _loc4_:URLStream = null;
-			var _loc5_:String = null;
-			var _loc6_:CcComponentLoader = null;
-			var _loc7_:String = null;
-			var _loc8_:String = null;
-			var _loc9_:String = null;
-			var _loc10_:String = null;
-			var _loc11_:Object = null;
-			var _loc12_:String = null;
-			if(param1)
-			{
-				if(!this._imageData)
-				{
-					this._imageData = new Object();
-				}
-				if(!this._imageData["imageData"])
-				{
-					if(param2)
-					{
-						this._imageData["imageData"] = param2;
-					}
-					else
-					{
-						this._imageData["imageData"] = new UtilHashBytes();
-					}
-				}
-				this._imageData["cam"] = param1;
-			}
-			if(this._state == this.STATE_LOADED)
+			if (this._state == this.STATE_LOADED)
 			{
 				this.dispatchEvent(new Event(Event.COMPLETE));
 				return;
 			}
-			if(this._state == this.STATE_LOADING)
+			if (!cam || this._state == this.STATE_LOADING)
 			{
 				return;
 			}
 			this._state = this.STATE_LOADING;
-			if(param1)
+			initImageData(imageData, null, cam);
+
+			var index:String;
+			var path:String;
+			this._regulator = new ProcessRegulator();
+			for (index in cam.libraryPaths)
 			{
-				_loc7_ = _configManager.getValue(ServerConstants.FLASHVAR_IS_VIDEO_RECORD_MODE);
-				this._regulator = new anifire.component.ProcessRegulator();
-				for(_loc9_ in param1.libraryPaths)
+				path = cam.libraryPaths[index] as String;
+				loadCcComponent(path, getStoreUrl(path));
+			}
+			for (index in cam.components)
+			{
+				// multiple components of the same type are allowed
+				if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(index) > -1)
 				{
-					_loc10_ = param1.libraryPaths[_loc9_] as String;
-					_loc5_ = getStoreUrl(_loc10_);
-					_loc8_ = _loc10_;
-					if(UtilHashBytes(this._imageData["imageData"]).getValueByKey(_loc8_) == null)
+					var compsOfType:Object = cam.components[index];
+					for (var i2:String in compsOfType)
 					{
-						(_loc6_ = CcComponentLoader.getComponentLoader(_loc8_,_loc5_)).addEventListener(Event.COMPLETE,this.onCcComponentLoaded);
-						_loc6_.addEventListener(IOErrorEvent.IO_ERROR,this.onCcComponentFailed);
-						this._regulator.addProcess(_loc6_,Event.COMPLETE);
+						path = String(compsOfType[i2].path);
+						loadCcComponent(path, getStoreUrl(path));
 					}
 				}
-				for(_loc9_ in param1.components)
+				else
 				{
-					if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(_loc9_) > -1)
-					{
-						_loc11_ = param1.components[_loc9_];
-						for(_loc12_ in _loc11_)
-						{
-							_loc10_ = String(_loc11_[_loc12_].path);
-							_loc5_ = getStoreUrl(_loc10_);
-							_loc8_ = _loc10_;
-							if(UtilHashBytes(this._imageData["imageData"]).getValueByKey(_loc8_) == null)
-							{
-								(_loc6_ = CcComponentLoader.getComponentLoader(_loc8_,_loc5_)).addEventListener(Event.COMPLETE,this.onCcComponentLoaded);
-								_loc6_.addEventListener(IOErrorEvent.IO_ERROR,this.onCcComponentFailed);
-								this._regulator.addProcess(_loc6_,Event.COMPLETE);
-							}
-						}
-					}
-					else
-					{
-						_loc10_ = String(param1.getComponentByType(_loc9_).path);
-						_loc5_ = getStoreUrl(_loc10_);
-						_loc8_ = _loc10_;
-						if(UtilHashBytes(this._imageData["imageData"]).getValueByKey(_loc8_) == null)
-						{
-							(_loc6_ = CcComponentLoader.getComponentLoader(_loc8_,_loc5_)).addEventListener(Event.COMPLETE,this.onCcComponentLoaded);
-							_loc6_.addEventListener(IOErrorEvent.IO_ERROR,this.onCcComponentFailed);
-							this._regulator.addProcess(_loc6_,Event.COMPLETE);
-						}
-						this.doLoadExtraComponentByCam(param1,_loc9_);
-					}
+					path = String(cam.getComponentByType(index).path);
+					loadCcComponent(path, getStoreUrl(path));
+					this.doLoadExtraComponentByCam(cam, index);
 				}
-				this._regulator.startProcess();
-				if(this._regulator.numProcess == 0)
-				{
-					this._state = this.STATE_LOADED;
-					this.dispatchEvent(new Event(Event.COMPLETE));
-				}
+			}
+			this._regulator.startProcess();
+			if (this._regulator.numProcess == 0)
+			{
+				this._state = this.STATE_LOADED;
+				this._regulator = null;
+				this.dispatchEvent(new Event(Event.COMPLETE));
+			}
+		}
+
+		private function loadCcComponent(path:String, storeUrl:String) : void
+		{
+			if (!this._regulator || this._state == this.STATE_LOADED) {
+				return;
+			}
+			if (UtilHashBytes(this._imageData["imageData"]).getValueByKey(path) == null)
+			{
+				var compLoader:CcComponentLoader = CcComponentLoader.getComponentLoader(path, storeUrl);
+				compLoader.addEventListener(Event.COMPLETE, this.onCcComponentLoaded);
+				compLoader.addEventListener(IOErrorEvent.IO_ERROR, this.onCcComponentFailed);
+				this._regulator.addProcess(compLoader, Event.COMPLETE);
 			}
 		}
 		
@@ -338,21 +323,21 @@ package anifire.component
 			try
 			{
 				loader = CcComponentLoader(e.target);
-				if(loader)
+				if (loader)
 				{
-					loader.removeEventListener(e.type,this.onCcComponentLoaded);
-					this.addComponent(loader.componentId,loader.swfBytes);
+					loader.removeEventListener(e.type, this.onCcComponentLoaded);
+					this.addComponent(loader.componentId, loader.swfBytes);
 				}
 			}
-			catch(e:Error)
+			catch (e:Error)
 			{
-				UtilErrorLogger.getInstance().appendCustomError("CcActionLoader:onCcComponentLoaded:",e);
+				UtilErrorLogger.getInstance().appendCustomError("CcActionLoader:onCcComponentLoaded:", e);
 			}
 		}
 		
 		private function addComponent(param1:String, param2:ByteArray) : void
 		{
-			UtilHashBytes(this._imageData["imageData"]).push(param1,param2);
+			UtilHashBytes(this._imageData["imageData"]).push(param1, param2);
 			this.progress();
 		}
 		
@@ -362,7 +347,7 @@ package anifire.component
 			_loc1_.bytesLoaded = UtilHashBytes(this._imageData["imageData"]).length;
 			_loc1_.bytesTotal = this._regulator.numProcess;
 			this.dispatchEvent(_loc1_);
-			if(UtilHashBytes(this._imageData["imageData"]).length == this._regulator.numProcess)
+			if (UtilHashBytes(this._imageData["imageData"]).length == this._regulator.numProcess)
 			{
 				this._state = this.STATE_LOADED;
 				this.dispatchEvent(new Event(Event.COMPLETE));
@@ -376,18 +361,18 @@ package anifire.component
 			var _loc7_:UtilHashBytes = null;
 			var _loc8_:String = null;
 			var _loc9_:String = null;
-			if(param2 == CcLibConstant.COMPONENT_TYPE_MOUTH)
+			if (param2 == CcLibConstant.COMPONENT_TYPE_MOUTH)
 			{
-				_loc6_ = CCLipSyncController.getLipSyncComponentItemsByCam(param1,param2,param3,param4);
+				_loc6_ = CCLipSyncController.getLipSyncComponentItemsByCam(param1, param2, param3, param4);
 				_loc7_ = this._imageData["imageData"] as UtilHashBytes;
-				for(_loc8_ in _loc6_)
+				for (_loc8_ in _loc6_)
 				{
 					_loc9_ = String(_loc6_[_loc8_]);
-					if(_loc7_.getValueByKey(_loc9_) == null)
+					if (_loc7_.getValueByKey(_loc9_) == null)
 					{
-						(_loc5_ = CcComponentLoader.getComponentLoader(_loc9_,_loc8_)).addEventListener(Event.COMPLETE,this.onCcComponentLoaded);
-						_loc5_.addEventListener(IOErrorEvent.IO_ERROR,this.onCcComponentFailed);
-						this._regulator.addProcess(_loc5_,Event.COMPLETE);
+						(_loc5_ = CcComponentLoader.getComponentLoader(_loc9_, _loc8_)).addEventListener(Event.COMPLETE, this.onCcComponentLoaded);
+						_loc5_.addEventListener(IOErrorEvent.IO_ERROR, this.onCcComponentFailed);
+						this._regulator.addProcess(_loc5_, Event.COMPLETE);
 					}
 				}
 			}
@@ -397,22 +382,22 @@ package anifire.component
 		{
 			var _loc4_:CcComponentLoader;
 			var _loc5_:UtilHashArray = new UtilHashArray();
-			if(param1.@type == CcLibConstant.COMPONENT_TYPE_MOUTH)
+			if (param1.@type == CcLibConstant.COMPONENT_TYPE_MOUTH)
 			{
-				var _loc7_:UtilHashArray = CCLipSyncController.getLipSyncComponentItems(param1,param2,param3);
-				_loc5_.insert(0,_loc7_);
+				var _loc7_:UtilHashArray = CCLipSyncController.getLipSyncComponentItems(param1, param2, param3);
+				_loc5_.insert(0, _loc7_);
 			}
 			var _loc6_:int = 0;
-			while(_loc6_ < _loc5_.length)
+			while (_loc6_ < _loc5_.length)
 			{
 				var _loc8_:String = _loc5_.getKey(_loc6_);
 				var _loc9_:String = _loc5_.getValueByIndex(_loc6_);
-				if(UtilHashBytes(this._imageData["imageData"]).getValueByKey(_loc9_) == null)
+				if (UtilHashBytes(this._imageData["imageData"]).getValueByKey(_loc9_) == null)
 				{
-					_loc4_ = CcComponentLoader.getComponentLoader(_loc9_,_loc8_);
-					_loc4_.addEventListener(Event.COMPLETE,this.onCcComponentLoaded);
-					_loc4_.addEventListener(IOErrorEvent.IO_ERROR,this.onCcComponentFailed);
-					this._regulator.addProcess(_loc4_,Event.COMPLETE);
+					_loc4_ = CcComponentLoader.getComponentLoader(_loc9_, _loc8_);
+					_loc4_.addEventListener(Event.COMPLETE, this.onCcComponentLoaded);
+					_loc4_.addEventListener(IOErrorEvent.IO_ERROR, this.onCcComponentFailed);
+					this._regulator.addProcess(_loc4_, Event.COMPLETE);
 				}
 				_loc6_++;
 			}
@@ -421,10 +406,10 @@ package anifire.component
 		private function onCcComponentFailed(param1:IOErrorEvent) : void
 		{
 			var _loc2_:CcComponentLoader = CcComponentLoader(param1.target);
-			if(_loc2_)
+			if (_loc2_)
 			{
-				_loc2_.removeEventListener(param1.type,this.onCcComponentFailed);
-				this.addComponent(_loc2_.componentId,_loc2_.swfBytes);
+				_loc2_.removeEventListener(param1.type, this.onCcComponentFailed);
+				this.addComponent(_loc2_.componentId, _loc2_.swfBytes);
 			}
 		}
 		

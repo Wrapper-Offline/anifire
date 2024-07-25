@@ -14,6 +14,7 @@
 			import anifire.component.CustomCharacterMaker;
 			import anifire.constant.AnimeConstants;
 			import anifire.constant.ServerConstants;
+			import anifire.constant.RaceConstants;
 			import anifire.event.LoadEmbedMovieEvent;
 			import anifire.event.StudioEvent;
 			import anifire.managers.AppConfigManager;
@@ -42,17 +43,17 @@
 			override protected function loadProductImage() : void
 			{
 				this._charThumb = _product as CharThumb;
-				var _loc1_:Object = ImageDataManager.instance.getImageData("charThumb",_product.themeId,_product.id);
-				if(_loc1_)
+				var imageData:Object = ImageDataManager.instance.getImageData("charThumb", _product.themeId, _product.id);
+				if (imageData)
 				{
-					this.imageContainer.source = _loc1_ as BitmapData;
+					this.imageContainer.source = imageData as BitmapData;
 					displayImage();
 				}
-				else if(this._charThumb.thumbnailUrl)
+				else if (this._charThumb.thumbnailUrl)
 				{
 					this.loadThumbnailUrl();
 				}
-				else if(this._charThumb.raceCode != 2 && Boolean(_product.imageData))
+				else if (this._charThumb.raceCode != RaceConstants.SKINNED_SWF && Boolean(_product.imageData))
 				{
 					onLoadingComplete();
 				}
@@ -69,23 +70,23 @@
 			
 			override protected function cancelProcessing() : void
 			{
-				if(_processing)
+				if (_processing)
 				{
-					if(this._loader)
+					if (this._loader)
 					{
-						this._loader.contentLoaderInfo.removeEventListener(Event.INIT,this.onImageLoaderInit);
-						if(Boolean(this._charThumb) && Boolean(this._charThumb.thumbnailUrl))
+						this._loader.contentLoaderInfo.removeEventListener(Event.INIT, this.onImageLoaderInit);
+						if (Boolean(this._charThumb) && Boolean(this._charThumb.thumbnailUrl))
 						{
-							this._loader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR,this.onImageLoaderError);
+							this._loader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, this.onImageLoaderError);
 						}
 					}
-					if(this._creator)
+					if (this._creator)
 					{
-						this._creator.removeEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.onCharacterMakerReady);
+						this._creator.removeEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT, this.onCharacterMakerReady);
 					}
-					if(this._createThumbnailByModel)
+					if (this._createThumbnailByModel)
 					{
-						this._charThumb.removeEventListener(StudioEvent.BODY_MODEL_COMPLETE,this.onBodyModelComplete);
+						this._charThumb.removeEventListener(StudioEvent.BODY_MODEL_COMPLETE, this.onBodyModelComplete);
 						this._createThumbnailByModel = false;
 					}
 					this._captureTarget = null;
@@ -95,13 +96,13 @@
 			
 			override protected function processProductImage() : void
 			{
-				var _loc1_:Boolean = _product.imageData is ByteArray;
-				if(_product.raceCode == 0 || _loc1_)
+				var dataIsImage:Boolean = _product.imageData is ByteArray;
+				if (_product.raceCode == 0 || dataIsImage)
 				{
-					var _loc2_:ByteArray = _loc1_ ? _product.imageData as ByteArray : _product.imageData["figure"] as ByteArray;
+					var image:ByteArray = dataIsImage ? _product.imageData as ByteArray : _product.imageData["figure"] as ByteArray;
 					this._loader = new Loader();
-					this._loader.contentLoaderInfo.addEventListener(Event.INIT,this.onImageLoaderInit);
-					this._loader.loadBytes(_loc2_,UtilCommonLoader.externalLoaderContext);
+					this._loader.contentLoaderInfo.addEventListener(Event.INIT, this.onImageLoaderInit);
+					this._loader.loadBytes(image, UtilCommonLoader.externalLoaderContext);
 				}
 				else
 				{
@@ -117,15 +118,15 @@
 				var _loc3_:CCCharacterActionModel = _loc1_["cam"] as CCCharacterActionModel;
 				var _loc4_:UtilHashBytes = _loc1_["imageData"] as UtilHashBytes;
 				var _loc5_:ByteArray = _product.raceCode == 2 ? _loc1_["figure"] : null;
-				this._creator.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.onCharacterMakerReady);
-				if(_loc2_)
+				this._creator.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT, this.onCharacterMakerReady);
+				if (_loc2_)
 				{
-					this._creator.init(_loc2_,_loc4_,(_product as CharThumb).getLibraries(),_product.raceCode,_loc5_);
+					this._creator.init(_loc2_, _loc4_, (_product as CharThumb).getLibraries(), _product.raceCode, _loc5_);
 				}
-				else if(_loc3_)
+				else if (_loc3_)
 				{
 					var _loc6_:CustomCharacterMaker = new CustomCharacterMaker();
-					_loc6_.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.onCharacterMakerReady);
+					_loc6_.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT, this.onCharacterMakerReady);
 					_loc6_.initByCam(_loc3_);
 					this._ccMaker = _loc6_;
 				}
@@ -142,10 +143,10 @@
 			private function loadProp() : void
 			{
 				var _loc1_:ByteArray = this._charThumb.propImageData as ByteArray;
-				if(_loc1_)
+				if (_loc1_)
 				{
 					this._propLoader = new Loader();
-					this._propLoader.contentLoaderInfo.addEventListener(Event.INIT,this.onPropImageReady);
+					this._propLoader.contentLoaderInfo.addEventListener(Event.INIT, this.onPropImageReady);
 					this._propLoader.loadBytes(_loc1_);
 				}
 				else
@@ -157,12 +158,12 @@
 			
 			private function onPropImageReady(param1:Event) : void
 			{
-				this._propLoader.removeEventListener(Event.COMPLETE,this.onPropImageReady);
-				var _loc2_:DisplayObjectContainer = UtilPlain.getInstance(this._captureTarget,UtilPlain.THE_CHAR);
-				if(_loc2_ != null)
+				this._propLoader.removeEventListener(Event.COMPLETE, this.onPropImageReady);
+				var _loc2_:DisplayObjectContainer = UtilPlain.getInstance(this._captureTarget, UtilPlain.THE_CHAR);
+				if (_loc2_ != null)
 				{
 					var _loc3_:DisplayObjectContainer = UtilPlain.getHead(_loc2_);
-					if(_loc3_ != null)
+					if (_loc3_ != null)
 					{
 						this._propLoader.name = AnimeConstants.MOVIECLIP_THE_WEAR;
 						_loc3_.addChild(this._propLoader);
@@ -187,7 +188,7 @@
 				UtilErrorLogger.getInstance().appendCustomError("Error loading thumbnail url: " + this._charThumb.thumbnailUrl);
 				_processing = true;
 				this._createThumbnailByModel = true;
-				this._charThumb.addEventListener(StudioEvent.BODY_MODEL_COMPLETE,this.onBodyModelComplete);
+				this._charThumb.addEventListener(StudioEvent.BODY_MODEL_COMPLETE, this.onBodyModelComplete);
 				this._charThumb.loadDefaultActionByBodyModel();
 			}
 			
@@ -199,13 +200,13 @@
 			protected function captureBitmapData() : void
 			{
 				var _loc1_:Rectangle = this._captureTarget.getBounds(this._captureTarget);
-				if(_loc1_.width > 0 && _loc1_.height > 0)
+				if (_loc1_.width > 0 && _loc1_.height > 0)
 				{
-					var _loc2_:BitmapData = new BitmapData(_loc1_.width,_loc1_.height,true,0);
-					_loc2_.draw(this._captureTarget,new Matrix(1,0,0,1,-_loc1_.x,-_loc1_.y));
-					ImageDataManager.instance.setImageData("charThumb",_product.themeId,_product.id,_loc2_);
+					var _loc2_:BitmapData = new BitmapData(_loc1_.width, _loc1_.height, true, 0);
+					_loc2_.draw(this._captureTarget, new Matrix(1, 0, 0, 1, -_loc1_.x, -_loc1_.y));
+					ImageDataManager.instance.setImageData("charThumb", _product.themeId, _product.id, _loc2_);
 					this._captureTarget = null;
-					if(_loc2_.height > this.height || _loc2_.width > this.width)
+					if (_loc2_.height > this.height || _loc2_.width > this.width)
 					{
 						this.imageContainer.fillMode = BitmapFillMode.SCALE;
 						this.imageContainer.scaleMode = BitmapScaleMode.LETTERBOX;
@@ -225,11 +226,11 @@
 				var _loc2_:PNGEncoder = null;
 				var _loc3_:ByteArray = null;
 				var _loc4_:Base64Encoder = null;
-				if(param1)
+				if (param1)
 				{
 					_loc2_ = new PNGEncoder();
 					_loc3_ = _loc2_.encode(param1);
-					if(_loc3_)
+					if (_loc3_)
 					{
 						(_loc4_ = new Base64Encoder()).encodeBytes(_loc3_);
 						return _loc4_.flush();
@@ -243,13 +244,13 @@
 				var params:URLVariables = new URLVariables();
 				_configManager.appendURLVariables(params);
 				params["assetId"] = this._charThumb.id;
-				if(this._ccMaker)
+				if (this._ccMaker)
 				{
 					var bodyImage:BitmapData = this._ccMaker.getBitmap();
 					params["thumbdata"] = this.encodeBitmapData(bodyImage);
 					params["thumbdata_sum"] = MD5.hash(params["thumbdata"]);
 				}
-				if(this._ccMaker)
+				if (this._ccMaker)
 				{
 					var headImage:BitmapData = this._ccMaker.getHeadBitmap();
 					params["imagedata"] = this.encodeBitmapData(headImage);
@@ -278,7 +279,7 @@
 			{
 				this._imageUpdated = false;
 				this.imageContainer.source = null;
-				if(this._loader)
+				if (this._loader)
 				{
 					this._loader.unload();
 				}
@@ -287,8 +288,8 @@
 			
 			override protected function updateDisplayList(param1:Number, param2:Number) : void
 			{
-				super.updateDisplayList(param1,param2);
-				if(Boolean(this._captureTarget) && this._propReady)
+				super.updateDisplayList(param1, param2);
+				if (Boolean(this._captureTarget) && this._propReady)
 				{
 					this.captureBitmapData();
 				}
@@ -298,13 +299,13 @@
 			{
 				_processing = true;
 				this._createThumbnailByModel = true;
-				this._charThumb.addEventListener(StudioEvent.BODY_MODEL_COMPLETE,this.onBodyModelComplete);
+				this._charThumb.addEventListener(StudioEvent.BODY_MODEL_COMPLETE, this.onBodyModelComplete);
 				this._charThumb.loadDefaultActionByBodyModel();
 			}
 			
 			private function onImageComplete(param1:Event) : void
 			{
-				if(this.imageContainer.bitmapData.height > this.height || this.imageContainer.bitmapData.width > this.width)
+				if (this.imageContainer.bitmapData.height > this.height || this.imageContainer.bitmapData.width > this.width)
 				{
 					this.imageContainer.fillMode = BitmapFillMode.SCALE;
 					this.imageContainer.scaleMode = BitmapScaleMode.LETTERBOX;

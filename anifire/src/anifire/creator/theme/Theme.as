@@ -62,7 +62,7 @@ package anifire.creator.theme
 		}
 
 		/**
-		 * Clears the theme.
+		 * Clear all of the Theme's Thumb objects
 		 */
 		public function clearAllThumbs() : void
 		{
@@ -147,6 +147,15 @@ package anifire.creator.theme
 		}
 
 		/**
+		 * Initialize by using a theme XML.
+		 */
+		public function initThemeByXml(themeId:String, xml:XML) : void
+		{
+			this._id = themeId;
+			this.deSerialize(xml, false);
+		}
+
+		/**
 		 * Initialize by retrieving a zipped theme XML.
 		 */
 		public function initThemeByLoadThemeFile(themeId:String) : void
@@ -154,14 +163,121 @@ package anifire.creator.theme
 			this._id = themeId;
 			this.loadXML();
 		}
-		
+
 		/**
-		 * Initialize by using a theme XML.
+		 * Retrieves the zipped theme XML from the server.
 		 */
-		public function initThemeByXml(themeId:String, xml:XML) : void
+		private function loadXML() : void
 		{
-			this._id = themeId;
-			this.deSerialize(xml, false);
+			var urlRequest:URLRequest = UtilNetwork.getGetThemeRequest(this.id, false);
+			var urlLoader:URLLoader = new URLLoader();
+			urlLoader.addEventListener(Event.COMPLETE, this.doLoadXMLComplete);
+			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, this.onLoadThemeXmlError);
+			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, this.onLoadThemeXmlError);
+			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
+			urlLoader.load(urlRequest);
+		}
+
+		private function onLoadThemeXmlError(e:Event) : void
+		{
+			UtilErrorLogger.getInstance().appendCustomError("onLoadThemeXmlError: " + this.id);
+			UtilErrorLogger.getInstance().fatal("Error: Load theme failed.");
+		}
+		
+		private function doLoadXMLComplete(e:Event) : void
+		{
+			(e.target as IEventDispatcher).removeEventListener(e.type,this.doLoadXMLComplete);
+			var urlLoader:URLLoader = e.target as URLLoader;
+			this.doLoadXMLBytesComplete(urlLoader.data as ByteArray);
+		}
+
+		/**
+		 * Extracts the XML from the theme zip.
+		 */
+		private function doLoadXMLBytesComplete(themeZip:IDataInput) : void
+		{
+			var _loc2_:ZipFile = new ZipFile(themeZip);
+			this.deSerialize(new XML(_loc2_.getInput(_loc2_.getEntry("theme.xml"))));
+		}
+
+		/**
+		 * Extract information from the root and prepare for XML node parsing.
+		 */
+		public function deSerialize(xml:XML, isMovieTheme:Boolean = false) : void
+		{
+			// extract the main data
+			this.setThemeXML(xml);
+			this.id = xml.@id;
+			this._ccThemeId = xml.@cc_theme_id;
+			this.isMovieTheme = isMovieTheme;
+			this._nodes = xml.children();
+			this._totalNodes = this._nodes.length();
+			this._nodeIndex = 0;
+			UtilErrorLogger.getInstance().info("Deserialize Theme XML nodes: " + this._totalNodes);
+			addEventListener(CcCoreEvent.DESERIALIZE_THEME_COMPLETE, this.onDeserializeComplete);
+			// start actually going through the assets
+			this.doNextPrepare();
+		}
+
+		/**
+		 * alright we're done
+		 */
+		private function onDeserializeComplete(event:CcCoreEvent) : void
+		{
+			removeEventListener(CcCoreEvent.DESERIALIZE_THEME_COMPLETE, this.onDeserializeComplete);
+			// nvm we're not done we still have to parse the cctheme
+			if (this._ccThemeId)
+			{
+				var ccThemeModel:CCThemeModel = CCThemeManager.instance.getThemeModel(this._ccThemeId);
+				if (!ccThemeModel.completed)
+				{
+					UtilErrorLogger.getInstance().info("Load CC Theme Model: " + this._ccThemeId);
+					ccThemeModel.addEventListener(Event.COMPLETE, this.onThemeModelComplete);
+					ccThemeModel.load();
+					return;
+				}
+			}
+			dispatchEvent(new Event(Event.COMPLETE));
+		}
+
+		private function onThemeModelComplete(e:Event) : void
+		{
+			(e.currentTarget as CCThemeModel).removeEventListener(Event.COMPLETE, this.onThemeModelComplete);
+			dispatchEvent(new Event(Event.COMPLETE));
+		}
+
+		/**
+		 * Loop through 32 XML nodes, wait 5ms and repeat until the final node is reached.
+		 */
+		private function doNextPrepare() : void
+		{
+			// check if we've gone through the entire xml
+			if (this._nodeIndex >= this._totalNodes)
+			{
+				dispatchEvent(new CcCoreEvent(CcCoreEvent.DESERIALIZE_THEME_COMPLETE, this));
+				return;
+			}
+			var stopAt:int = this._nodeIndex + 32;
+			while (this._nodeIndex < stopAt && this._nodeIndex < this._totalNodes)
+			{
+				this.deserializeThumb(this._nodes[this._nodeIndex], this.isMovieTheme);
+				++this._nodeIndex;
+			}
+			setTimeout(this.doNextPrepare, 5);
+		}
+
+		/**
+		 * 
+		 */
+		private function deserializeThumb(node:XML, isMovieTheme:Boolean = false) : void
+		{
+			var tagName:String = String(node.name().localName);
+			if (tagName == CharThumb.XML_NODE_NAME)
+			{
+				var charThumb:CharThumb = new CharThumb();
+				charThumb.deSerialize(node, this);
+				this.addThumb(charThumb);
+			}
 		}
 
 		/**
@@ -198,69 +314,13 @@ package anifire.creator.theme
 		}
 
 		/**
-		 * This is a heavily cut down version of the studio's deserializeThumb function.
-		 * This one is only capable of deserializing character thumbs.
+		 * Returns a Thumb's corresponding node from a theme XML. Likely deprecated as it's only used in one file.
+		 * @deprecated
 		 */
-		private function deserializeThumb(node:XML, isMovieTheme:Boolean = false) : void
+		public function getThumbNodeFromThemeXML(themeXML:XML, thumb:Thumb) : XML
 		{
-			var tagName:String = String(node.name().localName);
-			if (tagName == CharThumb.XML_NODE_NAME)
-			{
-				var charThumb:CharThumb = new CharThumb();
-				charThumb.deSerialize(node, this);
-				this.addThumb(charThumb);
-			}
-		}
-
-		/**
-		 * Begin parsing the theme XML.
-		 */
-		public function deSerialize(xml:XML, isMovieTheme:Boolean = false) : void
-		{
-			var _loc3_:XMLList;
-			var _loc4_:XML;
-			var _loc5_:int;
-			// extract the main data
-			this.setThemeXML(xml);
-			this.id = xml.@id;
-			this._ccThemeId = xml.@cc_theme_id;
-			this.isMovieTheme = isMovieTheme;
-			this._nodes = xml.children();
-			this._totalNodes = this._nodes.length();
-			this._nodeIndex = 0;
-			UtilErrorLogger.getInstance().info("Deserialize Theme XML nodes: " + this._totalNodes);
-			addEventListener(CcCoreEvent.DESERIALIZE_THEME_COMPLETE, this.onDeserializeComplete);
-			// start actually going through the assets
-			this.doNextPrepare();
-		}
-
-		/**
-		 * Loops through 32 XML nodes, wait 5ms, and repeats itself.
-		 */
-		private function doNextPrepare() : void
-		{
-			// check if we've gone through the entire xml
-			if (this._nodeIndex >= this._totalNodes)
-			{
-				dispatchEvent(new CcCoreEvent(CcCoreEvent.DESERIALIZE_THEME_COMPLETE, this));
-				return;
-			}
-			// parse 32 nodes, wait 5 ms and repeat
-			var _loc1_:int = this._nodeIndex + 32;
-			while (this._nodeIndex < _loc1_ && this._nodeIndex < this._totalNodes)
-			{
-				this.deserializeThumb(this._nodes[this._nodeIndex], this.isMovieTheme);
-				++this._nodeIndex;
-			}
-			setTimeout(this.doNextPrepare, 5);
-		}
-		
-		public function getThumbNodeFromThemeXML(param1:XML, param2:Thumb) : XML
-		{
-			var themeXML:XML = param1;
-			var thumb:Thumb = param2;
 			var nodeName:String = "";
-			if(thumb is CharThumb)
+			if (thumb is CharThumb)
 			{
 				nodeName = CharThumb.XML_NODE_NAME;
 			}
@@ -277,19 +337,6 @@ package anifire.creator.theme
 				return this._themeXML.children().(@id == idd)[0];
 			}
 			return null;
-		}
-
-		private function onLoadThemeXmlError(e:Event) : void
-		{
-			UtilErrorLogger.getInstance().appendCustomError("onLoadThemeXmlError: " + this.id);
-			UtilErrorLogger.getInstance().fatal("Error: Load theme failed.");
-		}
-		
-		private function doLoadXMLComplete(e:Event) : void
-		{
-			(e.target as IEventDispatcher).removeEventListener(e.type,this.doLoadXMLComplete);
-			var urlLoader:URLLoader = e.target as URLLoader;
-			this.doLoadXMLBytesComplete(urlLoader.data as ByteArray);
 		}
 		
 		public function isStateExists(param1:XML, param2:IBehavior) : Boolean
@@ -308,56 +355,6 @@ package anifire.creator.theme
 			_loc10_.refresh();
 			param1.setChildren(_loc10_.copy());
 			return _loc3_;
-		}
-
-		/**
-		 * Extracts the XML from the theme zip.
-		 */
-		private function doLoadXMLBytesComplete(themeZip:IDataInput) : void
-		{
-			var _loc2_:ZipFile = new ZipFile(themeZip);
-			this.deSerialize(new XML(_loc2_.getInput(_loc2_.getEntry("theme.xml"))));
-		}
-
-		/**
-		 * alright we're done
-		 */
-		private function onDeserializeComplete(event:CcCoreEvent) : void
-		{
-			removeEventListener(CcCoreEvent.DESERIALIZE_THEME_COMPLETE, this.onDeserializeComplete);
-			// nvm we're not done we still have to parse the cctheme
-			if (this._ccThemeId)
-			{
-				var ccThemeModel:CCThemeModel = CCThemeManager.instance.getThemeModel(this._ccThemeId);
-				if (!ccThemeModel.completed)
-				{
-					UtilErrorLogger.getInstance().info("Load CC Theme Model: " + this._ccThemeId);
-					ccThemeModel.addEventListener(Event.COMPLETE, this.onThemeModelComplete);
-					ccThemeModel.load();
-					return;
-				}
-			}
-			dispatchEvent(new Event(Event.COMPLETE));
-		}
-
-		private function onThemeModelComplete(e:Event) : void
-		{
-			(e.currentTarget as CCThemeModel).removeEventListener(Event.COMPLETE, this.onThemeModelComplete);
-			dispatchEvent(new Event(Event.COMPLETE));
-		}
-
-		/**
-		 * Retrieves the zipped theme XML from the server.
-		 */
-		private function loadXML() : void
-		{
-			var urlRequest:URLRequest = UtilNetwork.getGetThemeRequest(this.id, false);
-			var urlLoader:URLLoader = new URLLoader();
-			urlLoader.addEventListener(Event.COMPLETE, this.doLoadXMLComplete);
-			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, this.onLoadThemeXmlError);
-			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, this.onLoadThemeXmlError);
-			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
-			urlLoader.load(urlRequest);
 		}
 		
 		public function isThumbExist(param1:Thumb) : Boolean

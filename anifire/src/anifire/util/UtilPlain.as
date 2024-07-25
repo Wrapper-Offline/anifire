@@ -2,260 +2,225 @@ package anifire.util
 {
 	import anifire.constant.AnimeConstants;
 	import anifire.constant.CcLibConstant;
-	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Loader;
 	import flash.display.MovieClip;
-	import flash.display.Shape;
 	import flash.events.Event;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
 	import nochump.util.zip.ZipEntry;
 	import nochump.util.zip.ZipFile;
-	
+
 	public class UtilPlain
 	{
-		
 		public static const THE_CHAR:String = "theChar";
-		
 		public static const THE_CHAR_FLIP:String = "theCharFlip";
-		
 		public static const THE_COLOR:String = "theColor";
-		
 		public static const COLORABLE_PREFIX:String = "Color";
-		
 		public static const THE_PROP:String = AnimeConstants.MOVIECLIP_THE_PROP;
-		
 		public static const THE_HEAD:String = AnimeConstants.MOVIECLIP_THE_HEAD;
-		
 		public static const THE_WEAR:String = AnimeConstants.MOVIECLIP_THE_WEAR;
-		
 		public static const THE_TAIL:String = AnimeConstants.MOVIECLIP_THE_TAIL;
-		
 		public static const THE_MOUTH:String = AnimeConstants.MOVIECLIP_THE_MOUTH;
-		
 		public static const PROPERTY_SCALEX:String = "scalex";
-		
 		public static const PROPERTY_SCALEY:String = "scaley";
-		
 		private static const SPEECH_MOUTH:String = "speechMouth";
-		 
-		
+
 		public function UtilPlain()
 		{
 			super();
 		}
-		
+
 		public static function get PARTS_NOT_CONTROL_BY_PLAYER() : Array
 		{
 			var _loc1_:Array = new Array();
 			_loc1_.push(SPEECH_MOUTH);
 			return _loc1_;
 		}
-		
-		public static function playFamily(param1:DisplayObject) : void
+
+		public static function playFamily(iObj:DisplayObject) : void
 		{
-			var iObj:DisplayObject = param1;
-			var treatment:Function = function(param1:DisplayObject):void
+			var treatment:Function = function (obj:DisplayObject):void
 			{
-				var _loc2_:MovieClip = null;
-				if(param1 is MovieClip)
+				if (obj is MovieClip)
 				{
-					_loc2_ = MovieClip(param1);
-					_loc2_.play();
+					var clip:MovieClip = MovieClip(obj);
+					clip.play();
 				}
 			};
-			UtilPlain.transverseFamily(iObj,treatment,PARTS_NOT_CONTROL_BY_PLAYER);
+			UtilPlain.transverseFamily(iObj, treatment, PARTS_NOT_CONTROL_BY_PLAYER);
 		}
-		
-		public static function stopFamily(param1:DisplayObject) : void
+
+		public static function stopFamily(iObj:DisplayObject) : void
 		{
-			var iObj:DisplayObject = param1;
-			var treatment:Function = function(param1:DisplayObject):void
+			var treatment:Function = function (obj:DisplayObject):void
 			{
-				var _loc2_:MovieClip = null;
-				if(param1 is MovieClip)
+				var clip:MovieClip = null;
+				if (obj is MovieClip)
 				{
-					_loc2_ = MovieClip(param1);
-					_loc2_.stop();
+					clip = MovieClip(obj);
+					clip.stop();
 				}
 			};
-			UtilPlain.transverseFamily(iObj,treatment);
+			UtilPlain.transverseFamily(iObj, treatment);
 		}
-		
-		public static function advanceFamilyToNextFrame(param1:DisplayObject) : Boolean
+
+		public static function advanceFamilyToNextFrame(iObj:DisplayObject) : Boolean
 		{
 			var result:Boolean = false;
-			var iObj:DisplayObject = param1;
-			var treatment:Function = function(param1:DisplayObject):void
+			var treatment:Function = function (obj:DisplayObject):void
 			{
-				var _loc2_:MovieClip = null;
-				if(param1 is MovieClip)
+				if (obj is MovieClip)
 				{
-					_loc2_ = MovieClip(param1);
-					_loc2_.nextFrame();
-					if(_loc2_.name == THE_CHAR)
+					var clip:MovieClip = MovieClip(obj);
+					clip.nextFrame();
+					if (clip.name == THE_CHAR)
 					{
-						if(_loc2_.currentFrame < _loc2_.totalFrames)
+						if (clip.currentFrame < clip.totalFrames)
 						{
 							result = true;
 						}
 					}
 				}
 			};
-			UtilPlain.transverseFamily(iObj,treatment);
+			UtilPlain.transverseFamily(iObj, treatment);
 			return result;
 		}
-		
-		public static function traceDisplayList(param1:DisplayObjectContainer, param2:String = "") : void
+
+		public static function traceDisplayList(container:DisplayObjectContainer, unused:String = "") : void
 		{
-			var _loc3_:DisplayObject = null;
-			var _loc4_:int = 0;
-			while(_loc4_ < param1.numChildren)
+			for (var i:int = 0; i < container.numChildren; i++)
 			{
-				_loc3_ = param1.getChildAt(_loc4_);
-				if(_loc3_ != null)
+				var child:DisplayObject = container.getChildAt(i);
+				if (child != null)
 				{
 				}
-				if(param1.getChildAt(_loc4_) is DisplayObjectContainer)
+				if (container.getChildAt(i) is DisplayObjectContainer)
 				{
-					traceDisplayList(DisplayObjectContainer(_loc3_),param2 + "	 ");
+					traceDisplayList(DisplayObjectContainer(child), unused + "	 ");
 				}
-				_loc4_++;
 			}
 		}
-		
-		public static function removeAllSon(param1:DisplayObjectContainer) : void
+
+		public static function removeAllSon(container:DisplayObjectContainer) : void
 		{
-			var _loc3_:Object = null;
-			var _loc2_:int = param1.numChildren;
-			var _loc4_:int = _loc2_ - 1;
-			while(_loc4_ >= 0)
+			var length:int = container.numChildren;
+			for (var i:int = length - 1; i >= 0; i--)
 			{
-				_loc3_ = param1.getChildAt(_loc4_);
-				param1.removeChildAt(_loc4_);
-				_loc3_ = null;
-				_loc4_--;
+				var child:Object = container.getChildAt(i);
+				container.removeChildAt(i);
+				child = null;
 			}
 		}
-		
+
 		public static function getCharacter(param1:DisplayObjectContainer) : MovieClip
 		{
-			return getInstance(param1,THE_CHAR) as MovieClip;
+			return getInstance(param1, THE_CHAR) as MovieClip;
 		}
-		
+
 		public static function getCharacterFlip(param1:DisplayObjectContainer) : MovieClip
 		{
-			return getInstance(param1,THE_CHAR_FLIP) as MovieClip;
+			return getInstance(param1, THE_CHAR_FLIP) as MovieClip;
 		}
-		
-		public static function getAllShaderObj(param1:DisplayObject) : Array
+
+		public static function getAllShaderObj(theObj:DisplayObject) : Array
 		{
 			var objArray:Array = new Array();
-			var theObj:DisplayObject = param1;
-			var treatment:Function = function(param1:DisplayObject):void
+			var treatment:Function = function (obj:DisplayObject):void
 			{
-				if(param1 != null)
+				if (obj != null)
 				{
-					if(DisplayObject(param1).name == "shaderObj")
+					if (DisplayObject(obj).name == "shaderObj")
 					{
-						objArray.push(param1);
+						objArray.push(obj);
 					}
 				}
 			};
-			UtilPlain.transverseFamily(theObj,treatment);
+			UtilPlain.transverseFamily(theObj, treatment);
 			return objArray;
 		}
-		
-		public static function getLoaderItem(param1:DisplayObject) : Array
+
+		public static function getLoaderItem(theObj:DisplayObject) : Array
 		{
 			var objArray:Array = new Array();
-			var theObj:DisplayObject = param1;
-			var treatment:Function = function(param1:DisplayObject):void
+			var treatment:Function = function (obj:DisplayObject):void
 			{
-				if(param1 != null)
+				if (obj != null)
 				{
-					if(param1 is Loader)
+					if (obj is Loader)
 					{
-						objArray.push(param1);
+						objArray.push(obj);
 					}
 				}
 			};
-			UtilPlain.transverseFamily(theObj,treatment);
+			UtilPlain.transverseFamily(theObj, treatment);
 			return objArray;
 		}
-		
-		public static function getLoaderItemExcludeTheHeadTheHand(param1:DisplayObject) : Array
+
+		public static function getLoaderItemExcludeTheHeadTheHand(theObj:DisplayObject) : Array
 		{
 			var objArray:Array = new Array();
-			var theObj:DisplayObject = param1;
-			var treatment:Function = function(param1:DisplayObject):void
+			var treatment:Function = function (obj:DisplayObject):void
 			{
-				if(param1 != null)
+				if (obj != null)
 				{
-					if(param1 is Loader)
+					if (obj is Loader)
 					{
-						objArray.push(param1);
+						objArray.push(obj);
 					}
 				}
 			};
-			UtilPlain.transverseFamily(theObj,treatment,[UtilPlain.THE_HEAD,UtilPlain.THE_PROP]);
+			UtilPlain.transverseFamily(theObj, treatment, [UtilPlain.THE_HEAD, UtilPlain.THE_PROP]);
 			return objArray;
 		}
-		
-		public static function getColorItem(param1:DisplayObject, param2:String = "") : Array
+
+		public static function getColorItem(theObj:DisplayObject, spec:String = "") : Array
 		{
 			var objArray:Array = new Array();
-			var theObj:DisplayObject = param1;
-			var spec:String = param2;
-			var treatment:Function = function(param1:DisplayObject):void
+			var treatment:Function = function (obj:DisplayObject):void
 			{
-				var _loc2_:String = null;
-				if(param1 != null)
+				if (obj != null)
 				{
-					_loc2_ = getColorItemName(DisplayObject(param1).name);
-					if(_loc2_ != "" && (spec == "" || spec != "" && _loc2_ == spec))
+					var _loc2_:String = getColorItemName(DisplayObject(obj).name);
+					if (_loc2_ != "" && (spec == "" || spec != "" && _loc2_ == spec))
 					{
-						objArray.push(param1);
+						objArray.push(obj);
 					}
 				}
 			};
-			UtilPlain.transverseFamily(theObj,treatment);
+			UtilPlain.transverseFamily(theObj, treatment);
 			return objArray;
 		}
-		
+
 		public static function getColorItemName(param1:String) : String
 		{
-			var _loc3_:Array = null;
 			var _loc4_:String = null;
 			var _loc2_:String = "";
-			if(param1.indexOf(THE_COLOR) == 0)
+			if (param1.indexOf(THE_COLOR) == 0)
 			{
-				_loc3_ = param1.split("_");
-				if(_loc3_.length > 1)
+				var _loc3_:Array = param1.split("_");
+				if (_loc3_.length > 1)
 				{
 					_loc2_ = _loc3_[1];
 				}
 			}
-			else if(param1.indexOf(COLORABLE_PREFIX) == 0)
+			else if (param1.indexOf(COLORABLE_PREFIX) == 0)
 			{
 				_loc4_ = param1.substring(COLORABLE_PREFIX.length);
 				_loc2_ = _loc4_;
 			}
 			return _loc2_;
 		}
-		
-		public static function extractCharFlip(param1:Loader) : DisplayObject
+
+		public static function extractCharFlip(swfLoader:Loader) : DisplayObject
 		{
-			var charFlip:Class = null;
-			var swfLoader:Loader = param1;
 			try
 			{
-				charFlip = swfLoader.content.loaderInfo.applicationDomain.getDefinition(THE_CHAR_FLIP) as Class;
+				var charFlip:Class = swfLoader.content.loaderInfo.applicationDomain.getDefinition(THE_CHAR_FLIP) as Class;
 			}
-			catch(e:Error)
+			catch (e:Error)
 			{
 				return null;
 			}
@@ -263,79 +228,72 @@ package anifire.util
 			char.name = THE_CHAR_FLIP;
 			return char;
 		}
-		
-		public static function extractEffectThumbnail(param1:Loader) : DisplayObject
+
+		public static function extractEffectThumbnail(effectSwfLoader:Loader) : DisplayObject
 		{
-			var thumbnailClass:Class = null;
-			var effectSwfLoader:Loader = param1;
 			try
 			{
-				thumbnailClass = effectSwfLoader.content.loaderInfo.applicationDomain.getDefinition("EFFECT_THUMBNAIL") as Class;
+				var thumbnailClass:Class = effectSwfLoader.content.loaderInfo.applicationDomain.getDefinition("EFFECT_THUMBNAIL") as Class;
 			}
-			catch(e:Error)
+			catch (e:Error)
 			{
 				return null;
 			}
 			var thumbnail:DisplayObject = new thumbnailClass();
 			return thumbnail;
 		}
-		
-		public static function extractSymbolFromLoader(param1:Loader, param2:String) : DisplayObject
+
+		public static function extractSymbolFromLoader(loader:Loader, symbolName:String) : DisplayObject
 		{
-			var symbolClass:Class = null;
-			var loader:Loader = param1;
-			var symbolName:String = param2;
 			try
 			{
-				symbolClass = loader.content.loaderInfo.applicationDomain.getDefinition(symbolName) as Class;
+				var symbolClass:Class = loader.content.loaderInfo.applicationDomain.getDefinition(symbolName) as Class;
 			}
-			catch(e:Error)
+			catch (e:Error)
 			{
 				return null;
 			}
 			var obj:DisplayObject = new symbolClass();
 			return obj;
 		}
-		
-		public static function getMultipleInstance(param1:DisplayObject, param2:*) : Array
+
+		public static function getMultipleInstance(iObj:DisplayObject, pattern:*) : Array
 		{
-			var _loc3_:Array = new Array();
-			getMultipleInstanceRecursive(param1,param2,_loc3_);
-			return _loc3_;
+			var instances:Array = new Array();
+			getMultipleInstanceRecursive(iObj, pattern, instances);
+			return instances;
 		}
-		
-		private static function getMultipleInstanceRecursive(param1:DisplayObject, param2:*, param3:Array) : void
+
+		/**
+		 * Looks for matches to `pattern` in a display object and its children.
+		 */
+		private static function getMultipleInstanceRecursive(iObj:DisplayObject, pattern:*, instances:Array) : void
 		{
-			var _loc4_:DisplayObjectContainer = null;
-			var _loc5_:DisplayObject = null;
-			var _loc6_:int = 0;
-			if(param1.name.match(param2) != null)
+			if (iObj.name.match(pattern) != null)
 			{
-				param3.push(param1);
+				instances.push(iObj);
 			}
-			if(param1 is DisplayObjectContainer)
+			if (iObj is DisplayObjectContainer)
 			{
-				_loc4_ = param1 as DisplayObjectContainer;
-				_loc6_ = 0;
-				while(_loc6_ < _loc4_.numChildren)
+				var container:DisplayObjectContainer = iObj as DisplayObjectContainer;
+				for (var i:int = 0; i < container.numChildren; i++)
 				{
-					_loc5_ = _loc4_.getChildAt(_loc6_);
-					if(_loc5_)
+					var child:DisplayObject = container.getChildAt(i);
+					if (child)
 					{
-						getMultipleInstanceRecursive(_loc5_,param2,param3);
+						getMultipleInstanceRecursive(child, pattern, instances);
 					}
-					_loc6_++;
 				}
 			}
 		}
-		
+
 		public static function centerAlignObj(param1:DisplayObject, param2:Rectangle, param3:Boolean) : void
 		{
 			var _loc4_:Rectangle = param1.getRect(param1);
 			var _loc5_:Number = 1;
-			if(param3)
+			if (param3)
 			{
-				if(param2.width / param2.height > _loc4_.width / _loc4_.height)
+				if (param2.width / param2.height > _loc4_.width / _loc4_.height)
 				{
 					_loc5_ = param2.height / _loc4_.height;
 				}
@@ -356,28 +314,28 @@ package anifire.util
 			param1.x = param1.x + _loc8_.x;
 			param1.y = param1.y + _loc8_.y;
 		}
-		
+
 		public static function getInstance(param1:DisplayObjectContainer, param2:String) : DisplayObjectContainer
 		{
 			var _loc3_:DisplayObjectContainer = null;
 			var _loc4_:DisplayObjectContainer = null;
 			var _loc5_:int = 0;
-			if(param1 == null)
+			if (param1 == null)
 			{
 				return null;
 			}
-			if(param1.name == param2)
+			if (param1.name == param2)
 			{
 				return param1;
 			}
 			_loc5_ = 0;
-			while(_loc5_ < param1.numChildren)
+			while (_loc5_ < param1.numChildren)
 			{
-				if(param1.getChildAt(_loc5_) is DisplayObjectContainer)
+				if (param1.getChildAt(_loc5_) is DisplayObjectContainer)
 				{
 					_loc4_ = DisplayObjectContainer(param1.getChildAt(_loc5_));
-					_loc3_ = UtilPlain.getInstance(_loc4_,param2);
-					if(_loc3_ != null)
+					_loc3_ = UtilPlain.getInstance(_loc4_, param2);
+					if (_loc3_ != null)
 					{
 						return _loc3_;
 					}
@@ -386,28 +344,28 @@ package anifire.util
 			}
 			return null;
 		}
-		
+
 		public static function getMouth(param1:DisplayObjectContainer) : DisplayObjectContainer
 		{
 			var _loc2_:DisplayObjectContainer = null;
 			var _loc3_:DisplayObjectContainer = null;
 			var _loc4_:int = 0;
-			if(param1 == null)
+			if (param1 == null)
 			{
 				return null;
 			}
-			if(param1.name == UtilPlain.THE_MOUTH && param1.getChildByName(AnimeConstants.MOVIECLIP_DEFAULT_MOUTH) != null)
+			if (param1.name == UtilPlain.THE_MOUTH && param1.getChildByName(AnimeConstants.MOVIECLIP_DEFAULT_MOUTH) != null)
 			{
 				return param1;
 			}
 			_loc4_ = 0;
-			while(_loc4_ < param1.numChildren)
+			while (_loc4_ < param1.numChildren)
 			{
-				if(param1.getChildAt(_loc4_) is DisplayObjectContainer)
+				if (param1.getChildAt(_loc4_) is DisplayObjectContainer)
 				{
 					_loc3_ = DisplayObjectContainer(param1.getChildAt(_loc4_));
 					_loc2_ = UtilPlain.getMouth(_loc3_);
-					if(_loc2_ != null)
+					if (_loc2_ != null)
 					{
 						return _loc2_;
 					}
@@ -416,28 +374,28 @@ package anifire.util
 			}
 			return null;
 		}
-		
+
 		public static function getHead(param1:DisplayObjectContainer) : DisplayObjectContainer
 		{
 			var _loc2_:DisplayObjectContainer = null;
 			var _loc3_:DisplayObjectContainer = null;
 			var _loc4_:int = 0;
-			if(param1 == null)
+			if (param1 == null)
 			{
 				return null;
 			}
-			if(param1.name == UtilPlain.THE_HEAD && param1.getChildByName(AnimeConstants.MOVIECLIP_DEFAULT_HEAD) != null)
+			if (param1.name == UtilPlain.THE_HEAD && param1.getChildByName(AnimeConstants.MOVIECLIP_DEFAULT_HEAD) != null)
 			{
 				return param1;
 			}
 			_loc4_ = 0;
-			while(_loc4_ < param1.numChildren)
+			while (_loc4_ < param1.numChildren)
 			{
-				if(param1.getChildAt(_loc4_) is DisplayObjectContainer)
+				if (param1.getChildAt(_loc4_) is DisplayObjectContainer)
 				{
 					_loc3_ = DisplayObjectContainer(param1.getChildAt(_loc4_));
 					_loc2_ = UtilPlain.getHead(_loc3_);
-					if(_loc2_ != null)
+					if (_loc2_ != null)
 					{
 						return _loc2_;
 					}
@@ -446,28 +404,28 @@ package anifire.util
 			}
 			return null;
 		}
-		
+
 		public static function getTail(param1:DisplayObjectContainer) : DisplayObjectContainer
 		{
 			var _loc2_:DisplayObjectContainer = null;
 			var _loc3_:DisplayObjectContainer = null;
 			var _loc4_:int = 0;
-			if(param1 == null)
+			if (param1 == null)
 			{
 				return null;
 			}
-			if(param1.name == UtilPlain.THE_TAIL && param1.getChildByName(AnimeConstants.MOVIECLIP_DEFAULT_TAIL) != null)
+			if (param1.name == UtilPlain.THE_TAIL && param1.getChildByName(AnimeConstants.MOVIECLIP_DEFAULT_TAIL) != null)
 			{
 				return param1;
 			}
 			_loc4_ = 0;
-			while(_loc4_ < param1.numChildren)
+			while (_loc4_ < param1.numChildren)
 			{
-				if(param1.getChildAt(_loc4_) is DisplayObjectContainer)
+				if (param1.getChildAt(_loc4_) is DisplayObjectContainer)
 				{
 					_loc3_ = DisplayObjectContainer(param1.getChildAt(_loc4_));
 					_loc2_ = UtilPlain.getTail(_loc3_);
-					if(_loc2_ != null)
+					if (_loc2_ != null)
 					{
 						return _loc2_;
 					}
@@ -476,28 +434,28 @@ package anifire.util
 			}
 			return null;
 		}
-		
+
 		public static function getProp(param1:DisplayObjectContainer) : DisplayObjectContainer
 		{
 			var _loc2_:DisplayObjectContainer = null;
 			var _loc3_:DisplayObjectContainer = null;
 			var _loc4_:int = 0;
-			if(param1 == null)
+			if (param1 == null)
 			{
 				return null;
 			}
-			if(param1.name == UtilPlain.THE_PROP)
+			if (param1.name == UtilPlain.THE_PROP)
 			{
 				return param1;
 			}
 			_loc4_ = 0;
-			while(_loc4_ < param1.numChildren)
+			while (_loc4_ < param1.numChildren)
 			{
-				if(param1.getChildAt(_loc4_) is DisplayObjectContainer)
+				if (param1.getChildAt(_loc4_) is DisplayObjectContainer)
 				{
 					_loc3_ = DisplayObjectContainer(param1.getChildAt(_loc4_));
 					_loc2_ = UtilPlain.getProp(_loc3_);
-					if(_loc2_ != null)
+					if (_loc2_ != null)
 					{
 						return _loc2_;
 					}
@@ -506,14 +464,14 @@ package anifire.util
 			}
 			return null;
 		}
-		
+
 		public static function flipObj(param1:DisplayObject, param2:Boolean = false, param3:Boolean = false) : Number
 		{
-			if(param2)
+			if (param2)
 			{
 				param1.scaleX = Math.abs(param1.scaleX);
 			}
-			else if(param3)
+			else if (param3)
 			{
 				param1.scaleX = -1 * Math.abs(param1.scaleX);
 			}
@@ -524,14 +482,14 @@ package anifire.util
 			var _loc4_:DisplayObject = null;
 			var _loc5_:DisplayObject = null;
 			var _loc6_:DisplayObjectContainer = param1 as DisplayObjectContainer;
-			if(_loc6_ != null)
+			if (_loc6_ != null)
 			{
-				_loc4_ = UtilPlain.getInstance(_loc6_,THE_CHAR);
-				_loc5_ = UtilPlain.getInstance(_loc6_,THE_CHAR_FLIP);
+				_loc4_ = UtilPlain.getInstance(_loc6_, THE_CHAR);
+				_loc5_ = UtilPlain.getInstance(_loc6_, THE_CHAR_FLIP);
 			}
-			if(_loc5_ != null)
+			if (_loc5_ != null)
 			{
-				if(_loc6_.scaleX < 0)
+				if (_loc6_.scaleX < 0)
 				{
 					_loc4_.visible = false;
 					_loc5_.visible = true;
@@ -544,70 +502,65 @@ package anifire.util
 			}
 			return param1.scaleX;
 		}
-		
+
 		public static function isObjectFlipped(param1:DisplayObjectContainer) : Boolean
 		{
-			if(param1.scaleX >= 0)
+			if (param1.scaleX >= 0)
 			{
 				return false;
 			}
 			return true;
 		}
-		
-		public static function transverseFamily(param1:DisplayObject, param2:Function, param3:Array = null) : void
+
+		/**
+		 * Recursively traverses a family of display objects and applies a function.
+		 * @param obj A family of display objects
+		 * @param treatment A function to run on each display object
+		 * @param exclusions A list of display object names to not run the treatment on
+		 */
+		public static function transverseFamily(obj:DisplayObject, treatment:Function, exclusions:Array = null) : void
 		{
-			var _loc4_:int = 0;
-			var _loc5_:DisplayObject = null;
-			var _loc6_:DisplayObjectContainer = null;
-			param2(param1);
-			if(param1 is DisplayObjectContainer)
+			treatment(obj);
+			if (obj is DisplayObjectContainer)
 			{
-				_loc6_ = DisplayObjectContainer(param1);
-				_loc4_ = 0;
-				while(_loc4_ < _loc6_.numChildren)
+				var container:DisplayObjectContainer = DisplayObjectContainer(obj);
+				var i:int;
+				for (i = 0; i < container.numChildren; i++)
 				{
-					_loc5_ = _loc6_.getChildAt(_loc4_);
-					if(!(param3 && _loc5_ && param3.indexOf(_loc5_.name) > -1))
+					var child:DisplayObject = container.getChildAt(i);
+					if (!(exclusions && child && exclusions.indexOf(child.name) > -1))
 					{
-						UtilPlain.transverseFamily(_loc5_,param2,param3);
+						UtilPlain.transverseFamily(child, treatment, exclusions);
 					}
-					_loc4_++;
 				}
 			}
 		}
-		
-		private static function transverseFamilyWithCheck(param1:DisplayObject, param2:Function) : void
+
+		/**
+		 * Traverses the family of display objects with a check.
+		 */
+		private static function transverseFamilyWithCheck(obj:DisplayObject, treatment:Function) : void
 		{
-			var _loc3_:DisplayObjectContainer = null;
-			var _loc4_:int = 0;
-			var _loc5_:Object = null;
-			var _loc6_:EventListenerWithData = null;
-			param2(param1);
-			if(param1 is DisplayObjectContainer)
+			treatment(obj);
+			if (obj is DisplayObjectContainer)
 			{
-				_loc3_ = param1 as DisplayObjectContainer;
-				_loc4_ = 0;
-				while(_loc4_ < _loc3_.numChildren)
+				var container:DisplayObjectContainer = obj as DisplayObjectContainer;
+				var i:int;
+				for (i = 0; i < container.numChildren; i++)
 				{
-					_loc5_ = new Object();
-					_loc5_["rootNode"] = param1;
-					_loc5_["treatment"] = param2;
-					_loc5_["targetIndex"] = _loc4_;
-					_loc5_["targetParent"] = param1;
-					_loc6_ = new EventListenerWithData(null,_loc5_);
-					UtilPlain.transverseFamilyListener(_loc6_);
-					_loc4_++;
+					var data:Object = new Object();
+					data["rootNode"] = obj;
+					data["treatment"] = treatment;
+					data["targetIndex"] = i;
+					data["targetParent"] = obj;
+					var agent:EventListenerWithData = new EventListenerWithData(null, data);
+					UtilPlain.transverseFamilyListener(agent);
 				}
 			}
 		}
-		
-		private static function transverseFamilyListener(param1:EventListenerWithData) : void
+
+		private static function transverseFamilyListener(listenerObj:EventListenerWithData) : void
 		{
-			var data:Object = null;
-			var agent:EventListenerWithData = null;
-			var container:DisplayObjectContainer = null;
-			var i:int = 0;
-			var listenerObj:EventListenerWithData = param1;
 			var rootNode:DisplayObjectContainer = listenerObj.data["rootNode"] as DisplayObjectContainer;
 			var treatment:Function = listenerObj.data["treatment"];
 			var targetIndex:int = listenerObj.data["targetIndex"];
@@ -617,28 +570,29 @@ package anifire.util
 			{
 				targetNode = targetParent.getChildAt(targetIndex);
 			}
-			catch(e:Error)
+			catch (e:Error)
 			{
 				return;
 			}
-			targetParent.removeEventListener(Event.ADDED,listenerObj.listener);
-			if(targetNode != null)
+			targetParent.removeEventListener(Event.ADDED, listenerObj.listener);
+			var data:Object;
+			var agent:EventListenerWithData;
+			if (targetNode != null)
 			{
 				treatment(targetNode);
-				if(targetNode is DisplayObjectContainer)
+				if (targetNode is DisplayObjectContainer)
 				{
-					container = targetNode as DisplayObjectContainer;
-					i = 0;
-					while(i < container.numChildren)
+					var container:DisplayObjectContainer = targetNode as DisplayObjectContainer;
+					var i:int;
+					for (i = 0; i < container.numChildren; i++)
 					{
 						data = new Object();
 						data["rootNode"] = rootNode;
 						data["treatment"] = treatment;
 						data["targetIndex"] = i;
 						data["targetParent"] = container;
-						agent = new EventListenerWithData(UtilPlain.transverseFamilyListener,data);
+						agent = new EventListenerWithData(UtilPlain.transverseFamilyListener, data);
 						transverseFamilyListener(agent);
-						i++;
 					}
 				}
 			}
@@ -649,119 +603,126 @@ package anifire.util
 				data["treatment"] = treatment;
 				data["targetIndex"] = targetIndex;
 				data["targetParent"] = targetParent;
-				agent = new EventListenerWithData(UtilPlain.transverseFamilyListener,data);
-				targetParent.addEventListener(Event.ADDED,agent.listener);
+				agent = new EventListenerWithData(UtilPlain.transverseFamilyListener, data);
+				targetParent.addEventListener(Event.ADDED, agent.listener);
 			}
 		}
-		
-		private static function isWholeFamilyReady(param1:DisplayObject) : Boolean
+
+		/**
+		 * Checks if the whole family of display objects is ready.
+		 */
+		private static function isWholeFamilyReady(obj:DisplayObject) : Boolean
 		{
-			var _loc2_:DisplayObjectContainer = null;
-			var _loc3_:int = 0;
-			if(param1 == null)
+			if (obj == null)
 			{
 				return false;
 			}
-			if(param1 is DisplayObjectContainer)
+			if (obj is DisplayObjectContainer)
 			{
-				_loc2_ = param1 as DisplayObjectContainer;
-				_loc3_ = 0;
-				while(_loc3_ < _loc2_.numChildren)
+				var container:DisplayObjectContainer = obj as DisplayObjectContainer;
+				var i:int;
+				for (i = 0; i < container.numChildren; i++)
 				{
-					if(!UtilPlain.isWholeFamilyReady(_loc2_.getChildAt(_loc3_)))
+					if (!UtilPlain.isWholeFamilyReady(container.getChildAt(i)))
 					{
 						return false;
 					}
-					_loc3_++;
 				}
 			}
 			return true;
 		}
-		
-		public static function gotoAndStopFamilyAt1(param1:DisplayObject) : void
+
+		/**
+		 * Stops a family of DisplayObjects at the first frame.
+		 */
+		public static function gotoAndStopFamilyAt1(iObj:DisplayObject) : void
 		{
-			var iObj:DisplayObject = param1;
-			var treatment:Function = function(param1:DisplayObject):void
+			var treatment:Function = function (obj:DisplayObject):void
 			{
-				var _loc2_:MovieClip = null;
-				if(param1 is MovieClip)
+				if (obj is MovieClip)
 				{
-					_loc2_ = param1 as MovieClip;
-					_loc2_.gotoAndStop(1);
+					var clip:MovieClip = obj as MovieClip;
+					clip.gotoAndStop(1);
 				}
 			};
-			UtilPlain.transverseFamilyWithCheck(iObj,treatment);
+			UtilPlain.transverseFamilyWithCheck(iObj, treatment);
 		}
-		
-		public static function nextFrameAtFamily(param1:DisplayObject) : void
+
+		/**
+		 * Increments a family of DisplayObjects by one frame.
+		 */
+		public static function nextFrameAtFamily(iObj:DisplayObject) : void
 		{
-			var iObj:DisplayObject = param1;
-			var treatment:Function = function(param1:DisplayObject):void
+			var treatment:Function = function (obj:DisplayObject):void
 			{
-				var _loc2_:MovieClip = null;
-				if(param1 is MovieClip)
+				if (obj is MovieClip)
 				{
-					_loc2_ = param1 as MovieClip;
-					if(_loc2_.currentFrame >= _loc2_.totalFrames)
+					var clip:MovieClip = obj as MovieClip;
+					if (clip.currentFrame >= clip.totalFrames)
 					{
-						_loc2_.gotoAndStop(1);
+						clip.gotoAndStop(1);
 					}
 					else
 					{
-						_loc2_.nextFrame();
+						clip.nextFrame();
 					}
 				}
 			};
-			UtilPlain.transverseFamilyWithCheck(iObj,treatment);
+			UtilPlain.transverseFamilyWithCheck(iObj, treatment);
 		}
-		
-		public static function switchParent(param1:DisplayObjectContainer, param2:DisplayObjectContainer) : void
+
+		/**
+		 * Copies all children from copyFrom to the end of copyTo
+		 */
+		public static function switchParent(copyFrom:DisplayObjectContainer, copyTo:DisplayObjectContainer) : void
 		{
-			var _loc3_:int = param2.numChildren;
-			var _loc4_:int = param1.numChildren - 1;
-			while(_loc4_ >= 0)
+			var ctnr2Length:int = copyTo.numChildren;
+			var ctnrInd:int = copyFrom.numChildren - 1;
+			for (; ctnrInd >= 0; ctnrInd--)
 			{
-				param2.addChildAt(param1.getChildAt(_loc4_),_loc3_);
-				_loc4_--;
+				copyTo.addChildAt(copyFrom.getChildAt(ctnrInd), ctnr2Length);
 			}
 		}
-		
-		public static function isTimeRangesOverlap(param1:Number, param2:Number, param3:Number, param4:Number) : Boolean
+
+		/**
+		 * checks if two time ranges overlap
+		 */
+		public static function isTimeRangesOverlap(start1:Number, end1:Number, start2:Number, end2:Number) : Boolean
 		{
-			if(param1 >= param3 && param1 <= param4)
+			if (start1 >= start2 && start1 <= end2)
 			{
 				return true;
 			}
-			if(param2 >= param3 && param2 <= param4)
+			if (end1 >= start2 && end1 <= end2)
 			{
 				return true;
 			}
-			if(param3 >= param1 && param3 <= param2)
+			if (start2 >= start1 && start2 <= end1)
 			{
 				return true;
 			}
-			if(param4 >= param1 && param4 <= param2)
+			if (end2 >= start1 && end2 <= end1)
 			{
 				return true;
 			}
 			return false;
 		}
-		
-		public static function getRelativeProperty(param1:DisplayObject, param2:DisplayObjectContainer, param3:String) : Number
+
+		public static function getRelativeProperty(targetObj:DisplayObject, referenceContainer:DisplayObjectContainer, property:String) : Number
 		{
-			if(param1 == null)
+			if (targetObj == null)
 			{
 				throw new Error("The target Obj is null.");
 			}
-			if(param2 == null)
+			if (referenceContainer == null)
 			{
 				throw new Error("The reference container is null.");
 			}
-			var _loc4_:DisplayObject = param1;
+			var _loc4_:DisplayObject = targetObj;
 			var _loc5_:Number = 1;
-			while(true)
+			while (true)
 			{
-				switch(param3)
+				switch (property)
 				{
 					case PROPERTY_SCALEX:
 						_loc5_ = _loc5_ * _loc4_.scaleX;
@@ -770,13 +731,13 @@ package anifire.util
 						_loc5_ = _loc5_ * _loc4_.scaleY;
 				}
 				_loc4_ = _loc4_.parent;
-				if(_loc4_ == null)
+				if (_loc4_ == null)
 				{
 					break;
 				}
-				if(!(_loc4_ != param2 && _loc4_ != param1.stage))
+				if (!(_loc4_ != referenceContainer && _loc4_ != targetObj.stage))
 				{
-					if(param1.stage != param2 && _loc4_ == param1.stage)
+					if (targetObj.stage != referenceContainer && _loc4_ == targetObj.stage)
 					{
 						throw new Error("referenceContainer does not contain targetObj");
 					}
@@ -785,137 +746,60 @@ package anifire.util
 			}
 			throw new Error("Reference Container is not found during reverse-parent finding");
 		}
-		
-		public static function get_isMoviePublished_by_flashVar(param1:String, param2:String) : Boolean
+
+		/**
+		 * randomizes all keys in an array
+		 */
+		public static function randomizeArray(array:Array) : void
 		{
-			if(param1 != null && param1 == "0")
+			var length:int = array.length;
+			for (var i:int = 0; i < length; i++)
 			{
-				return false;
-			}
-			if(param1 != null && param1 == "1")
-			{
-				return true;
-			}
-			if(param1 == null && param2 == null)
-			{
-				return true;
-			}
-			return false;
-		}
-		
-		public static function get_isMoviePrivateShare_by_flashVar(param1:String) : Boolean
-		{
-			if(param1 != null && param1 == "1")
-			{
-				return true;
-			}
-			return false;
-		}
-		
-		public static function randomizeArray(param1:Array) : void
-		{
-			var _loc3_:Object = null;
-			var _loc4_:int = 0;
-			var _loc2_:int = param1.length;
-			var _loc5_:int = 0;
-			while(_loc5_ < _loc2_)
-			{
-				_loc4_ = Math.floor(Math.random() * _loc2_);
-				_loc3_ = param1[_loc5_];
-				param1[_loc5_] = param1[_loc4_];
-				param1[_loc4_] = _loc3_;
-				_loc5_++;
+				var swapWithI:int = Math.floor(Math.random() * length);
+				var originalObj:Object = array[i];
+				array[i] = array[swapWithI];
+				array[swapWithI] = originalObj;
 			}
 		}
-		
-		public static function randomNumberRange(param1:Number, param2:Number) : Number
+
+		/**
+		 * returns a random number within a range of numbers
+		 */
+		public static function randomNumberRange(start:Number, end:Number) : Number
 		{
-			param2++;
-			return Math.floor(param1 + Math.random() * (param2 - param1));
+			end++;
+			return Math.floor(start + Math.random() * (end - start));
 		}
-		
-		public static function rasterizeImage(param1:Boolean, param2:DisplayObjectContainer, param3:Rectangle) : void
+
+		/**
+		 * Transfers all entires in an asset zip into an object.
+		 * returns `{"xml": <desc.xml>, "imagedata": <*.swf>[]}`
+		 */
+		public static function convertZipAsImagedataObject(zip:ZipFile) : Object
 		{
-			var _loc5_:int = 0;
-			var _loc6_:Shape = null;
-			var _loc7_:DisplayObject = null;
-			var _loc8_:BitmapData = null;
-			var _loc4_:String = "rasterized_img";
-			if(param1)
+			var files:UtilHashArray = new UtilHashArray();
+			var imagedata:Object = new Object();
+			for (var i:int = 0; i < zip.size; i++)
 			{
-				_loc8_ = new BitmapData(param3.width,param3.height);
-				_loc8_.draw(param2,null,null,null,param3,false);
-				_loc6_ = new Shape();
-				_loc6_.graphics.beginBitmapFill(_loc8_);
-				_loc6_.graphics.drawRect(param3.left,param3.top,param3.width,param3.height);
-				_loc6_.graphics.endFill();
-				_loc6_.name = _loc4_;
-				_loc5_ = 0;
-				while(_loc5_ < param2.numChildren)
+				var entry:ZipEntry = zip.entries[i];
+				if (entry.name == "desc.xml")
 				{
-					_loc7_ = param2.getChildAt(_loc5_);
-					if(_loc7_ != null)
+					imagedata["xml"] = new XML(zip.getInput(entry).toString());
+				}
+				else if (entry.name.substr(entry.name.length - 3, 3).toLowerCase() == "swf")
+				{
+					var type:String = entry.name.split(".")[1];
+					var input:ByteArray = zip.getInput(entry);
+					if (CcLibConstant.ALL_LIBRARY_TYPES.indexOf(type) == -1)
 					{
-						_loc7_.visible = false;
+						var crypto:UtilCrypto = new UtilCrypto();
+						crypto.decrypt(input);
 					}
-					_loc5_++;
-				}
-				param2.addChild(_loc6_);
-			}
-			else
-			{
-				_loc6_ = param2.getChildByName(_loc4_) as Shape;
-				if(_loc6_ != null)
-				{
-					_loc5_ = 0;
-					while(_loc5_ < param2.numChildren)
-					{
-						_loc7_ = param2.getChildAt(_loc5_);
-						if(_loc7_ != null)
-						{
-							_loc7_.visible = true;
-						}
-						_loc5_++;
-					}
-					param2.removeChild(_loc6_);
+					files.push(entry.name, input);
 				}
 			}
-		}
-		
-		public static function convertZipAsImagedataObject(param1:ZipFile) : Object
-		{
-			var _loc2_:UtilHashArray = null;
-			var _loc3_:Object = null;
-			var _loc4_:int = 0;
-			var _loc5_:ZipEntry = null;
-			var _loc6_:ByteArray = null;
-			var _loc7_:UtilCrypto = null;
-			var _loc8_:String = null;
-			_loc2_ = new UtilHashArray();
-			_loc3_ = new Object();
-			_loc4_ = 0;
-			while(_loc4_ < param1.size)
-			{
-				_loc5_ = param1.entries[_loc4_];
-				if(_loc5_.name == "desc.xml")
-				{
-					_loc3_["xml"] = new XML(param1.getInput(_loc5_).toString());
-				}
-				else if(_loc5_.name.substr(_loc5_.name.length - 3,3).toLowerCase() == "swf")
-				{
-					_loc8_ = _loc5_.name.split(".")[1];
-					_loc6_ = param1.getInput(_loc5_);
-					if(CcLibConstant.ALL_LIBRARY_TYPES.indexOf(_loc8_) == -1)
-					{
-						_loc7_ = new UtilCrypto();
-						_loc7_.decrypt(_loc6_);
-					}
-					_loc2_.push(_loc5_.name,_loc6_);
-				}
-				_loc4_++;
-			}
-			_loc3_["imageData"] = _loc2_;
-			return _loc3_;
+			imagedata["imageData"] = files;
+			return imagedata;
 		}
 	}
 }
@@ -924,24 +808,20 @@ import flash.events.Event;
 
 class EventListenerWithData
 {
-	 
-	
 	public var data:Object;
-	
 	public var event:Event;
-	
 	private var callBack:Function;
-	
-	function EventListenerWithData(param1:Function, param2:Object = null)
+
+	function EventListenerWithData(callback:Function, data:Object = null)
 	{
 		super();
-		this.callBack = param1;
-		this.data = param2;
+		this.callBack = callback;
+		this.data = data;
 	}
-	
-	public function listener(param1:Event) : void
+
+	public function listener(event:Event) : void
 	{
-		this.event = param1;
+		this.event = event;
 		this.callBack(this);
 	}
 }

@@ -10,10 +10,7 @@ package anifire.util
 	
 	public class ExtraDataLoader extends Loader implements IRegulatedProcess
 	{
-		 
-		
 		public var extraData;
-		
 		private var _bytes:ByteArray;
 		
 		public function ExtraDataLoader()
