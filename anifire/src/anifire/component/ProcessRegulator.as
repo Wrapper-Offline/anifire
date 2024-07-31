@@ -37,24 +37,22 @@ package anifire.component
 			this.reset();
 		}
 		
-		public function addProcess(param1:IRegulatedProcess, param2:String) : void
+		public function addProcess(process:IRegulatedProcess, eventType:String) : void
 		{
-			var _loc3_:Boolean = false;
-			var _loc4_:ProcessData = null;
-			if(Boolean(param1) && Boolean(param2))
+			if (Boolean(process) && Boolean(eventType))
 			{
-				_loc3_ = false;
-				for each(_loc4_ in this._processes)
+				var alreadyExists:Boolean = false;
+				for each (var processData:ProcessData in this._processes)
 				{
-					if(_loc4_.process == param1)
+					if (processData.process == process)
 					{
-						_loc3_ = true;
+						alreadyExists = true;
 						break;
 					}
 				}
-				if(!_loc3_)
+				if (!alreadyExists)
 				{
-					this._processes.push(new ProcessData(param1,param2));
+					this._processes.push(new ProcessData(process, eventType));
 				}
 			}
 		}
@@ -69,41 +67,39 @@ package anifire.component
 			return this._numComplete;
 		}
 		
-		public function startProcess(param1:Boolean = false, param2:Number = 0) : void
+		public function startProcess(oneByOne:Boolean = false, interval:Number = 0) : void
 		{
-			var _loc3_:ProcessData = null;
-			this._oneByOne = param1;
-			this._interval = param2;
-			if(0 == this._processes.length || this._state == this.STATE_COMPLETE)
+			this._oneByOne = oneByOne;
+			this._interval = interval;
+			if (0 == this._processes.length || this._state == this.STATE_COMPLETE)
 			{
 				this.dispatchEvent(new Event(Event.COMPLETE));
 				return;
 			}
-			if(this._state != this.STATE_IDLE)
+			if (this._state != this.STATE_IDLE)
 			{
 				return;
 			}
 			this._state = this.STATE_IN_PROGRESS;
-			if(param1)
+			if (oneByOne)
 			{
 				this.startNext();
 			}
 			else
 			{
-				for each(_loc3_ in this._processes)
+				for each (var processData:ProcessData in this._processes)
 				{
-					_loc3_.process.addEventListener(_loc3_.eventType,this.onProcessComplete);
-					_loc3_.process.startProcess(param1,param2);
+					processData.process.addEventListener(processData.eventType, this.onProcessComplete);
+					processData.process.startProcess(oneByOne, interval);
 				}
 			}
 		}
 		
 		public function reset() : void
 		{
-			var _loc1_:ProcessData = null;
-			for each(_loc1_ in this._processes)
+			for each (var processData:ProcessData in this._processes)
 			{
-				_loc1_.process.removeEventListener(_loc1_.eventType,this.onProcessComplete);
+				processData.process.removeEventListener(processData.eventType, this.onProcessComplete);
 			}
 			this._processes = new Vector.<ProcessData>();
 			this._step = 0;
@@ -115,35 +111,35 @@ package anifire.component
 		
 		private function startNext() : void
 		{
-			if(this._step < this._processes.length)
+			if (this._step < this._processes.length)
 			{
 				++this._step;
-				this._processes[this._step - 1].process.addEventListener(this._processes[this._step - 1].eventType,this.onProcessComplete);
-				this._processes[this._step - 1].process.startProcess(this._oneByOne,this._interval);
+				this._processes[this._step - 1].process.addEventListener(this._processes[this._step - 1].eventType, this.onProcessComplete);
+				this._processes[this._step - 1].process.startProcess(this._oneByOne, this._interval);
 			}
 		}
 		
 		private function onProcessComplete(param1:Event) : void
 		{
-			IEventDispatcher(param1.target).removeEventListener(param1.type,this.onProcessComplete);
+			IEventDispatcher(param1.target).removeEventListener(param1.type, this.onProcessComplete);
 			++this._numComplete;
 			var _loc2_:ProgressEvent = new ProgressEvent(ProgressEvent.PROGRESS);
 			_loc2_.bytesLoaded = this._numComplete;
 			_loc2_.bytesTotal = this._processes.length;
 			this.dispatchEvent(_loc2_);
-			if(this._numComplete == this._processes.length)
+			if (this._numComplete == this._processes.length)
 			{
 				this._state = this.STATE_COMPLETE;
 				this.dispatchEvent(new Event(Event.COMPLETE));
 				return;
 			}
-			if(this._oneByOne)
+			if (this._oneByOne)
 			{
-				if(this._state == this.STATE_IN_PROGRESS)
+				if (this._state == this.STATE_IN_PROGRESS)
 				{
-					if(this._interval > 0)
+					if (this._interval > 0)
 					{
-						setTimeout(this.startNext,this._interval);
+						setTimeout(this.startNext, this._interval);
 					}
 					else
 					{
@@ -159,19 +155,15 @@ import anifire.interfaces.IRegulatedProcess;
 
 class ProcessData
 {
-	
-	
 	private var _process:IRegulatedProcess;
-	
 	private var _eventType:String;
-	
 	public var completed:Boolean = false;
 	
-	public function ProcessData(param1:IRegulatedProcess, param2:String)
+	public function ProcessData(theprocess:IRegulatedProcess, theeventType:String)
 	{
 		super();
-		this._process = param1;
-		this._eventType = param2;
+		this._process = theprocess;
+		this._eventType = theeventType;
 	}
 	
 	public function get process() : IRegulatedProcess

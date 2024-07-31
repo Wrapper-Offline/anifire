@@ -2,198 +2,186 @@ package anifire.models.creator
 {
 	public class CCLibraryModel
 	{
-		 
-		
 		public var type:String;
-		
 		public var id:String;
-		
 		public var basePath:String;
-		
 		protected var _enable:Boolean;
-		
 		public var tags:Object;
-		
 		public var bodyShapes:Object;
-		
 		public var runwayMode:Boolean;
-		
 		public var localChanged:Boolean;
-		
 		protected var _localDisplayOrder:Number;
-		
-		public function CCLibraryModel(param1:Boolean = false)
+
+		public function CCLibraryModel(runway:Boolean = false)
 		{
 			super();
-			this.runwayMode = param1;
+			this.runwayMode = runway;
 			this._enable = true;
-			if(param1)
+			if (runway)
 			{
 				this.tags = {};
 				this.bodyShapes = {};
 			}
 		}
-		
+
 		public function get enable() : Boolean
 		{
 			return this._enable;
 		}
-		
-		public function set enable(param1:Boolean) : void
+
+		public function set enable(value:Boolean) : void
 		{
-			if(this._enable != param1)
+			if (this._enable != value)
 			{
-				this._enable = param1;
+				this._enable = value;
 				this.localChanged = true;
 			}
 		}
-		
+
 		public function get localDisplayOrder() : Number
 		{
 			return this._localDisplayOrder;
 		}
-		
-		public function set localDisplayOrder(param1:Number) : void
+
+		public function set localDisplayOrder(value:Number) : void
 		{
-			if(this._localDisplayOrder != param1)
+			if (this._localDisplayOrder != value)
 			{
-				this._localDisplayOrder = param1;
+				this._localDisplayOrder = value;
 				this.localChanged = true;
 			}
 		}
-		
-		public function parse(param1:XML) : void
+
+		public function parse(xml:XML) : void
 		{
-			this.id = param1.@id;
-			this.type = param1.@type;
-			this.basePath = param1.@path;
-			if(this.runwayMode)
+			this.id = xml.@id;
+			this.type = xml.@type;
+			this.basePath = xml.@path;
+			if (this.runwayMode)
 			{
-				var _loc2_:XMLList = param1.tag;
-				var _loc3_:int = _loc2_.length();
-				var _loc4_:int = 0;
-				while(_loc4_ < _loc3_)
+				var tags:XMLList = xml.tag;
+				var length:int = tags.length();
+				for (var index:int = 0; index < length; index++)
 				{
-					this.tags[_loc2_[_loc4_]] = true;
-					_loc4_++;
+					this.tags[tags[index]] = true;
 				}
-				this._enable = param1.@enable != "N";
+				this._enable = xml.@enable != "N";
 			}
-			if(param1.hasOwnProperty("@display_order"))
+			if (xml.hasOwnProperty("@display_order"))
 			{
-				this._localDisplayOrder = param1.@display_order;
+				this._localDisplayOrder = xml.@display_order;
 			}
 			else
 			{
 				this._localDisplayOrder = 0;
 			}
 		}
-		
-		public function restore(param1:CCLibraryModel) : void
+
+		public function restore(library:CCLibraryModel) : void
 		{
-			this._enable = param1.enable;
-			this.tags = param1.tags;
-			this.bodyShapes = param1.bodyShapes;
-			this._localDisplayOrder = param1.localDisplayOrder;
+			this._enable = library.enable;
+			this.tags = library.tags;
+			this.bodyShapes = library.bodyShapes;
+			this._localDisplayOrder = library.localDisplayOrder;
 			this.localChanged = true;
 		}
-		
+
 		public function get uniqueId() : String
 		{
 			return this.type + "/" + this.basePath;
 		}
-		
+
 		public function getFilename() : String
 		{
 			return this.basePath + ".swf";
 		}
-		
+
 		public function getPath() : String
 		{
 			return this.pathPrefix + this.getFilename();
 		}
-		
+
 		private function get pathPrefix() : String
 		{
 			return this.type + "/";
 		}
-		
-		public function hasTag(param1:String) : Boolean
+
+		public function hasTag(name:String) : Boolean
 		{
-			return this.tags && this.tags[param1];
+			return this.tags && this.tags[name];
 		}
-		
-		public function addTag(param1:String) : void
+
+		public function addTag(name:String) : void
 		{
-			this.tags[param1] = true;
+			this.tags[name] = true;
 			this.localChanged = true;
 		}
-		
-		public function removeTag(param1:String) : void
+
+		public function removeTag(name:String) : void
 		{
-			delete this.tags[param1];
+			delete this.tags[name];
 			this.localChanged = true;
 		}
-		
-		protected function shouldIncludeTag(param1:String, param2:String) : Boolean
+
+		protected function shouldIncludeTag(bs:String, tagName:String) : Boolean
 		{
-			switch(param2)
+			switch (tagName)
 			{
 				case "_sticky_filter_guy":
 				case "_sticky_filter_girl":
-					return param1 == "default";
+					return bs == "default";
 				case "_sticky_filter_littleboy":
 				case "_sticky_filter_littlegirl":
-					return param1 == "kid";
+					return bs == "kid";
 				case "_sticky_filter_heavyguy":
 				case "_sticky_filter_heavygirl":
-					return param1 == "heavy";
+					return bs == "heavy";
 				case "_userrole_admin":
 					return true;
 				default:
 					return false;
 			}
 		}
-		
-		public function getLocalXMLByBodyShape(param1:String) : XML
+
+		public function getLocalXMLByBodyShape(bs:String) : XML
 		{
-			var _loc2_:XML = <library/>;
-			_loc2_.@type = this.type;
-			_loc2_.@id = this.id;
-			_loc2_.@path = this.basePath;
-			_loc2_.@name = this.id;
-			_loc2_.@thumb = this.basePath + "_thumbnail.swf";
-			if(this._localDisplayOrder > 0)
+			var xml:XML = <library/>;
+			xml.@type = this.type;
+			xml.@id = this.id;
+			xml.@path = this.basePath;
+			xml.@name = this.id;
+			xml.@thumb = this.basePath + "_thumbnail.swf";
+			if (this._localDisplayOrder > 0)
 			{
-				_loc2_.@display_order = this._localDisplayOrder;
+				xml.@display_order = this._localDisplayOrder;
 			}
-			_loc2_.@enable = !!this.enable?"Y":"N";
-			_loc2_.@sharing = "0";
-			for(var _loc3_:String in this.tags)
+			xml.@enable = !!this.enable ? "Y" : "N";
+			xml.@sharing = "0";
+			for (var tagName:String in this.tags)
 			{
-				if(this.tags[_loc3_] && this.shouldIncludeTag(param1,_loc3_))
+				if (this.tags[tagName] && this.shouldIncludeTag(bs, tagName))
 				{
-					var _loc4_:XML = <tag>{_loc3_}</tag>;
-					_loc2_.appendChild(_loc4_);
+					var tagXml:XML = <tag>{tagName}</tag>;
+					xml.appendChild(tagXml);
 				}
 			}
-			return _loc2_;
+			return xml;
 		}
-		
-		public function hasLocalBodyShape(param1:String) : Boolean
+
+		public function hasLocalBodyShape(id:String) : Boolean
 		{
-			return this.bodyShapes[param1];
+			return this.bodyShapes[id];
 		}
-		
-		public function addLocalBodyShape(param1:String) : void
+
+		public function addLocalBodyShape(id:String) : void
 		{
-			this.bodyShapes[param1] = true;
+			this.bodyShapes[id] = true;
 			this.localChanged = true;
 		}
-		
-		public function removeLocalBodyShape(param1:String) : void
+
+		public function removeLocalBodyShape(id:String) : void
 		{
-			delete this.bodyShapes[param1];
+			delete this.bodyShapes[id];
 			this.localChanged = true;
 		}
 	}

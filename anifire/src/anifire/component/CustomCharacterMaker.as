@@ -761,16 +761,16 @@ package anifire.component
 			actionLoader.loadCcComponentsByCam(cam, imageData, this.ver);
 		}
 		
-		public function initByXMLWithData(param1:XML, param2:Number = 0, param3:Number = 0, param4:UtilHashBytes = null, param5:Boolean = false, param6:Boolean = false, param7:String = "") : void
+		public function initByXMLWithData(xml:XML, startMs:Number = 0, endMs:Number = 0, imageData:UtilHashBytes = null, isSpeech:Boolean = false, unused:Boolean = false, filename:String = "") : void
 		{
-			if (!param1)
+			if (!xml)
 			{
 				return;
 			}
-			var _loc8_:CcActionLoader = CcActionLoader.getActionLoader(param7);
+			var _loc8_:CcActionLoader = CcActionLoader.getActionLoader(filename);
 			_loc8_.addEventListener(Event.COMPLETE, this.onCcActionLoaded);
 			_loc8_.addEventListener(IOErrorEvent.IO_ERROR, this.onCcActionFailed);
-			_loc8_.loadCcComponents(param1, param2, param3, param4, this.ver, param6);
+			_loc8_.loadCcComponents(xml, startMs, endMs, imageData, this.ver, unused);
 		}
 		
 		public function initByXml(charXml:XML, param2:Number = 0, param3:Number = 0, param4:Boolean = false) : void
@@ -826,7 +826,6 @@ package anifire.component
 		private function onCcActionLoaded(e:Event) : void
 		{
 			(e.target as IEventDispatcher).removeEventListener(e.type, this.onCcActionLoaded);
-			var cDate:Date = new Date();
 			try
 			{
 				var loader:CcActionLoader = CcActionLoader(e.target);
@@ -849,37 +848,32 @@ package anifire.component
 			{
 				return;
 			}
-			var _loc2_:Date = new Date();
-			var _loc3_:XML;
 			this._decoArray = new Array();
-			var _loc4_:UtilLoadMgr = new UtilLoadMgr();
-			_loc4_.addEventListener(LoadMgrEvent.ALL_COMPLETE, this.onBodyLoadedByCam);
-			var _loc5_:String;
-			for (_loc5_ in this._myActionModel.components)
+			var loadMgr:UtilLoadMgr = new UtilLoadMgr();
+			loadMgr.addEventListener(LoadMgrEvent.ALL_COMPLETE, this.onBodyLoadedByCam);
+			for (var type:String in this._myActionModel.components)
 			{
-				if (CcLibConstant.ALL_BODY_COMPONENT_TYPES.indexOf(_loc5_) > -1)
+				if (CcLibConstant.ALL_BODY_COMPONENT_TYPES.indexOf(type) > -1)
 				{
-					var _loc6_:ExtraDataLoader = this.updateComponentImageData(_loc5_, null, null, _loc4_, null, this._myActionModel.getComponentByType(_loc5_).path);
+					var _loc6_:ExtraDataLoader = this.updateComponentImageData(type, null, null, loadMgr, null, this._myActionModel.getComponentByType(type).path);
 				}
 			}
-			_loc4_.commit();
+			loadMgr.commit();
 		}
 		
 		private function loadAllComponents(e:Event) : void
 		{
-			var _loc2_:Date = new Date();
-			var _loc3_:XML;
 			this._decoArray = new Array();
-			var _loc4_:UtilLoadMgr = new UtilLoadMgr();
-			_loc4_.addEventListener(LoadMgrEvent.ALL_COMPLETE, this.onBodyLoaded);
-			for each(_loc3_ in this.charXML.child(this.NODE_COMPONENT))
+			var loadMgr:UtilLoadMgr = new UtilLoadMgr();
+			loadMgr.addEventListener(LoadMgrEvent.ALL_COMPLETE, this.onBodyLoaded);
+			for each (var _loc3_:XML in this.charXML.child(this.NODE_COMPONENT))
 			{
 				if (CcLibConstant.ALL_BODY_COMPONENT_TYPES.indexOf(String(_loc3_.@type)) >= 0)
 				{
-					var _loc5_:ExtraDataLoader = this.updateComponentImageData(_loc3_.@type, null, null, _loc4_, null, _loc3_.@id, _loc3_);
+					var _loc5_:ExtraDataLoader = this.updateComponentImageData(_loc3_.@type, null, null, loadMgr, null, _loc3_.@id, _loc3_);
 				}
 			}
-			_loc4_.commit();
+			loadMgr.commit();
 		}
 		
 		public function updateComponentImageData(componentType:String, swfByteArray:ByteArray, properties:Object, loadMgr:UtilLoadMgr, colors:Array = null, id:String = "", node:XML = null) : ExtraDataLoader
@@ -898,10 +892,10 @@ package anifire.component
 				return null;
 			}
 			var loader:ExtraDataLoader = new ExtraDataLoader();
-			var assetImageId:Number = 0;
 			if (this._useImageLibrary)
 			{
 				var key:String;
+				var assetImageId:Number;
 				if (node)
 				{
 					key = node.@theme_id + "." + node.@type + "." + node.@path + "." + node.@file;

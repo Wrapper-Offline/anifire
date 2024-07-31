@@ -1032,36 +1032,36 @@ package anifire.browser.core
 		
 		override public function loadImageData() : void
 		{
-			var _loc1_:URLRequest;
-			var _loc2_:UtilURLStream = new UtilURLStream();
+			var request:URLRequest;
 			if (this.isCC)
 			{
-				var _loc3_:CCBodyModel = CCBodyManager.instance.getBodyModel(this.id);
-				var _loc4_:String = CCThemeManager.instance.getThemeModel(this.ccThemeId).getCharacterDefaultActionId(_loc3_.bodyShapeId);
-				var _loc5_:CCCharacterActionModel = CCThemeManager.instance.getThemeModel(this.ccThemeId).getCharacterActionModel(_loc3_, _loc4_);
-				if (_loc5_)
+				var bodyModel:CCBodyModel = CCBodyManager.instance.getBodyModel(this.id);
+				var defaultAction:String = CCThemeManager.instance.getThemeModel(this.ccThemeId).getCharacterDefaultActionId(bodyModel.bodyShapeId);
+				var cam:CCCharacterActionModel = CCThemeManager.instance.getThemeModel(this.ccThemeId).getCharacterActionModel(bodyModel, defaultAction);
+				if (cam)
 				{
-					var _loc6_:CcActionLoader = new CcActionLoader();
-					_loc6_.addEventListener(Event.COMPLETE, this.onCcActionLoaded);
-					_loc6_.addEventListener(IOErrorEvent.IO_ERROR, this.onCcActionFailed);
-					_loc6_.loadCcComponentsByCam(_loc5_);
+					var loader:CcActionLoader = new CcActionLoader();
+					loader.addEventListener(Event.COMPLETE, this.onCcActionLoaded);
+					loader.addEventListener(IOErrorEvent.IO_ERROR, this.onCcActionFailed);
+					loader.loadCcComponentsByCam(cam);
 					return;
 				}
-				_loc1_ = UtilNetwork.getGetCcActionRequest(this.id, this.defaultAction.id);
+				request = UtilNetwork.getGetCcActionRequest(this.id, this.defaultAction.id);
 			}
 			else if (this.path)
 			{
-				_loc1_ = UtilNetwork.getGetThemeAssetRequest(this.theme.id, this.path, ServerConstants.PARAM_CHAR_ACTION, this.defaultAction.id);
+				request = UtilNetwork.getGetThemeAssetRequest(this.theme.id, this.path, ServerConstants.PARAM_CHAR_ACTION, this.defaultAction.id);
 			}
 			else
 			{
-				_loc1_ = UtilNetwork.getGetThemeAssetRequest(this.theme.id, this.id, ServerConstants.PARAM_CHAR_ACTION, this.defaultAction.id);
+				request = UtilNetwork.getGetThemeAssetRequest(this.theme.id, this.id, ServerConstants.PARAM_CHAR_ACTION, this.defaultAction.id);
 			}
-			_loc2_.addEventListener(Event.COMPLETE, this.loadImageDataComplete);
-			_loc2_.addEventListener(UtilURLStream.TIME_OUT, this.onLoadImageDataFail);
-			_loc2_.addEventListener(IOErrorEvent.IO_ERROR, this.onLoadImageDataFail);
-			_loc2_.addEventListener(SecurityErrorEvent.SECURITY_ERROR, this.onLoadImageDataFail);
-			_loc2_.load(_loc1_);
+			var urlstream:UtilURLStream = new UtilURLStream();
+			urlstream.addEventListener(Event.COMPLETE, this.loadImageDataComplete);
+			urlstream.addEventListener(UtilURLStream.TIME_OUT, this.onLoadImageDataFail);
+			urlstream.addEventListener(IOErrorEvent.IO_ERROR, this.onLoadImageDataFail);
+			urlstream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, this.onLoadImageDataFail);
+			urlstream.load(request);
 		}
 		
 		private function onLoadImageDataFail(param1:Event) : void

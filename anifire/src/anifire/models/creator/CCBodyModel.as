@@ -12,41 +12,93 @@ package anifire.models.creator
 	import flash.net.URLRequest;
 	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
-	
+
 	public class CCBodyModel extends EventDispatcher
 	{
-		 
-		
+		/**
+		 * List of either `CCBodyComponentModel`s or
+		 * `Vector.\<CCBodyComponentModel\>`s, depending on whether
+		 * or not the component supports selection of multiple of
+		 * its own type, index by their type.
+		 */
 		public var components:Object;
-		
+
+		/**
+		 * List of library IDs indexed by their type.
+		 */
 		public var libraries:Object;
-		
+
+		/**
+		 * List of `CCColor`s indexed by their type.
+		 */
 		public var colors:Object;
-		
+
+		/**
+		 * Object containing the `scalex` and `scaley` values
+		 * for the custom character's body shape.
+		 */
 		public var bodyScale:Object;
-		
+
+		/**
+		 * Object containing the `scalex` and `scaley` values
+		 * for the custom character's head.
+		 */
 		public var headScale:Object;
-		
+
+		/**
+		 * Object containing the `dx` and `dx` values for the
+		 * custom character's head.
+		 */
 		public var headPos:Object;
-		
+
+		/**
+		 * Boolean indicating whether or not CC body XML parsing
+		 * has completed.
+		 */
 		public var completed:Boolean = false;
-		
+
+		/**
+		 * The custom character body's asset ID.
+		 */
 		public var assetId:String;
-		
+
+		/**
+		 * Number specifying the custom character version, with
+		 * `1` belonging to a skeletal CC theme and `2` belonging
+		 * to a freeaction CC theme.
+		 */
 		public var version:Number;
-		
+
+		/**
+		 * The ID of the bodyshape used for the custom character.
+		 */
 		public var bodyShapeId:String;
-		
+
+		/**
+		 * The custom character's theme ID.
+		 */
 		public var themeId:String;
-		
+
+		/**
+		 * The original, unmodified CC body XML that was
+		 * passed to this class.
+		 */
 		public var source:XML;
-		
+
+		/**
+		 * The `URLLoader` used to request a CC body XML
+		 * from the server.
+		 */
 		protected var loader:URLLoader;
-		
-		public function CCBodyModel(param1:String)
+
+		/**
+		 * Custom character body XML model.
+		 * @param id ID of the custom character.
+		 */
+		public function CCBodyModel(id:String)
 		{
 			super();
-			this.assetId = param1;
+			this.assetId = id;
 			this.components = {};
 			this.libraries = {};
 			this.colors = {};
@@ -55,141 +107,159 @@ package anifire.models.creator
 			this.headPos = {};
 			this.version = 1;
 		}
-		
+
+		/**
+		 * Requests a CC body XML from the server.
+		 */
 		public function load() : void
 		{
-			var _loc1_:URLRequest = null;
-			var _loc2_:URLVariables = null;
-			if(!this.loader)
+			if (!this.loader)
 			{
-				_loc1_ = new URLRequest(ServerConstants.ACTION_GET_CC_CHAR_COMPOSITION_XML);
-				_loc1_.method = URLRequestMethod.POST;
-				_loc2_ = AppConfigManager.instance.createURLVariables();
-				_loc2_["assetId"] = this.assetId;
-				_loc1_.data = _loc2_;
-				if(this.assetId && this.assetId != "")
+				var req:URLRequest = new URLRequest(ServerConstants.ACTION_GET_CC_CHAR_COMPOSITION_XML);
+				req.method = URLRequestMethod.POST;
+				var vars:URLVariables = AppConfigManager.instance.createURLVariables();
+				vars["assetId"] = this.assetId;
+				req.data = vars;
+				if (this.assetId && this.assetId != "")
 				{
 					this.loader = new URLLoader();
-					this.loader.addEventListener(Event.COMPLETE,this.onLoaderComplete);
-					this.loader.addEventListener(IOErrorEvent.IO_ERROR,this.onLoaderError);
-					this.loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR,this.onLoaderError);
-					this.loader.load(_loc1_);
+					this.loader.addEventListener(Event.COMPLETE, this.onLoaderComplete);
+					this.loader.addEventListener(IOErrorEvent.IO_ERROR, this.onLoaderError);
+					this.loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, this.onLoaderError);
+					this.loader.load(req);
 				}
 			}
 		}
-		
-		protected function onLoaderComplete(param1:Event) : void
+
+		/**
+		 * CC body XML request was successful.
+		 */
+		protected function onLoaderComplete(e:Event) : void
 		{
-			this.loader.removeEventListener(Event.COMPLETE,this.onLoaderComplete);
-			var _loc2_:String = this.loader.data;
-			if(_loc2_.charAt(0) == "0")
+			this.loader.removeEventListener(Event.COMPLETE, this.onLoaderComplete);
+			var responseText:String = this.loader.data;
+			this.loader = null;
+			if (responseText.charAt(0) == "0")
 			{
-				this.parse(XML(_loc2_.substr(1)));
+				this.parse(XML(responseText.substr(1)));
 			}
 			else
 			{
 				this.dispatchError();
 			}
 		}
-		
-		protected function onLoaderError(param1:Event) : void
+
+		/**
+		 * CC body XML request failed.
+		 */
+		protected function onLoaderError(e:Event) : void
 		{
 			this.dispatchError();
 		}
-		
 		protected function dispatchError() : void
 		{
 			dispatchEvent(new ErrorEvent(ErrorEvent.ERROR));
 		}
-		
-		public function parse(param1:XML) : void
+
+		/**
+		 * Parses a CC body XML.
+		 * @param charXml CC body XML to parse.
+		 */
+		public function parse(charXml:XML) : void
 		{
-			var _loc2_:int;
-			var _loc3_:String;
-			var _loc4_:String;
-			var _loc5_:XMLList = param1.component;
-			var _loc6_:int = _loc5_.length();
-			_loc2_ = 0;
-			while(_loc2_ < _loc6_)
+			var index:int;
+			var elements:XMLList = charXml.component;
+			var length:int = elements.length();
+			for (index = 0; index < length; index++)
 			{
-				var _loc7_:CCBodyComponentModel = new CCBodyComponentModel();
-				_loc7_.parse(_loc5_[_loc2_]);
-				if(_loc7_.type == "bodyshape")
+				var component:CCBodyComponentModel = new CCBodyComponentModel();
+				component.parse(elements[index]);
+				if (component.type == "bodyshape")
 				{
-					this.bodyShapeId = _loc7_.component_id;
-					this.themeId = _loc7_.theme_id;
+					this.bodyShapeId = component.component_id;
+					this.themeId = component.theme_id;
 				}
-				if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(_loc7_.type) > -1)
+				
+				if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(component.type) > -1)
 				{
-					var _loc8_:Vector.<CCBodyComponentModel>;
-					if(!this.components[_loc7_.type])
+					var cmpntArray:Vector.<CCBodyComponentModel>;
+					if (!this.components[component.type])
 					{
-						_loc8_ = this.components[_loc7_.type] = new Vector.<CCBodyComponentModel>();
+						cmpntArray = this.components[component.type] = new Vector.<CCBodyComponentModel>();
 					}
 					else
 					{
-						_loc8_ = this.components[_loc7_.type];
+						cmpntArray = this.components[component.type];
 					}
-					_loc8_.push(_loc7_);
+					cmpntArray.push(component);
 				}
 				else
 				{
-					this.components[_loc7_.type] = _loc7_;
+					this.components[component.type] = component;
 				}
-				_loc2_++;
 			}
-			_loc5_ = param1.library;
-			_loc6_ = _loc5_.length();
-			_loc2_ = 0;
-			while(_loc2_ < _loc6_)
+			elements = charXml.library;
+			length = elements.length();
+			for (index = 0; index < length; index++)
 			{
-				_loc3_ = _loc5_[_loc2_].@type;
-				_loc4_ = _loc5_[_loc2_].@component_id;
-				this.libraries[_loc3_] = _loc4_;
-				_loc2_++;
+				var type:String = elements[index].@type;
+				var iv:String = elements[index].@component_id;
+				this.libraries[type] = iv;
 			}
-			_loc5_ = param1.color;
-			_loc6_ = _loc5_.length();
-			_loc2_ = 0;
-			while(_loc2_ < _loc6_)
+			elements = charXml.color;
+			length = elements.length();
+			for (index = 0; index < length; index++)
 			{
-				var _loc9_:CCColor = new CCColor();
-				_loc9_.parse(_loc5_[_loc2_]);
-				if(_loc9_.targetComponent)
+				var color:CCColor = new CCColor();
+				color.parse(elements[index]);
+				if (color.targetComponent)
 				{
-					this.colors[_loc9_.type + _loc9_.targetComponent] = _loc9_;
+					this.colors[color.type + color.targetComponent] = color;
 				}
 				else
 				{
-					this.colors[_loc9_.type] = _loc9_;
+					this.colors[color.type] = color;
 				}
-				_loc2_++;
 			}
-			this.bodyScale.scalex = Number(param1.@xscale);
-			this.bodyScale.scaley = Number(param1.@yscale);
-			this.headScale.scalex = Number(param1.@hxscale);
-			this.headScale.scaley = Number(param1.@hyscale);
-			this.headPos.dx = Number(param1.@headdx);
-			this.headPos.dy = Number(param1.@headdy);
-			this.version = Number(param1.@version);
-			this.source = param1;
+			this.bodyScale.scalex = Number(charXml.@xscale);
+			this.bodyScale.scaley = Number(charXml.@yscale);
+			this.headScale.scalex = Number(charXml.@hxscale);
+			this.headScale.scaley = Number(charXml.@hyscale);
+			this.headPos.dx = Number(charXml.@headdx);
+			this.headPos.dy = Number(charXml.@headdy);
+			this.version = Number(charXml.@version);
+			this.source = charXml;
 			this.completed = true;
 			dispatchEvent(new Event(Event.COMPLETE));
 		}
-		
-		public function getColor(param1:String) : CCColor
+
+		/**
+		 * Returns a `CCColor` for the specified type.
+		 * @param type Type of color to return.
+		 */
+		public function getColor(type:String) : CCColor
 		{
-			return this.colors[param1];
+			return this.colors[type];
 		}
-		
-		public function getComponentId(param1:String) : Object
+
+		/**
+		 * Returns a `CCBodyComponentModel` of the specified type,
+		 * or a `Vector.\<CCBodyComponentModel\>` if multiple
+		 * components of that type are allowed to be selected.
+		 * @param type Component type to return.
+		 */
+		public function getComponentId(type:String) : Object
 		{
-			return this.components[param1];
+			return this.components[type];
 		}
-		
-		public function getLibraryId(param1:String) : String
+
+		/**
+		 * Returns a library ID of the specified type.
+		 * @param type Type of library to return the ID for.
+		 */
+		public function getLibraryId(type:String) : String
 		{
-			return this.libraries[param1];
+			return this.libraries[type];
 		}
 	}
 }

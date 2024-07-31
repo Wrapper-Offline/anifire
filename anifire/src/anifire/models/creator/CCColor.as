@@ -2,50 +2,45 @@ package anifire.models.creator
 {
 	public class CCColor
 	{
-		 
-		
 		public var type:String;
-		
 		public var dest:uint;
-		
 		public var oc:uint = 4.294967295E9;
-		
 		public var targetComponent:String = "";
-		
+
 		public function CCColor()
 		{
 			super();
 		}
-		
-		public function parse(param1:XML) : void
+
+		public function parse(xml:XML) : void
 		{
-			this.type = param1.@r;
-			this.dest = uint(param1);
-			this.oc = param1.attribute("oc").length() == 0 ? uint.MAX_VALUE : uint(param1.@oc);
-			if(param1.attribute("targetComponent").length() != 0)
+			this.type = xml.@r;
+			this.dest = uint(xml);
+			this.oc = xml.attribute("oc").length() == 0 ? uint.MAX_VALUE : uint(xml.@oc);
+			if(xml.attribute("targetComponent").length() != 0)
 			{
-				this.targetComponent = param1.@targetComponent;
+				this.targetComponent = xml.@targetComponent;
 			}
 		}
-		
+
 		public function serialize() : XML
 		{
-			var _loc1_:XML = <color>{this.dest.toString()}</color>;
-			_loc1_.@r = this.type;
+			var xml:XML = <color>{this.dest.toString()}</color>;
+			xml.@r = this.type;
 			if(this.oc != uint.MAX_VALUE)
 			{
-				_loc1_.@oc = this.oc.toString();
+				xml.@oc = this.oc.toString();
 			}
 			if(this.targetComponent)
 			{
-				_loc1_.@targetComponent = this.targetComponent;
+				xml.@targetComponent = this.targetComponent;
 			}
-			return _loc1_;
+			return xml;
 		}
-		
-		public function deserialize(param1:XML) : void
+
+		public function deserialize(xml:XML) : void
 		{
-			this.parse(param1);
+			this.parse(xml);
 		}
 	}
 }

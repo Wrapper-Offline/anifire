@@ -2,10 +2,7 @@ package anifire.models.creator
 {
 	public class CCCharActionComponentModel extends CCBodyComponentModel
 	{
-		 
-		
 		public var path:String;
-		
 		public var file:String;
 		
 		public function CCCharActionComponentModel()

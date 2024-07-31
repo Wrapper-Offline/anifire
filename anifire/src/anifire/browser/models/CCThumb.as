@@ -82,7 +82,7 @@ package anifire.browser.models
                _loc6_.initBySwfs(param1, param2, param3);
                break;
             case RaceConstants.SKINNED_SWF:
-               var _loc7__:SkinnedCharacterMaker = new SkinnedCharacterMaker();
+               var _loc7_:SkinnedCharacterMaker = new SkinnedCharacterMaker();
                _loc7_.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT, this.initCCMakerComplete);
                _loc7_.init(param1, figure, param2);
          }

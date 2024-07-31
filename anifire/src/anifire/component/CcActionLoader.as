@@ -151,107 +151,86 @@ package anifire.component
 			}
 		}
 		
-		public function loadCcComponents(param1:XML, param2:Number = 0, param3:Number = 0, param4:UtilHashBytes = null, param5:Number = 1, param6:Boolean = false, param7:String = "", param8:String = "", param9:Boolean = false) : void
+		public function loadCcComponents(xml:XML, startMs:Number = 0, endMs:Number = 0, imageData:UtilHashBytes = null, ver:Number = 1, unused:Boolean = false, unused2:String = "", filename:String = "", kms:Boolean = false) : void
 		{
-			var _loc10_:URLStream = null;
-			var _loc11_:String = null;
-			var _loc12_:XML = null;
-			var _loc13_:CcComponentLoader = null;
-			var _loc14_:String = null;
-			var _loc15_:* = null;
-			var _loc16_:String = null;
-			var _loc17_:String = null;
-			var _loc18_:String = null;
 			if (this._state == this.STATE_LOADED)
 			{
 				this.dispatchEvent(new Event(Event.COMPLETE));
 			}
-			else if (this._state == this.STATE_LOADING)
+			else if (!xml || this._state == this.STATE_LOADING)
 			{
 				return;
 			}
 			this._state = this.STATE_LOADING;
-			try
+			this.initImageData(imageData, xml);
+
+			var element:XML;
+			var key:String;
+			var url:String;
+			this._regulator = new ProcessRegulator();
+			for each (element in xml..library)
 			{
-				if (param1)
+				var themeId:String = String(element.@theme_id);
+				var type:String = element.@type;
+				if (ver == 3)
 				{
-					_loc14_ = _configManager.getValue(ServerConstants.FLASHVAR_IS_VIDEO_RECORD_MODE);
-					this.initImageData(param4, param1);
-					this._regulator = new ProcessRegulator();
-					for each(_loc12_ in param1..library)
+					if (element.@type == CcLibConstant.COMPONENT_TYPE_MOUTH)
 					{
-						_loc17_ = String(_loc12_.@theme_id);
-						_loc18_ = _loc12_.@type;
-						if (param5 == 3)
-						{
-							if (_loc12_.@type == CcLibConstant.COMPONENT_TYPE_MOUTH)
-							{
-								this.doLoadExtraComponent(_loc12_, param8, param5);
-								continue;
-							}
-							_loc11_ = getStoreUrl(_loc17_ + "/charparts" + "/" + _loc18_ + "/" + _loc12_.@path + ".swf", _loc17_, param5);
-							_loc18_ = CcLibConstant.LIBRARY_TYPE_GOHANDS;
-						}
-						else
-						{
-							_loc11_ = getStoreUrl(_loc17_ + "/" + _loc18_ + "/" + _loc12_.@path + ".swf", _loc17_);
-						}
-						_loc15_ = _loc17_ + "." + _loc18_ + "." + _loc12_.@path + ".swf";
-						if (UtilHashBytes(this._imageData["imageData"]).getValueByKey(_loc15_) == null)
-						{
-							(_loc13_ = CcComponentLoader.getComponentLoader(_loc15_, _loc11_)).addEventListener(Event.COMPLETE, this.onCcComponentLoaded);
-							_loc13_.addEventListener(IOErrorEvent.IO_ERROR, this.onCcComponentFailed);
-							this._regulator.addProcess(_loc13_, Event.COMPLETE);
-						}
+						this.doLoadExtraComponent(element, filename, ver);
+						continue;
 					}
-					_loc16_ = "default";
-					for each(_loc12_ in param1..component)
-					{
-						if (_loc12_.@type == "bodyshape")
-						{
-							_loc16_ = _loc12_.@path;
-						}
-					}
-					for each(_loc12_ in param1..component)
-					{
-						if (_loc12_.hasOwnProperty("@file"))
-						{
-							_loc11_ = getStoreUrl(_loc12_.@theme_id + "/" + _loc12_.@type + "/" + _loc12_.@path + "/" + _loc12_.@file);
-						}
-						else
-						{
-							if (!(_loc12_.@type == "freeaction" && _loc12_.@path != "default" && !param9))
-							{
-								continue;
-							}
-							if (_loc16_ == _loc12_.@path)
-							{
-								continue;
-							}
-							_loc11_ = getStoreUrl(_loc12_.@theme_id + "/" + _loc12_.@type + "/" + _loc16_ + "/" + _loc12_.@path + ".swf");
-						}
-						_loc15_ = _loc12_.@theme_id + "." + _loc12_.@type + "." + _loc12_.@path + ".swf";
-						if (UtilHashBytes(this._imageData["imageData"]).getValueByKey(_loc15_) == null)
-						{
-							(_loc13_ = CcComponentLoader.getComponentLoader(_loc15_, _loc11_)).addEventListener(Event.COMPLETE, this.onCcComponentLoaded);
-							_loc13_.addEventListener(IOErrorEvent.IO_ERROR, this.onCcComponentFailed);
-							this._regulator.addProcess(_loc13_, Event.COMPLETE);
-						}
-						this.doLoadExtraComponent(_loc12_);
-					}
-					this._regulator.startProcess();
-					if (this._regulator.numProcess == 0)
-					{
-						this._state = this.STATE_LOADED;
-						this.dispatchEvent(new Event(Event.COMPLETE));
-					}
+					url = getStoreUrl(themeId + "/charparts" + "/" + type + "/" + element.@path + ".swf", themeId, ver);
+					type = CcLibConstant.LIBRARY_TYPE_GOHANDS;
+				}
+				else
+				{
+					url = getStoreUrl(themeId + "/" + type + "/" + element.@path + ".swf", themeId);
+				}
+				key = themeId + "." + type + "." + element.@path + ".swf";
+				this.loadCcComponent(key, url);
+			}
+			var bsPath:String = "default";
+			for each (element in xml..component)
+			{
+				if (element.@type == "bodyshape")
+				{
+					bsPath = element.@path;
 				}
 			}
-			catch (e:Error)
+			for each (element in xml..component)
 			{
+				if (element.hasOwnProperty("@file"))
+				{
+					url = getStoreUrl(element.@theme_id + "/" + element.@type + "/" + element.@path + "/" + element.@file);
+				}
+				else
+				{
+					if (element.@type != "freeaction" || element.@path == "default" || kms)
+					{
+						continue;
+					}
+					if (bsPath == element.@path)
+					{
+						continue;
+					}
+					url = getStoreUrl(element.@theme_id + "/" + element.@type + "/" + bsPath + "/" + element.@path + ".swf");
+				}
+				key = element.@theme_id + "." + element.@type + "." + element.@path + ".swf";
+				this.loadCcComponent(key, url);
+				this.doLoadExtraComponent(element);
+			}
+			this._regulator.startProcess();
+			if (this._regulator.numProcess == 0)
+			{
+				this._state = this.STATE_LOADED;
+				this._regulator = null;
+				this.dispatchEvent(new Event(Event.COMPLETE));
 			}
 		}
-		
+
+		/**
+		 * loads components from a characteractionmodel
+		 */
 		public function loadCcComponentsByCam(cam:CCCharacterActionModel, imageData:UtilHashBytes = null, ver:Number = 1) : void
 		{
 			if (this._state == this.STATE_LOADED)
@@ -264,7 +243,7 @@ package anifire.component
 				return;
 			}
 			this._state = this.STATE_LOADING;
-			initImageData(imageData, null, cam);
+			this.initImageData(imageData, null, cam);
 
 			var index:String;
 			var path:String;
@@ -272,7 +251,7 @@ package anifire.component
 			for (index in cam.libraryPaths)
 			{
 				path = cam.libraryPaths[index] as String;
-				loadCcComponent(path, getStoreUrl(path));
+				this.loadCcComponent(path, getStoreUrl(path));
 			}
 			for (index in cam.components)
 			{
@@ -283,13 +262,13 @@ package anifire.component
 					for (var i2:String in compsOfType)
 					{
 						path = String(compsOfType[i2].path);
-						loadCcComponent(path, getStoreUrl(path));
+						this.loadCcComponent(path, getStoreUrl(path));
 					}
 				}
 				else
 				{
 					path = String(cam.getComponentByType(index).path);
-					loadCcComponent(path, getStoreUrl(path));
+					this.loadCcComponent(path, getStoreUrl(path));
 					this.doLoadExtraComponentByCam(cam, index);
 				}
 			}
@@ -316,13 +295,11 @@ package anifire.component
 			}
 		}
 		
-		private function onCcComponentLoaded(param1:Event) : void
+		private function onCcComponentLoaded(e:Event) : void
 		{
-			var loader:CcComponentLoader = null;
-			var e:Event = param1;
 			try
 			{
-				loader = CcComponentLoader(e.target);
+				var loader:CcComponentLoader = CcComponentLoader(e.target);
 				if (loader)
 				{
 					loader.removeEventListener(e.type, this.onCcComponentLoaded);
@@ -354,23 +331,19 @@ package anifire.component
 			}
 		}
 		
-		public function doLoadExtraComponentByCam(param1:CCCharacterActionModel, param2:String, param3:String = "", param4:Number = 1) : void
+		public function doLoadExtraComponentByCam(cam:CCCharacterActionModel, param2:String, param3:String = "", param4:Number = 1) : void
 		{
-			var _loc5_:CcComponentLoader = null;
-			var _loc6_:Object = null;
-			var _loc7_:UtilHashBytes = null;
-			var _loc8_:String = null;
-			var _loc9_:String = null;
 			if (param2 == CcLibConstant.COMPONENT_TYPE_MOUTH)
 			{
-				_loc6_ = CCLipSyncController.getLipSyncComponentItemsByCam(param1, param2, param3, param4);
-				_loc7_ = this._imageData["imageData"] as UtilHashBytes;
-				for (_loc8_ in _loc6_)
+				var _loc6_:Object = CCLipSyncController.getLipSyncComponentItemsByCam(cam, param2, param3, param4);
+				var _loc7_:UtilHashBytes = this._imageData["imageData"] as UtilHashBytes;
+				for (var _loc8_:String in _loc6_)
 				{
-					_loc9_ = String(_loc6_[_loc8_]);
+					var _loc9_:String = String(_loc6_[_loc8_]);
 					if (_loc7_.getValueByKey(_loc9_) == null)
 					{
-						(_loc5_ = CcComponentLoader.getComponentLoader(_loc9_, _loc8_)).addEventListener(Event.COMPLETE, this.onCcComponentLoaded);
+						var _loc5_:CcComponentLoader = CcComponentLoader.getComponentLoader(_loc9_, _loc8_);
+						_loc5_.addEventListener(Event.COMPLETE, this.onCcComponentLoaded);
 						_loc5_.addEventListener(IOErrorEvent.IO_ERROR, this.onCcComponentFailed);
 						this._regulator.addProcess(_loc5_, Event.COMPLETE);
 					}
@@ -380,26 +353,23 @@ package anifire.component
 		
 		public function doLoadExtraComponent(param1:XML, param2:String = "", param3:Number = 1) : void
 		{
-			var _loc4_:CcComponentLoader;
 			var _loc5_:UtilHashArray = new UtilHashArray();
 			if (param1.@type == CcLibConstant.COMPONENT_TYPE_MOUTH)
 			{
 				var _loc7_:UtilHashArray = CCLipSyncController.getLipSyncComponentItems(param1, param2, param3);
 				_loc5_.insert(0, _loc7_);
 			}
-			var _loc6_:int = 0;
-			while (_loc6_ < _loc5_.length)
+			for (var _loc6_:int = 0; _loc6_ < _loc5_.length; _loc6_++)
 			{
 				var _loc8_:String = _loc5_.getKey(_loc6_);
 				var _loc9_:String = _loc5_.getValueByIndex(_loc6_);
 				if (UtilHashBytes(this._imageData["imageData"]).getValueByKey(_loc9_) == null)
 				{
-					_loc4_ = CcComponentLoader.getComponentLoader(_loc9_, _loc8_);
+					var _loc4_:CcComponentLoader = CcComponentLoader.getComponentLoader(_loc9_, _loc8_);
 					_loc4_.addEventListener(Event.COMPLETE, this.onCcComponentLoaded);
 					_loc4_.addEventListener(IOErrorEvent.IO_ERROR, this.onCcComponentFailed);
 					this._regulator.addProcess(_loc4_, Event.COMPLETE);
 				}
-				_loc6_++;
 			}
 		}
 		
