@@ -3,8 +3,6 @@
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:component="anifire.component.*"
 			   xmlns:components="anifire.creator.components.*"
-			   xmlns:browser="anifire.creator.components.browser.*"
-			   xmlns:editor="anifire.creator.components.editor.*"
 			   width="960" height="600" preinitialize="initApp()" applicationComplete="onApplicationComplete()"
 			   backgroundAlpha="0" backgroundColor="0xEDF2F6" creationPolicy="auto"
 			   implements="anifire.creator.interfaces.ICcMainUiContainer"
@@ -118,10 +116,10 @@
 	<fx:Script>
 		<![CDATA[
 			import anifire.constant.ServerConstants;
-			import anifire.creator.components.BodyShapeChooser;
 			import anifire.creator.config.GoAnimate;
 			import anifire.creator.core.CcConsole;
 			import anifire.creator.events.CcCoreEvent;
+			import anifire.creator.components.EditView;
 			import anifire.managers.AppConfigManager;
 			import anifire.util.Util;
 			import anifire.util.UtilErrorLogger;
@@ -159,14 +157,14 @@
 			private function initConsole() : void
 			{
 				CcConsole.setConfiguration(new GoAnimate());
-				CcConsole.init(this, this.browseView, this.editView);
+				CcConsole.init(this);
 				this._ccConsole = CcConsole.instance;
 				this._ccConsole.addEventListener(CcCoreEvent.LOAD_EVERYTHING_COMPLETE, this.loadComplete);
 			}
 			
 			private function loadComplete(param1:Event) : void
 			{
-				this.setCurrentState("browser");
+				this.setCurrentState("editor");
 			}
 
 			private function uncaughtErrorHandler(param1:UncaughtErrorEvent) : void
@@ -174,12 +172,7 @@
 				UtilErrorLogger.getInstance().fatal("uncaughtErrorHandler: " + new Error().getStackTrace());
 			}
 
-			public function get ui_main_browseView() : BrowseView
-			{
-				return this.browseView;
-			}
-
-			public function get ui_main_editView() : EditView
+			public function get mui_editView() : EditView
 			{
 				return this.editView;
 			}
@@ -188,12 +181,10 @@
 
 	<s:states>
 		<s:State name="loading"/>
-		<s:State name="browser"/>
 		<s:State name="editor"/>
 	</s:states>
 
-	<browser:BrowseView id="browseView" width="100%" height="100%" visible="false" visible.editor="true"/>
-	<editor:EditView id="editView" width="100%" height="100%" visible="false" visible.editor="true"/>
+	<components:EditView id="editView" width="100%" height="100%" visible="true" visible.editor="true"/>
 	<component:EyeDropperScreenOverlay id="eyedropperScreenCap"/>
 	<components:CCLoadingScreen includeIn="loading"/>
 

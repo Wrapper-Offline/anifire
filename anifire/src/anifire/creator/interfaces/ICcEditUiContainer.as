@@ -16,7 +16,6 @@ package anifire.creator.interfaces
 	{
 		function get eui_componentTypeChooser() : TypeChooserSpark;
 		function get eui_charPreviewer() : CharPreviewer;
-		function get eui_facePreviewer() : CharPreviewer;
 		function get eui_colorPicker() : CcColorPickers;
 		function get eui_buttonBar() : TopButtons;
 		function get eui_componentChooserViewStack() : Group;
@@ -27,6 +26,5 @@ package anifire.creator.interfaces
 		function get eui_mainEditorComponentsContainer() : Group;
 		function get eui_clothesChooser() : ClothesChooser;
 		function get eui_charScaleChooser() : ScaleChooserSpark;
-		function get eui_bodyShapeChooser() : BodyShapeChooser;
 	}
 }

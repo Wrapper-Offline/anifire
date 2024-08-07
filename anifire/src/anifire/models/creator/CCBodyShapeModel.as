@@ -152,14 +152,36 @@ package anifire.models.creator
 			}
 			this.actions[action.id] = action;
 		}
+
+		public function getComponentsByType(type:String) : Vector.<CCComponentModel>
+		{
+			var components:Vector.<CCComponentModel> = new Vector.<CCComponentModel>();
+			for (var index:String in this.components)
+			{
+				if (index.split(":")[0] == type)
+					components.push(this.components[index]);
+			}
+			return components;
+		}
+
+		public function getLibrariesByType(type:String) : Vector.<CCLibraryModel>
+		{
+			var libraries:Vector.<CCLibraryModel> = new Vector.<CCLibraryModel>();
+			for (var index:String in this.libraries)
+			{
+				if (index.split(":")[0] == type)
+					libraries.push(this.libraries[index]);
+			}
+			return libraries;
+		}
 		
 		protected function createDefaultCharacter(param1:XML) : void
 		{
 		}
 		
-		private function componentUniqueId(param1:String, param2:String) : String
+		private function componentUniqueId(type:String, id:String) : String
 		{
-			return param1 + ":" + param2;
+			return type + ":" + id;
 		}
 		
 		public function storeComponent(param1:CCComponentModel) : void
@@ -168,10 +190,10 @@ package anifire.models.creator
 			this.components[_loc2_] = param1;
 		}
 		
-		public function getComponent(param1:String, param2:String) : CCComponentModel
+		public function getComponent(type:String, id:String) : CCComponentModel
 		{
-			var _loc3_:String = this.componentUniqueId(param1,param2);
-			return this.components[_loc3_];
+			var uniqueId:String = this.componentUniqueId(type, id);
+			return this.components[uniqueId];
 		}
 		
 		public function storeLibrary(param1:CCLibraryModel) : void

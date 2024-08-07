@@ -58,7 +58,7 @@
 			public function addComponentType(param1:CcComponent, param2:String, param3:CcTheme, param4:CcCharacter) : void
 			{
 				var _loc6_:CcColorThumb = null;
-				var _loc8_:anifire.creator.components.CcColorPickerElementSpark = null;
+				var _loc8_:CcColorPickerElementSpark = null;
 				var _loc9_:int = 0;
 				var _loc5_:Array = new Array();
 				var _loc7_:int = 0;
@@ -84,7 +84,7 @@
 			
 			public function addComponentThumb(param1:CcComponent, param2:CcComponentThumb, param3:CcTheme, param4:CcCharacter) : void
 			{
-				var _loc5_:anifire.creator.components.CcColorPickerElementSpark = null;
+				var _loc5_:CcColorPickerElementSpark = null;
 				var _loc6_:int = 0;
 				var _loc7_:CcColorThumb = null;
 				if(param2.getMyOwnColorNum() > 0)
@@ -101,12 +101,12 @@
 			
 			private function addColorPicker(param1:CcColorThumb, param2:CcComponent, param3:CcTheme, param4:CcCharacter) : void
 			{
-				var _loc5_:anifire.creator.components.CcColorPickerElementSpark = null;
+				var _loc5_:CcColorPickerElementSpark = null;
 				if(!param1.enable)
 				{
 					return;
 				}
-				_loc5_ = new anifire.creator.components.CcColorPickerElementSpark();
+				_loc5_ = new CcColorPickerElementSpark();
 				if(param1.colorChoices.length > 4)
 				{
 					_loc5_.width = this._biggerElementWidth;
@@ -137,10 +137,10 @@
 			public function destroy() : void
 			{
 				var _loc1_:int = 0;
-				var _loc2_:anifire.creator.components.CcColorPickerElementSpark = null;
+				var _loc2_:CcColorPickerElementSpark = null;
 				while(_loc1_ < this._pickers.numChildren)
 				{
-					_loc2_ = this._pickers.getChildAt(_loc1_) as anifire.creator.components.CcColorPickerElementSpark;
+					_loc2_ = this._pickers.getChildAt(_loc1_) as CcColorPickerElementSpark;
 					_loc2_.removeEventListener(CcColorPickerEvent.COLOR_CHOSEN,this.onUserChooseColor);
 					_loc1_++;
 				}

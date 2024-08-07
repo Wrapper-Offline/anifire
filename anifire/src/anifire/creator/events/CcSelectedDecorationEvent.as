@@ -1,6 +1,6 @@
 package anifire.creator.events
 {
-   import anifire.creator.models.CcComponent;
+   import anifire.models.creator.CCBodyComponentModel;
    import anifire.event.ExtraDataEvent;
    
    public class CcSelectedDecorationEvent extends ExtraDataEvent
@@ -15,7 +15,7 @@ package anifire.creator.events
       public static const DECORATION_DELETED:String = "decoration_deleted";
        
       
-      public var ccComponent:CcComponent;
+      public var ccComponent:CCBodyComponentModel;
       
       public function CcSelectedDecorationEvent(param1:String, param2:Object, param3:Object = null, param4:Boolean = false, param5:Boolean = false)
       {

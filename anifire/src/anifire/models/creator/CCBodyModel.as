@@ -234,6 +234,46 @@ package anifire.models.creator
 		}
 
 		/**
+		 * Serializes the CC body model back into an XML.
+		 */
+		public function serialize() : XML
+		{
+			var charXml:XML = new XML(<cc_char/>);
+			charXml.@xscale = this.bodyScale.scalex;
+			charXml.@yscale = this.bodyScale.scaley;
+			charXml.@hxscale = this.headScale.scalex;
+			charXml.@hyscale = this.headScale.scaley;
+			charXml.@headdx = this.headPos.dx;
+			charXml.@headdy = this.headPos.dy;
+			var type:String;
+			for (type in this.colors)
+			{
+				charXml.appendChild(this.colors[type].serialize());
+			}
+			for (type in this.components)
+			{
+				if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) > -1)
+				{
+					for each (var component:CCBodyComponentModel in this.components[type])
+					{
+						charXml.appendChild(component.serialize());
+					}
+					continue;
+				}
+				charXml.appendChild(this.components[type].serialize());
+			}
+			for (type in this.libraries)
+			{
+				var library:XML = <library/>;
+				library.@type = type;
+				library.@component_id = this.libraries[type];
+				library.@theme_id = this.themeId;
+				charXml.appendChild(library);
+			}
+			return charXml;
+		}
+
+		/**
 		 * Returns a `CCColor` for the specified type.
 		 * @param type Type of color to return.
 		 */

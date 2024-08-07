@@ -12,12 +12,14 @@
 			import anifire.constant.CcLibConstant;
 			import anifire.creator.core.CcConsole;
 			import anifire.creator.events.CcComponentTypeChooserEvent;
-			import anifire.creator.models.CcCharacter;
-			import anifire.creator.models.CcComponentThumb;
-			import anifire.creator.models.CcTheme;
+			import anifire.models.creator.CCBodyModel;
+			import anifire.models.creator.CCComponentModel;
+			import anifire.models.creator.CCThemeModel;
 			import anifire.util.UtilDict;
 			import anifire.util.UtilHashArray;
 			import spark.events.IndexChangeEvent;
+			import anifire.models.creator.CCLibraryModel;
+			import org.apache.flex.collections.VectorList;
 
 			private static var TRANSITION:String = "easeOut";
 			private static var CAN_BG:String = "bg";
@@ -36,88 +38,75 @@
 				super.createChildren();
 			}
 			
-			public function init(param1:CcTheme, param2:CcCharacter, param3:Boolean = true) : void
+			public function init(ccTheme:CCThemeModel, ccChar:CCBodyModel, param3:Boolean = true) : void
 			{
-				var _loc6_:Array = null;
-				var _loc7_:String = null;
-				var _loc8_:String = null;
-				var _loc9_:Boolean = false;
-				var _loc10_:UtilHashArray = null;
-				var _loc11_:UtilHashArray = null;
-				var _loc12_:int = 0;
-				var _loc13_:Function = null;
-				var _loc14_:Number = NaN;
-				var _loc4_:Array = new Array();
-				var _loc5_:* = param1.getBodyShapeNum() > 1;
+				var displayList:Array = new Array();
+				var multipleBses:Boolean = ccTheme.bodyShapes.length > 1;
 				this.components = new Array();
-				if(param2.bodyShape.getLibraryNum() == 0)
+				var order:Array = ccChar.version == 1 ?
+					CcLibConstant.COMPONENT_TYPE_CHOOSER_ORDERING_VER1 :
+					CcLibConstant.COMPONENT_TYPE_CHOOSER_ORDERING_VER2;
+				for (var typeObj:String in this.typeList.source)
 				{
-					_loc6_ = CcLibConstant.COMPONENT_TYPE_CHOOSER_ORDERING_VER1;
-				}
-				else
-				{
-					_loc6_ = CcLibConstant.COMPONENT_TYPE_CHOOSER_ORDERING_VER2;
-				}
-				for(_loc7_ in this.typeList.source)
-				{
-					_loc8_ = String(this.typeList.source[_loc7_].label);
-					_loc9_ = false;
-					if(CcLibConstant.COMPONENT_TYPE_CHOOSER_COMPONENT_GROUP.indexOf(_loc8_) >= 0 || param1.getAvailableComponentTypes().indexOf(_loc8_) > -1)
+					var type:String = this.typeList.source[typeObj].label;
+					var pushType:Boolean = false;
+					if (type == CcLibConstant.COMPONENT_TYPE_BODYSHAPE)
 					{
-						if(_loc8_ == CcLibConstant.COMPONENT_TYPE_BODYSHAPE)
+						if (multipleBses && CcLibConstant.BODYSHAPE_CHOOSABLE || CcLibConstant.CHOOSE_TAG_TYPE_SEX)
 						{
-							if(_loc5_ && CcLibConstant.BODYSHAPE_CHOOSABLE || CcLibConstant.CHOOSE_TAG_TYPE_SEX)
-							{
-								_loc9_ = true;
-							}
+							pushType = true;
+						}
+					}
+					else
+					{
+						var matchCount:int = 0;
+						var searchArr:*;
+						if (CcLibConstant.ALL_LIBRARY_TYPES.indexOf(type) > -1)
+						{
+							searchArr = ccTheme.bodyShapes[ccChar.bodyShapeId].getLibrariesByType(type);
 						}
 						else
 						{
-							if(!(_loc10_ = param2.bodyShape.getComponentThumbByType(_loc8_)))
+							searchArr = ccTheme.bodyShapes[ccChar.bodyShapeId].getComponentsByType(type);
+							if (!searchArr.length <= 0)
 							{
-								_loc10_ = param1.getComponentThumbByType(_loc8_);
+								searchArr = ccTheme.getComponentsByType(type);
 							}
-							_loc11_ = new UtilHashArray();
-							if(_loc10_)
+						}
+
+						for (var index:int = 0; index < searchArr.length; index++)
+						{
+							if (searchArr[index].enable)
 							{
-								_loc12_ = 0;
-								while(_loc12_ < _loc10_.length)
+								var filter:Function = CcConsole.instance.configuration.defaultThumbFilter.filter;
+								if (filter(searchArr[index]))
 								{
-									if(CcComponentThumb(_loc10_.getValueByIndex(_loc12_)).enable)
-									{
-										if((_loc13_ = CcConsole.instance.configuration.defaultThumbFilter.filter)(CcComponentThumb(_loc10_.getValueByIndex(_loc12_))))
-										{
-											_loc11_.push(_loc10_.getKey(_loc12_),_loc10_.getValueByIndex(_loc12_));
-										}
-									}
-									_loc12_++;
-								}
-							}
-							else
-							{
-								_loc11_ = null;
-							}
-							if(CcLibConstant.COMPONENT_TYPE_CHOOSER_COMPONENT_GROUP.indexOf(_loc8_) >= 0)
-							{
-								_loc9_ = true;
-							}
-							else
-							{
-								_loc14_ = CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(_loc8_) > -1 ? 0 : 1;
-								if(param1.getAvailableComponentTypes().indexOf(_loc8_) > -1 && _loc11_ && _loc11_.length > _loc14_)
-								{
-									_loc9_ = true;
+									matchCount++;
 								}
 							}
 						}
+
+						if (CcLibConstant.COMPONENT_TYPE_CHOOSER_COMPONENT_GROUP.indexOf(type) >= 0)
+						{
+							pushType = true;
+						}
+						else
+						{
+							var minCmpnts:Number = CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) > -1 ? 0 : 1;
+							if (matchCount > minCmpnts)
+							{
+								pushType = true;
+							}
+						}
 					}
-					if(_loc9_ && _loc6_.indexOf(_loc8_) > -1)
+					
+					if (pushType && order.indexOf(type) > -1)
 					{
-						this.components.push(_loc8_);
-						_loc4_.push(this.typeList.source[_loc7_]);
+						this.components.push(type);
+						displayList.push(this.typeList.source[typeObj]);
 					}
 				}
-				this.confirmTypeList.source = _loc4_;
+				this.confirmTypeList.source = displayList;
 				this.currentComponentIndex = 0;
 				this.switchToComponentType(this.components[this.currentComponentIndex],param3);
 			}

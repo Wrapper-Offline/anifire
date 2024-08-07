@@ -3,7 +3,7 @@ package anifire.creator.config
    import anifire.constant.ServerConstants;
    import anifire.constant.ThemeConstants;
    import anifire.creator.interfaces.IConfiguration;
-   import anifire.creator.models.CcComponentThumb;
+   import anifire.models.creator.CCComponentModel;
    import anifire.creator.utils.ComponentThumbFilter;
    import anifire.managers.AppConfigManager;
    import anifire.util.UtilUser;
@@ -19,7 +19,7 @@ package anifire.creator.config
          super();
       }
       
-      private static function goTagFilter(thumb:CcComponentThumb) : Boolean
+      private static function goTagFilter(thumb:CCComponentModel) : Boolean
       {
          if (!thumb) {
             return false;

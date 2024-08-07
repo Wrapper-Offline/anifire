@@ -340,9 +340,9 @@ package anifire.component
 			}
 		}
 		
-		public function addColor(param1:String, param2:uint, param3:uint) : void
+		public function addColor(type:String, oc:uint, value:uint) : void
 		{
-			var _loc4_:SelectedColor = new SelectedColor(param1, param2, param3);
+			var _loc4_:SelectedColor = new SelectedColor(type, oc, value);
 			this._customColor.push(_loc4_.areaName, _loc4_);
 			this.CCM.addColor(_loc4_.areaName, _loc4_);
 		}
@@ -359,7 +359,7 @@ package anifire.component
 		{
 			var loadMgr:UtilLoadMgr = new UtilLoadMgr();
 			loadMgr.addEventListener(LoadMgrEvent.ALL_COMPLETE, this.doPrepareFinishedByCam);
-			for (var i:int in this._myActionModel.libraryPaths)
+			for (var i:String in this._myActionModel.libraryPaths)
 			{
 				var loader:ExtraDataLoader = new ExtraDataLoader();
 				var libraryPath:String = this._myActionModel.libraryPaths[i];
@@ -773,7 +773,7 @@ package anifire.component
 			_loc8_.loadCcComponents(xml, startMs, endMs, imageData, this.ver, unused);
 		}
 		
-		public function initByXml(charXml:XML, param2:Number = 0, param3:Number = 0, param4:Boolean = false) : void
+		public function initByXml(charXml:XML, startMs:Number = 0, endMs:Number = 0, param4:Boolean = false) : void
 		{
 			if (!charXml)
 			{
@@ -782,7 +782,7 @@ package anifire.component
 			var _loc5_:CcActionLoader = new CcActionLoader();
 			_loc5_.addEventListener(Event.COMPLETE, this.onCcActionLoaded);
 			_loc5_.addEventListener(IOErrorEvent.IO_ERROR, this.onCcActionFailed);
-			_loc5_.loadCcComponents(charXml, param2, param3, null, this.ver);
+			_loc5_.loadCcComponents(charXml, startMs, endMs, null, this.ver);
 		}
 		
 		public function initByCam(param1:CCCharacterActionModel) : void

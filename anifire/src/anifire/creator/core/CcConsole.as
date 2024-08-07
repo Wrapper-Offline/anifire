@@ -4,11 +4,9 @@ package anifire.creator.core
 	import anifire.constant.ServerConstants;
 	import anifire.creator.events.CcCoreEvent;
 	import anifire.creator.interfaces.ICcMainUiContainer;
-	import anifire.creator.components.browser.BrowseView;
-	import anifire.creator.components.editor.EditView;
 	import anifire.creator.interfaces.IConfiguration;
-	import anifire.creator.models.CcCharacter;
-	import anifire.creator.models.CcTheme;
+	import anifire.models.creator.CCBodyModel;
+	import anifire.models.creator.CCThemeModel;
 	import anifire.creator.theme.Theme;
 	import anifire.managers.AppConfigManager;
 	import anifire.managers.ServerConnector;
@@ -21,6 +19,7 @@ package anifire.creator.core
 	import flash.net.URLRequest;
 	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
+	import anifire.models.creator.CCBodyShapeModel;
 	
 	public class CcConsole extends EventDispatcher
 	{
@@ -31,15 +30,12 @@ package anifire.creator.core
 
 		private static var _configManager:AppConfigManager = AppConfigManager.instance;
 
-		private var _ccChar:CcCharacter;
-
-		private var _theme:Theme;
-		private var _ccTheme:CcTheme;
+		private var _ccChar:CCBodyModel;
+		private var _theme:CCThemeModel;
 		private var _themeId:String = "";
-		private var _ccThemeId:String = "";
 
-		private var _ui_mainUiContainer:ICcMainUiContainer;
-		private var _ui_browseView:BrowseView;
+		private var _mainUi:ICcMainUiContainer;
+		private var _editUiController:CcEditUiController;
 
 		private var _userLevel:int;
 
@@ -47,11 +43,12 @@ package anifire.creator.core
 
 		private var _isEditing:Boolean = true;
 
-		public function CcConsole(mainUi:ICcMainUiContainer, browseView:BrowseView, editView:EditView)
+		public function CcConsole(iMainUi:ICcMainUiContainer)
 		{
 			super();
-			this._ui_mainUiContainer = mainUi;
-			this._ui_browseView = browseView;
+			this._mainUi = iMainUi;
+			this._editUiController = new CcEditUiController();
+			this.editUiController.initUi(iMainUi.mui_editView);
 			var themeId:String = _configManager.getValue(ServerConstants.PARAM_THEME_ID);
 			if (themeId == null || themeId.length <= 0)
 			{
@@ -71,7 +68,7 @@ package anifire.creator.core
 				CcLibConstant.USER_LEVEL_NORMAL;
 
 			this.addEventListener(CcCoreEvent.LOAD_THEME_COMPLETE, this.doLoadPreMadeChar);
-			this.loadTheme(this._themeId);
+			this.loadCcTheme(this._themeId);
 		}
 
 		public static function setConfiguration(config:IConfiguration) : void
@@ -79,11 +76,11 @@ package anifire.creator.core
 			_cfg = config;
 		}
 
-		public static function init(mainUi:ICcMainUiContainer, browseView:BrowseView, editView:EditView) : CcConsole
+		public static function init(mainUi:ICcMainUiContainer) : CcConsole
 		{
 			if (_instance == null)
 			{
-				_instance = new CcConsole(mainUi, browseView, editView);
+				_instance = new CcConsole(mainUi);
 			}
 			return _instance;
 		}
@@ -107,9 +104,9 @@ package anifire.creator.core
 			return this._original_assetId;
 		}
 
-		private function set originalAssetId(param1:String) : void
+		private function set originalAssetId(assetId:String) : void
 		{
-			this._original_assetId = param1;
+			this._original_assetId = assetId;
 		}
 
 		private function get userLevel() : int
@@ -117,12 +114,17 @@ package anifire.creator.core
 			return this._userLevel;
 		}
 
-		private function get ui_mainUiContainer() : ICcMainUiContainer
+		private function get mainUi() : ICcMainUiContainer
 		{
-			return this._ui_mainUiContainer;
+			return this._mainUi;
 		}
 
-		private function get ccChar() : CcCharacter
+		private function get editUiController() : CcEditUiController
+		{
+			return this._editUiController;
+		}
+
+		private function get ccChar() : CCBodyModel
 		{
 			return this._ccChar;
 		}
@@ -137,47 +139,32 @@ package anifire.creator.core
 			return this.originalAssetId == null ? false : true;
 		}
 
-		private function switchToBrowser() : void
+		private function switchToEditor() : void
 		{
-			if (_configManager.getValue(ServerConstants.FLASHVAR_CC_START_PAGE) == "editor")
+			this.editUiController.initTheme(this._theme);
+			this.editUiController.initMode(this.userLevel);
+			this.editUiController.start(this.ccChar, !this.isCopyingChar());
+			this._isEditing = true;
+			if (_configManager.getValue(ServerConstants.FLASHVAR_CC_START_PAGE) == "save")
 			{
-				//init editor
 				//this.onUserWantToPreview(param1);
-				//return
 			}
-			this._ui_browseView.init()
 			this.dispatchEvent(new CcCoreEvent(CcCoreEvent.LOAD_EVERYTHING_COMPLETE, this));
 		}
-
-		// private function switchToEditor() : void
-		// {
-		// 	this.ccEditUiController.initTheme(this._theme);
-		// 	this.ccEditUiController.initMode(this.userLevel);
-		// 	this.ccEditUiController.start(this.ccChar,!this.isCopyingChar());
-		// 	this.ccPreviewAndSaveController.initTheme(this._theme);
-		// 	this.ccPreviewAndSaveController.initMode();
-		// 	this.ccPreviewAndSaveController.initChar(this.ccChar);
-		// 	this._isEditing = true;
-		// 	if(_configManager.getValue(ServerConstants.FLASHVAR_CC_START_PAGE) == "save")
-		// 	{
-		// 		this.onUserWantToPreview(param1);
-		// 	}
-		// 	this.dispatchEvent(new CcCoreEvent(CcCoreEvent.LOAD_EVERYTHING_COMPLETE,this));
-		// }
 
 		// private function onUserWantToModify() : void
 		// {
 		// 	this._isEditing = true;
-		// 	this.ui_mainUiContainer.ui_main_ccCharEditor.visible = true;
-		// 	this.ui_mainUiContainer.ui_main_ccCharPreviewAndSaveScreen.visible = false;
-		// 	this.ccEditUiController.proceedToShow();
+		// 	this.mainUi.ui_main_ccCharEditor.visible = true;
+		// 	this.mainUi.ui_main_ccCharPreviewAndSaveScreen.visible = false;
+		// 	this.cceditUiControllerController.proceedToShow();
 		// }
 
 		// private function onUserWantToPreview() : void
 		// {
 		// 	this._isEditing = false;
-		// 	this.ui_mainUiContainer.ui_main_ccCharEditor.visible = false;
-		// 	this.ui_mainUiContainer.ui_main_ccCharPreviewAndSaveScreen.visible = true;
+		// 	this.mainUi.ui_main_ccCharEditor.visible = false;
+		// 	this.mainUi.ui_main_ccCharPreviewAndSaveScreen.visible = true;
 		// 	this.ccPreviewAndSaveController.proceedToShow();
 		// }
 
@@ -187,8 +174,8 @@ package anifire.creator.core
 		// 	this.addEventListener(CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR,this.doTellUserSaveStatus);
 		// 	if(this._isEditing)
 		// 	{
-		// 		this.ccEditUiController.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.doSave);
-		// 		this.ccEditUiController.resetCCAction();
+		// 		this.cceditUiControllerController.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.doSave);
+		// 		this.cceditUiControllerController.resetCCAction();
 		// 	}
 		// 	else
 		// 	{
@@ -249,21 +236,15 @@ package anifire.creator.core
 			var proceedHandler:Function = function proceedHandler(e:CcCoreEvent):void
 			{
 				self.removeEventListener(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, proceedHandler);
-				switchToBrowser();
+				self.switchToEditor();
 			};
-			if (this.originalAssetId != null)
-			{
-				this.addEventListener(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, proceedHandler);
-			}
-			else
-			{
-				this.switchToBrowser();
-			}
+			this.addEventListener(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, proceedHandler);
 		}
 
 		private function doLoadPreMadeChar(param1:Event) : void
 		{
 			(param1.target as IEventDispatcher).removeEventListener(param1.type, this.doLoadPreMadeChar);
+			this.doEnableUserToStartUseCC();
 			if (this.originalAssetId != null)
 			{
 				this.loadCharXml(_configManager.getValue("original_asset_id") as String);
@@ -272,55 +253,54 @@ package anifire.creator.core
 			{
 				this.doPrepareCcChar();
 			}
-			this.doEnableUserToStartUseCC();
 		}
 
 		private function doPrepareCcChar() : void
 		{
-			this._ccChar = new CcCharacter();
+			// TODO: dehardcode this
 			if (_themeId == "cc2" || _themeId == "chibi" || _themeId == "ninja")
 			{
-				this._ccChar.ver = 2;
+				this._ccChar.version = 2;
 			}
-			var ccTheme:CcTheme = this._theme;
-			var bodyshapes:Array = ccTheme.getBodyShapeTypes();
-			var randomBodyshape:String = bodyshapes[int(Math.floor(Math.random() * bodyshapes.length))] as String;
-		}
-
-		private function loadCharXml(param1:String) : void
-		{
-			var request:URLRequest = new URLRequest(ServerConstants.ACTION_GET_CC_CHAR_COMPOSITION_XML);
-			request.method = URLRequestMethod.POST;
-			var variables:URLVariables = new URLVariables();
-			_configManager.appendURLVariables(variables);
-			variables["assetId"] = param1;
-			request.data = variables;
-			var loader:URLLoader = new URLLoader();
-			loader.dataFormat = URLLoaderDataFormat.TEXT;
-			loader.addEventListener(Event.COMPLETE, this.onLoadCharXmlComplete);
-			loader.load(request);
-		}
-
-		private function onLoadCharXmlComplete(param1:Event) : void
-		{
-			(param1.target as IEventDispatcher).removeEventListener(param1.type, this.onLoadCharXmlComplete);
-			var loader:URLLoader = param1.target as URLLoader;
-			var responseText:String = loader.data as String;
-			if (responseText.charAt(0) == "0")
-			{
-				var charData:String = responseText.substr(1);
-				var loadEvent = new CcCoreEvent(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, this, charData);
-				this.dispatchEvent(loadEvent);
-				this.prepareExistingCcChar(charData);
+			var ccTheme:CCThemeModel = this._theme;
+			var bodyShape:CCBodyShapeModel;
+			var bsId:String = _configManager.getValue(ServerConstants.PARAM_BODYSHAPE);
+			if (bsId != null && bsId.length > 0) {
+				if (bsId == "__random") {
+					var bodyShapes:Object = ccTheme.bodyShapes;
+					bsId = bodyShapes[int(Math.floor(Math.random() * bodyShapes.length))] as String;
+				}
+				bodyShape = ccTheme.bodyShapes[bsId];
 			}
+			if (bodyShape == null) {
+				bodyShape = ccTheme.bodyShapes[ccTheme.defaultBodyShape];
+			}
+
+			this._ccChar = new CCBodyModel("");
+			this._ccChar.addEventListener(Event.COMPLETE, this.onLoadCharXmlComplete);
+			this._ccChar.parse(new XML(bodyShape.defaultCharacterXML));
 		}
 
-		private function prepareExistingCcChar(param1:String) : void
+		/**
+		 * Requests a character body XML from the server.
+		 * @param ID of the character to load.
+		 */
+		private function loadCharXml(assetId:String) : void
 		{
-			this._ccChar = new CcCharacter();
-			var themeArray:UtilHashArray = new UtilHashArray();
-			themeArray.push(this._themeId, this._theme);
-			this._ccChar.deserialize(new XML(param1), themeArray);
+			this._ccChar = new CCBodyModel(assetId);
+			this._ccChar.addEventListener(Event.COMPLETE, this.onLoadCharXmlComplete);
+			this._ccChar.load();
+		}
+
+		/**
+		 * Requests a character body XML from the server.
+		 * @param ID of the character to load.
+		 */
+		private function onLoadCharXmlComplete(e:Event) : void
+		{
+			(e.target as IEventDispatcher).removeEventListener(e.type, this.onLoadCharXmlComplete);
+			var loadEvent = new CcCoreEvent(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, this);
+			this.dispatchEvent(loadEvent);
 		}
 
 		// private function save() : void
@@ -333,8 +313,8 @@ package anifire.creator.core
 		// 	AmplitudeAnalyticsManager.instance.log(AmplitudeAnalyticsManager.EVENT_NAME_CREATED_CHARACTER);
 		// 	if(this._isEditing)
 		// 	{
-		// 		_loc1_ = this._ccEditUiController.saveSnapShot();
-		// 		_loc3_ = this._ccEditUiController.saveSnapShot(true);
+		// 		_loc1_ = this._cceditUiControllerController.saveSnapShot();
+		// 		_loc3_ = this._cceditUiControllerController.saveSnapShot(true);
 		// 	}
 		// 	else
 		// 	{
@@ -394,51 +374,18 @@ package anifire.creator.core
 		// 	this.dispatchEvent(new CcSaveCharEvent(CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR,this));
 		// }
 
-		// private function showLoggedOutPopUp() : void
-		// {
-		// 	var _loc1_:ConfirmPopUp = new ConfirmPopUp();
-		// 	_loc1_.title = UtilDict.translate("Logged out");
-		// 	_loc1_.message = UtilDict.translate("Login again to continue.\nUnsaved changes may have been lost.");
-		// 	_loc1_.confirmText = UtilDict.translate("Login");
-		// 	_loc1_.iconType = ConfirmPopUp.CONFIRM_POPUP_NO_ICON;
-		// 	_loc1_.showCancelButton = false;
-		// 	_loc1_.showCloseButton = false;
-		// 	_loc1_.addEventListener(PopUpEvent.CLOSE,this.loggedOutPopUp_closeHandler);
-		// 	_loc1_.open(FlexGlobals.topLevelApplication as DisplayObjectContainer,true);
-		// }
-
-		// private function loggedOutPopUp_closeHandler(param1:PopUpEvent) : void
-		// {
-		// 	ExternalLinkManager.instance.navigate(ServerConstants.LOGIN_PAGE_PATH);
-		// }
-
 		private function serialize() : String
 		{
-			return "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + this.ccChar.serialize();
+			return "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + this.ccChar.source;
 		}
 
-		private function loadTheme(themeId:String) : void
+		private function loadCcTheme(themeId:String) : void
 		{
-			var theme:Theme = new Theme();
-			this._theme = theme;
-			theme.addEventListener(CcCoreEvent.DESERIALIZE_THEME_COMPLETE, this.onLoadThemeComplete);
-			theme.initThemeByLoadThemeFile(themeId);
-		}
-
-		private function onLoadThemeComplete(event:Event) : void
-		{
-			var theme = event.target as Theme;
-			this._ccThemeId = theme.ccThemeId;
-			this.loadCcTheme(this._ccThemeId);
-		}
-
-		private function loadCcTheme(ccThemeId:String) : void
-		{
-			var ccTheme:CcTheme = new CcTheme();
-			ccTheme.id = ccThemeId;
-			this._ccTheme = ccTheme;
-			ccTheme.addEventListener(CcCoreEvent.LOAD_THEME_COMPLETE, this.onLoadCcThemeComplete);
-			ccTheme.initCcThemeByLoadThemeFile(ccThemeId);
+			var ccTheme:CCThemeModel = new CCThemeModel(themeId);
+			this._theme = ccTheme;
+			ccTheme.runwayMode = true;
+			ccTheme.addEventListener(Event.COMPLETE, this.onLoadCcThemeComplete);
+			ccTheme.load();
 		}
 
 		private function onLoadCcThemeComplete(event:Event) : void

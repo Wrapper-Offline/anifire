@@ -21,10 +21,10 @@ package anifire.models.creator
 		protected var loader:URLLoader;
 		private var _actionModels:Object;
 		
-		public function CCThemeModel(param1:String)
+		public function CCThemeModel(themeId:String)
 		{
 			super();
-			this.themeId = param1;
+			this.themeId = themeId;
 			this.bodyShapes = {};
 			this.faces = {};
 			this.components = {};
@@ -138,6 +138,17 @@ package anifire.models.creator
 				component = this.getSharedComponent(type, id);
 			}
 			return component;
+		}
+
+		public function getComponentsByType(type:String) : Vector.<CCComponentModel>
+		{
+			var components:Vector.<CCComponentModel> = new Vector.<CCComponentModel>();
+			for (var index:String in this.components)
+			{
+				if (index.split(":")[0] == type)
+					components.push(this.components[index]);
+			}
+			return components;
 		}
 
 		public function createCharacterActionModel(param1:CCBodyModel, param2:CCActionModel) : CCCharacterActionModel
@@ -264,25 +275,25 @@ package anifire.models.creator
 		/**
 		 * get a cam
 		 */
-		public function getCharacterActionModel(param1:CCBodyModel, param2:String) : CCCharacterActionModel
+		public function getCharacterActionModel(ccBody:CCBodyModel, actionId:String) : CCCharacterActionModel
 		{
-			var _loc3_:CCCharacterActionModel = this.getCache(param1.assetId,param2);
-			if(_loc3_)
+			var cam:CCCharacterActionModel = this.getCache(ccBody.assetId, actionId);
+			if (cam)
 			{
-				return _loc3_;
+				return cam;
 			}
-			var _loc4_:CCBodyShapeModel = this.bodyShapes[param1.bodyShapeId];
-			if(!_loc4_)
+			var bs:CCBodyShapeModel = this.bodyShapes[ccBody.bodyShapeId];
+			if (!bs)
 			{
 				return null;
 			}
-			var _loc5_:CCActionModel = _loc4_.actions[param2];
-			if(_loc5_)
+			var action:CCActionModel = bs.actions[actionId];
+			if (action)
 			{
-				_loc3_ = this.createCharacterActionModel(param1, _loc5_);
+				cam = this.createCharacterActionModel(ccBody, action);
 			}
-			this.putCache(param1.assetId, param2, _loc3_);
-			return _loc3_;
+			this.putCache(ccBody.assetId, actionId, cam);
+			return cam;
 		}
 		
 		public function getCharacterFacialModel(param1:CCBodyModel, param2:String) : CCCharacterActionModel
@@ -350,16 +361,16 @@ package anifire.models.creator
 			return _loc3_;
 		}
 		
-		public function getCharacterDefaultActionId(param1:String) : String
+		public function getCharacterDefaultActionId(bsId:String) : String
 		{
-			var _loc2_:CCBodyShapeModel = this.bodyShapes[param1];
-			return _loc2_.defaultActionId;
+			var bodyShape:CCBodyShapeModel = this.bodyShapes[bsId];
+			return bodyShape.defaultActionId;
 		}
 		
-		public function getCharacterDefaultMotionId(param1:String) : String
+		public function getCharacterDefaultMotionId(bsId:String) : String
 		{
-			var _loc2_:CCBodyShapeModel = this.bodyShapes[param1];
-			return _loc2_.defaultMotionId;
+			var bodyShape:CCBodyShapeModel = this.bodyShapes[bsId];
+			return bodyShape.defaultMotionId;
 		}
 	}
 }

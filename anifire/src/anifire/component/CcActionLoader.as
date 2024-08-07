@@ -156,6 +156,7 @@ package anifire.component
 			if (this._state == this.STATE_LOADED)
 			{
 				this.dispatchEvent(new Event(Event.COMPLETE));
+				return;
 			}
 			else if (!xml || this._state == this.STATE_LOADING)
 			{
@@ -223,7 +224,6 @@ package anifire.component
 			if (this._regulator.numProcess == 0)
 			{
 				this._state = this.STATE_LOADED;
-				this._regulator = null;
 				this.dispatchEvent(new Event(Event.COMPLETE));
 			}
 		}
@@ -276,7 +276,6 @@ package anifire.component
 			if (this._regulator.numProcess == 0)
 			{
 				this._state = this.STATE_LOADED;
-				this._regulator = null;
 				this.dispatchEvent(new Event(Event.COMPLETE));
 			}
 		}

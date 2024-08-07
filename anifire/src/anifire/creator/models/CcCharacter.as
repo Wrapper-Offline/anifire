@@ -7,48 +7,26 @@ package anifire.creator.models
 	
 	public class CcCharacter
 	{
-		
 		public static const XML_NODE_NAME:String = "cc_char";
-		 
-		
 		private var _userChosenColors:UtilHashArray;
-		
 		private var _userChosenComponents:Array;
-		
 		private var _userChosenLibraries:Array;
-		
 		private var _bodyShape:CcBodyShape;
-		
 		private var _assetId:String = "";
-		
 		private var _templateId:String = "";
-		
 		private var _templateMD5:String = "";
-		
 		private var _currentTheme:CcTheme;
-		
 		private var _name:String;
-		
 		private var _createDateTime:String = "";
-		
 		private var _tags:Array;
-		
 		private var _category:String = null;
-		
 		private var _headScaleX:Number = 1;
-		
 		private var _headScaleY:Number = 1;
-		
 		private var _headDX:Number = 0;
-		
 		private var _headDY:Number = 0;
-		
 		private var _scaleX:Number = 1;
-		
 		private var _scaleY:Number = 1;
-		
 		private var _ver:Number = 1;
-		
 		private var _isRandom:Boolean = false;
 		
 		public function CcCharacter()
@@ -216,188 +194,203 @@ package anifire.creator.models
 		{
 			return this._ver;
 		}
-		
+
+		/**
+		 * Returns a clone of the CcCharacter instance.
+		 */
 		public function clone() : CcCharacter
 		{
-			var _loc1_:int = 0;
-			var _loc3_:CcColor = null;
-			var _loc4_:CcComponent = null;
-			var _loc5_:CcLibrary = null;
-			var _loc2_:CcCharacter = new CcCharacter();
-			_loc2_.currentTheme = this.currentTheme;
-			_loc2_.assetId = this.assetId;
-			_loc2_.bodyShape = this.bodyShape;
-			_loc2_._name = this._name;
-			_loc2_._tags = this.tags.slice();
-			_loc2_.ver = this._ver;
-			_loc2_._templateId = this._templateId;
-			_loc2_._templateMD5 = this._templateMD5;
-			_loc1_ = 0;
-			while(_loc1_ < this.getUserChosenColorNum())
+			var clone:CcCharacter = new CcCharacter();
+			clone.currentTheme = this.currentTheme;
+			clone.assetId = this.assetId;
+			clone.bodyShape = this.bodyShape;
+			clone._name = this._name;
+			clone._tags = this.tags.slice();
+			clone.ver = this._ver;
+			clone._templateId = this._templateId;
+			clone._templateMD5 = this._templateMD5;
+			var index:int = 0;
+			for (index = 0; index < this.getUserChosenColorNum(); index++)
 			{
-				_loc3_ = this.getUserChosenColorByIndex(_loc1_);
-				_loc2_.addUserChosenColor(_loc3_.clone());
-				_loc1_++;
+				var color:CcColor = this.getUserChosenColorByIndex(index);
+				clone.addUserChosenColor(color.clone());
 			}
-			_loc1_ = 0;
-			while(_loc1_ < this.getUserChosenComponentSize())
+			for (index = 0; index < this.getUserChosenComponentSize(); index++)
 			{
-				_loc4_ = this.getUserChosenComponentByIndex(_loc1_);
-				_loc2_.addUserChosenComponent(_loc4_.clone());
-				_loc1_++;
+				var component:CcComponent = this.getUserChosenComponentByIndex(index);
+				clone.addUserChosenComponent(component.clone());
 			}
-			_loc1_ = 0;
-			while(_loc1_ < this.getUserChosenLibraryNum())
+			for (index = 0; index < this.getUserChosenLibraryNum(); index++)
 			{
-				_loc5_ = this.getUserChosenLibraryByIndex(_loc1_);
-				_loc2_.addUserChosenLibrary(_loc5_.clone());
-				_loc1_++;
+				var library:CcLibrary = this.getUserChosenLibraryByIndex(index);
+				clone.addUserChosenLibrary(library.clone());
 			}
-			_loc2_.bodyScale = this.bodyScale;
-			_loc2_.headScale = this.headScale;
-			_loc2_.headShift = this.headShift;
-			return _loc2_;
+			clone.bodyScale = this.bodyScale;
+			clone.headScale = this.headScale;
+			clone.headShift = this.headShift;
+			return clone;
 		}
-		
-		public function cloneFromSourceToMe(param1:CcCharacter) : void
+
+		/**
+		 * Copies all properties from an existing CcCharacter
+		 * instance to this one.
+		 */
+		public function cloneFromSourceToMe(source:CcCharacter) : void
 		{
-			var _loc2_:int = 0;
-			this.currentTheme = param1.currentTheme;
+			this.currentTheme = source.currentTheme;
 			this.removeAllUserChosenComponent();
-			_loc2_ = 0;
-			while(_loc2_ < param1.getUserChosenComponentSize())
+			var index:int = 0;
+			for (index = 0; index < source.getUserChosenComponentSize(); index++)
 			{
-				this.addUserChosenComponent(param1.getUserChosenComponentByIndex(_loc2_));
-				_loc2_++;
+				this.addUserChosenComponent(source.getUserChosenComponentByIndex(index));
 			}
 			this.removeAllUserChosenColors();
-			_loc2_ = 0;
-			while(_loc2_ < param1.getUserChosenColorNum())
+			for (index = 0; index < source.getUserChosenColorNum(); index++)
 			{
-				this.addUserChosenColor(param1.getUserChosenColorByIndex(_loc2_));
-				_loc2_++;
+				this.addUserChosenColor(source.getUserChosenColorByIndex(index));
 			}
 			this.removeAllUserChosenLibraries();
-			_loc2_ = 0;
-			while(_loc2_ < param1.getUserChosenLibraryNum())
+			for (index = 0; index < source.getUserChosenLibraryNum(); index++)
 			{
-				this.addUserChosenLibrary(param1.getUserChosenLibraryByIndex(_loc2_));
-				_loc2_++;
+				this.addUserChosenLibrary(source.getUserChosenLibraryByIndex(index));
 			}
-			this.bodyShape = param1.bodyShape;
-			this.assetId = param1.assetId;
-			this._name = param1._name;
-			this._tags = param1.tags.slice();
-			this._ver = param1.ver;
-			this._templateId = param1._templateId;
-			this._templateMD5 = param1._templateMD5;
-			this.bodyScale = param1.bodyScale;
-			this.headScale = param1.headScale;
-			this.headShift = param1.headShift;
+			this.bodyShape = source.bodyShape;
+			this.assetId = source.assetId;
+			this._name = source._name;
+			this._tags = source.tags.slice();
+			this._ver = source.ver;
+			this._templateId = source._templateId;
+			this._templateMD5 = source._templateMD5;
+			this.bodyScale = source.bodyScale;
+			this.headScale = source.headScale;
+			this.headShift = source.headShift;
 		}
-		
-		public function getUserChosenLibraryByIndex(param1:Number) : CcLibrary
+
+		/**
+		 * Returns a library at the specified index.
+		 * @param index Index of the library to return.
+		 */
+		public function getUserChosenLibraryByIndex(index:Number) : CcLibrary
 		{
-			return this._userChosenLibraries[param1];
+			return this._userChosenLibraries[index];
 		}
-		
+
+		/**
+		 * Returns the number of libraries the character utilizes.
+		 */
 		public function getUserChosenLibraryNum() : Number
 		{
 			return this._userChosenLibraries.length;
 		}
-		
+
+		/**
+		 * Clears all libraries.
+		 */
 		public function removeAllUserChosenLibraries() : void
 		{
-			this._userChosenLibraries.splice(0,this._userChosenLibraries.length);
+			this._userChosenLibraries.splice(0, this._userChosenLibraries.length);
 		}
-		
-		public function addUserChosenLibrary(param1:CcLibrary) : void
+
+		/**
+		 * Adds a library.
+		 * @param library Library to add.
+		 */
+		public function addUserChosenLibrary(library:CcLibrary) : void
 		{
-			this.removeUserChosenLibraryByType(param1.type);
-			this._userChosenLibraries.push(param1);
+			this.removeUserChosenLibraryByType(library.type);
+			this._userChosenLibraries.push(library);
 		}
-		
-		public function getUserChosenLibraryByType(param1:String) : CcLibrary
+
+		/**
+		 * Returns a library with the specified type.
+		 * @param type Library type to return.
+		 */
+		public function getUserChosenLibraryByType(type:String) : CcLibrary
 		{
-			var _loc3_:CcLibrary = null;
-			var _loc2_:int = int(this._userChosenLibraries.length - 1);
-			while(_loc2_ >= 0)
+			var index:int = int(this._userChosenLibraries.length - 1);
+			for (; index >= 0; index--)
 			{
-				_loc3_ = this._userChosenLibraries[_loc2_] as CcLibrary;
-				if(_loc3_.type == param1)
+				var library:CcLibrary = this._userChosenLibraries[index] as CcLibrary;
+				if (library.type == type)
 				{
-					return _loc3_;
+					return library;
 				}
-				_loc2_--;
 			}
 			return null;
 		}
-		
-		public function removeUserChosenLibraryByType(param1:String) : void
+
+		/**
+		 * Removes a library with the specified type.
+		 * @param type Library type to remove.
+		 */
+		public function removeUserChosenLibraryByType(type:String) : void
 		{
-			var _loc3_:CcLibrary = null;
-			var _loc2_:int = int(this._userChosenLibraries.length - 1);
-			while(_loc2_ >= 0)
+			var index:int = int(this._userChosenLibraries.length - 1);
+			for (; index >= 0; index--)
 			{
-				_loc3_ = this._userChosenLibraries[_loc2_] as CcLibrary;
-				if(_loc3_.type == param1)
+				var library:CcLibrary = this._userChosenLibraries[index] as CcLibrary;
+				if (library.type == type)
 				{
-					this._userChosenLibraries.splice(_loc2_,1);
+					this._userChosenLibraries.splice(index, 1);
 				}
-				_loc2_--;
 			}
 		}
-		
-		public function addUserChosenColor(param1:CcColor) : void
+
+		/**
+		 * Adds a color.
+		 */
+		public function addUserChosenColor(color:CcColor) : void
 		{
-			var _loc2_:String = null;
-			if(param1.ccComponent != null && CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(param1.ccColorThumb.componentType) > -1)
+			var id:String;
+			if (color.ccComponent != null && CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(color.ccColorThumb.componentType) > -1)
 			{
-				_loc2_ = param1.ccComponent.id + param1.ccColorThumb.internalId;
+				id = color.ccComponent.id + color.ccColorThumb.internalId;
 			}
 			else
 			{
-				_loc2_ = param1.ccColorThumb.internalId;
+				id = color.ccColorThumb.internalId;
 			}
-			this._userChosenColors.push(_loc2_,param1);
+			this._userChosenColors.push(id, color);
 		}
-		
+
+		/**
+		 * Returns the amount of colors utilized by the character.
+		 */
 		public function getUserChosenColorNum() : Number
 		{
 			return this._userChosenColors.length;
 		}
-		
-		public function getUserChosenColorByColorReference(param1:String) : CcColor
+
+		/**
+		 * Returns a color with the specified reference.
+		 * @param type Color reference to return.
+		 */
+		public function getUserChosenColorByColorReference(ref:String) : CcColor
 		{
-			var _loc2_:CcColor = null;
-			var _loc3_:int = 0;
-			while(_loc3_ < this._userChosenColors.length)
+			for (var index:int = 0; index < this._userChosenColors.length; index++)
 			{
-				_loc2_ = this._userChosenColors.getValueByIndex(_loc3_) as CcColor;
-				if(_loc2_.ccColorThumb.colorReference == param1)
+				var color:CcColor = this._userChosenColors.getValueByIndex(index) as CcColor;
+				if (color.ccColorThumb.colorReference == ref)
 				{
-					return _loc2_;
+					return color;
 				}
-				_loc3_++;
 			}
 			return null;
 		}
-		
-		public function getUserChosenColorByComponentType(param1:String) : Array
+
+		public function getUserChosenColorByComponentType(type:String) : Array
 		{
-			var _loc3_:CcColor = null;
-			var _loc2_:Array = new Array();
-			var _loc4_:int = 0;
-			while(_loc4_ < this._userChosenColors.length)
+			var colors:Array = new Array();
+			// can we just rename "for" to "indexmaxx"
+			for (var index:int = 0; index < this._userChosenColors.length; index++)
 			{
-				_loc3_ = this._userChosenColors.getValueByIndex(_loc4_) as CcColor;
-				if(_loc3_.ccColorThumb.componentType == param1)
+				var color:CcColor = this._userChosenColors.getValueByIndex(index) as CcColor;
+				if (color.ccColorThumb.componentType == type)
 				{
-					_loc2_.push(_loc3_);
+					colors.push(color);
 				}
-				_loc4_++;
 			}
-			return _loc2_;
+			return colors;
 		}
 		
 		public function getUserChosenColorByIndex(param1:int) : CcColor
@@ -455,7 +448,10 @@ package anifire.creator.models
 		{
 			return this.currentTheme.getFacialById(param1);
 		}
-		
+
+		/**
+		 * does absolutely nothing don't even bother using it
+		 */
 		private function addBodyShapeThumb() : void
 		{
 		}
@@ -829,7 +825,7 @@ package anifire.creator.models
 				}
 			}
 			this.removeAllUserChosenLibraries();
-			for  (element in charXml.child(CcLibrary.XML_NODE_NAME))
+			for each (element in charXml.child(CcLibrary.XML_NODE_NAME))
 			{
 				var _loc6_:CcLibrary = new CcLibrary();
 				var _loc12_:CcComponentThumb = this.currentTheme.getComponentThumbByInternalId(CcComponentThumb.generateInternalId(element.@type, element.@component_id));
