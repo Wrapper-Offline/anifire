@@ -62,7 +62,7 @@
 			horizontalCenter="0" verticalCenter="0"/>
 	</s:Group>
 
-	<s:SkinnableContainer id="componentPanel" top="0" left="280" width="630" height="548" skinClass="anifire.creator.skins.SlidingComponentPanelSkin">
+	<s:SkinnableContainer id="componentPanel" top="0" left="280" width="{this.width - 280}" height="548" skinClass="anifire.creator.skins.SlidingComponentPanelSkin">
 		<s:layout>
 			<s:VerticalLayout/>
 		</s:layout>
@@ -70,7 +70,7 @@
 			id="componentTypeChooser" left="0" top="0" width="100%" height="51"/>
 		<s:Group id="componentChooser">
 			<components:ComponentThumbChooserSpark
-				id="componentThumbChooser" biggerHeight="422" width="630" height="422"
+				id="componentThumbChooser" biggerHeight="422" width="{this.width - 281}" height="422"
 				smallerHeight="{422 - _ce_selectedDecoration.height}"/>
 			<components:ClothesChooser
 				id="clothesChooser" y="10" width="100%" height="250" visible="false"

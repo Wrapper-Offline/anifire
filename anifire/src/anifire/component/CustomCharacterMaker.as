@@ -1656,6 +1656,27 @@ package anifire.component
 		
 		public function removeComponentById(type:String, id:String) : void
 		{
+			// split components are separated
+			if (CcLibConstant.ALL_OFFSETABLE_COMPONENT_TYPES.indexOf(type) >= 0)
+			{
+				this.removeComponentById(type + CcLibConstant.LEFT, id);
+				this.removeComponentById(type + CcLibConstant.RIGHT, id);
+				return;
+			}
+			else if (type == CcLibConstant.COMPONENT_TYPE_HAIR)
+			{
+				this.removeComponentById(CcLibConstant.COMPONENT_TYPE_FRONT_HAIR, id);
+				this.removeComponentById(CcLibConstant.COMPONENT_TYPE_BACK_HAIR, id);
+			}
+			else if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) >= 0)
+			{
+				type = id;
+			}
+			else if (CcLibConstant.ALL_LIBRARY_TYPES.indexOf(type) >= 0)
+			{
+				this.CCM.removeStyle("body");
+			}
+
 			var clipName:String;
 			switch (type)
 			{
@@ -1669,20 +1690,6 @@ package anifire.component
 					clipName = this.DEFAULTHEAD;
 			}
 
-			// split components are separated
-			if (CcLibConstant.ALL_OFFSETABLE_COMPONENT_TYPES.indexOf(type) >= 0)
-			{
-				this.removeComponentById(type + CcLibConstant.LEFT, id);
-				this.removeComponentById(type + CcLibConstant.RIGHT, id);
-				return;
-			}
-
-			if (
-				CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) >= 0
-			)
-			{
-				type = id;
-			}
 			var bodyContainer:DisplayObjectContainer = UtilPlain.getInstance(this, clipName);
 			var component:DisplayObjectContainer;
 			component = UtilPlain.getInstance(bodyContainer, type);
