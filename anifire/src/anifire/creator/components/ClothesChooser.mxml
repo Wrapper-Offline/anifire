@@ -9,8 +9,8 @@
 		<![CDATA[
 			import anifire.constant.CcLibConstant;
 			import anifire.creator.events.CcComponentThumbChooserEvent;
-			import anifire.creator.models.CcCharacter;
-			import anifire.creator.models.CcTheme;
+			import anifire.models.creator.CCBodyModel;
+			import anifire.models.creator.CCThemeModel;
 
 			private var _biggerHeight:Number;
 			private var _smallerHeight:Number;
@@ -44,11 +44,11 @@
 				}
 			}
 			
-			public function init(param1:CcCharacter, param2:CcTheme, param3:String, param5:Boolean) : void
+			public function init(ccChar:CCBodyModel, ccTheme:CCThemeModel, componentType:String, shouldUseBiggerHeight:Boolean) : void
 			{
-				this.upperBodyChooser.init(param1,param2,CcLibConstant.COMPONENT_TYPE_UPPER_BODY,param5);
+				this.upperBodyChooser.init(ccChar,ccTheme,CcLibConstant.COMPONENT_TYPE_UPPER_BODY,shouldUseBiggerHeight);
 				this.upperBodyChooser.addEventListener(CcComponentThumbChooserEvent.COMPONENT_THUMB_CHOSEN,this.onComponentThumbChoosen);
-				this.lowerBodyChooser.init(param1,param2,CcLibConstant.COMPONENT_TYPE_LOWER_BODY,param5);
+				this.lowerBodyChooser.init(ccChar,ccTheme,CcLibConstant.COMPONENT_TYPE_LOWER_BODY,shouldUseBiggerHeight);
 				this.lowerBodyChooser.addEventListener(CcComponentThumbChooserEvent.COMPONENT_THUMB_CHOSEN,this.onComponentThumbChoosen);
 			}
 			

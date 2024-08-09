@@ -4,7 +4,7 @@ package anifire.creator.core
 	import anifire.constant.ServerConstants;
 	import anifire.creator.events.CcCoreEvent;
 	import anifire.creator.interfaces.ICcMainUiContainer;
-	import anifire.creator.interfaces.IConfiguration;
+	import anifire.creator.config.GoAnimate;
 	import anifire.models.creator.CCBodyModel;
 	import anifire.models.creator.CCThemeModel;
 	import anifire.creator.theme.Theme;
@@ -26,7 +26,7 @@ package anifire.creator.core
 
 		private static var _instance:anifire.creator.core.CcConsole;
 
-		private static var _cfg:IConfiguration;
+		private static var _cfg:GoAnimate;
 
 		private static var _configManager:AppConfigManager = AppConfigManager.instance;
 
@@ -49,29 +49,28 @@ package anifire.creator.core
 			this._mainUi = iMainUi;
 			this._editUiController = new CcEditUiController();
 			this.editUiController.initUi(iMainUi.mui_editView);
+
 			var themeId:String = _configManager.getValue(ServerConstants.PARAM_THEME_ID);
 			if (themeId == null || themeId.length <= 0)
 			{
 				themeId = "family";
 			}
 			this._themeId = themeId;
-			// are we copying an existing character?
 			this.originalAssetId = _configManager.getValue("original_asset_id") as String;
 			if (this.originalAssetId == null || this.originalAssetId.length <= 0)
 			{
 				this.originalAssetId = null;
 			}
-			// check if the user is an admin
 			var isAdmin:String = _configManager.getValue(ServerConstants.FLASHVAR_IS_ADMIN) as String;
 			this._userLevel = isAdmin == "1" ?
 				CcLibConstant.USER_LEVEL_SUPER :
 				CcLibConstant.USER_LEVEL_NORMAL;
 
-			this.addEventListener(CcCoreEvent.LOAD_THEME_COMPLETE, this.doLoadPreMadeChar);
+			this.addEventListener(CcCoreEvent.LOAD_THEME_COMPLETE, this.prepareCharacter);
 			this.loadCcTheme(this._themeId);
 		}
 
-		public static function setConfiguration(config:IConfiguration) : void
+		public static function setConfiguration(config:GoAnimate) : void
 		{
 			_cfg = config;
 		}
@@ -94,7 +93,7 @@ package anifire.creator.core
 			throw new Error("CcConsole must be intialized first");
 		}
 
-		public function get configuration() : IConfiguration
+		public function get configuration() : GoAnimate
 		{
 			return _cfg;
 		}
@@ -230,7 +229,7 @@ package anifire.creator.core
 		// 	}
 		// }
 
-		private function doEnableUserToStartUseCC() : void
+		private function listenForCharacterLoad() : void
 		{
 			var self:CcConsole = this;
 			var proceedHandler:Function = function proceedHandler(e:CcCoreEvent):void
@@ -241,38 +240,36 @@ package anifire.creator.core
 			this.addEventListener(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, proceedHandler);
 		}
 
-		private function doLoadPreMadeChar(param1:Event) : void
+		private function prepareCharacter(event:Event) : void
 		{
-			(param1.target as IEventDispatcher).removeEventListener(param1.type, this.doLoadPreMadeChar);
-			this.doEnableUserToStartUseCC();
+			(event.target as IEventDispatcher).removeEventListener(event.type, this.prepareCharacter);
+			this.listenForCharacterLoad();
 			if (this.originalAssetId != null)
 			{
 				this.loadCharXml(_configManager.getValue("original_asset_id") as String);
 			}
 			else
 			{
-				this.doPrepareCcChar();
+				this.loadDefaultChar();
 			}
 		}
 
-		private function doPrepareCcChar() : void
+		private function loadDefaultChar() : void
 		{
-			// TODO: dehardcode this
-			if (_themeId == "cc2" || _themeId == "chibi" || _themeId == "ninja")
-			{
-				this._ccChar.version = 2;
-			}
 			var ccTheme:CCThemeModel = this._theme;
 			var bodyShape:CCBodyShapeModel;
 			var bsId:String = _configManager.getValue(ServerConstants.PARAM_BODYSHAPE);
-			if (bsId != null && bsId.length > 0) {
-				if (bsId == "__random") {
+			if (bsId != null && bsId.length > 0)
+			{
+				if (bsId == "__random")
+				{
 					var bodyShapes:Object = ccTheme.bodyShapes;
 					bsId = bodyShapes[int(Math.floor(Math.random() * bodyShapes.length))] as String;
 				}
 				bodyShape = ccTheme.bodyShapes[bsId];
 			}
-			if (bodyShape == null) {
+			if (bodyShape == null)
+			{
 				bodyShape = ccTheme.bodyShapes[ccTheme.defaultBodyShape];
 			}
 
@@ -299,6 +296,13 @@ package anifire.creator.core
 		private function onLoadCharXmlComplete(e:Event) : void
 		{
 			(e.target as IEventDispatcher).removeEventListener(e.type, this.onLoadCharXmlComplete);
+			this._ccChar.bodyScale.scalex = 1;
+			this._ccChar.bodyScale.scaley = 1;
+			this._ccChar.headScale.scalex = 1;
+			this._ccChar.headScale.scaley = 1;
+			this._ccChar.headPos.dx = 0;
+			this._ccChar.headPos.dy = 0;
+			this._ccChar.version = this._theme.version;
 			var loadEvent = new CcCoreEvent(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, this);
 			this.dispatchEvent(loadEvent);
 		}
@@ -376,7 +380,7 @@ package anifire.creator.core
 
 		private function serialize() : String
 		{
-			return "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + this.ccChar.source;
+			return "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + this.ccChar.serialize().toXmlString();
 		}
 
 		private function loadCcTheme(themeId:String) : void

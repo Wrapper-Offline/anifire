@@ -46,6 +46,7 @@
 			import anifire.models.creator.CCBodyComponentModel;
 			import anifire.models.creator.CCThemeModel;
 			import anifire.models.creator.CCCharacterActionModel;
+			import anifire.models.creator.CCColor;
 
 			private static var _configManager:AppConfigManager = AppConfigManager.instance;
 			private static var _themeId:String;
@@ -65,6 +66,7 @@
 			public var showFace:Boolean = false;
 			private var _shouldPauseOnLoadByteComplete:Boolean = false;
 			private var _charCanvasHeight:Number;
+			private var cam:CCCharacterActionModel;
 
 			private static function get themeId() : String
 			{
@@ -116,7 +118,10 @@
 				var charMaker:CustomCharacterMaker = new CustomCharacterMaker();
 				charMaker.name = this.LOADER;
 				charMaker.visible = false;
-				charMaker.scaleX = -1;
+				charMaker.scaleX = -1.6;
+				charMaker.scaleY = 1.6;
+				charMaker.x = 135;
+				charMaker.y = 270;
 				this._orgX = this.width * 0.4;
 				this._orgY = this.height * 0.5;
 				this._tarX = this.width * 0.6;
@@ -137,28 +142,6 @@
 			 * @param actionId action id
 			 * @param param3 facial id
 			 */
-			public function initByCcChar(ccChar:CCBodyModel, actionId:String, facialId:String = "") : void
-			{
-				if (this._isBuilding == 1)
-				{
-					return;
-				}
-				this._isBuilding = 1;
-				NativeCursorManager.instance.setBusyCursor();
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).destroy();
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).ver = ccChar.version;
-				//CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).visible = false;
-
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).initByXml(ccChar.serialize());
-				
-				return;
-			}
-
-			/**
-			 * @param ccChar cc char
-			 * @param actionId action id
-			 * @param param3 facial id
-			 */
 			public function initByCcBody(ccChar:CCBodyModel, theme:CCThemeModel) : void
 			{
 				if (this._isBuilding == 1)
@@ -169,13 +152,21 @@
 				NativeCursorManager.instance.setBusyCursor();
 				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).destroy();
 				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).ver = ccChar.version;
-				//CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).visible = false;
 
 				var actionId:String = theme.getCharacterDefaultActionId(ccChar.bodyShapeId);
-				var cam:CCCharacterActionModel = theme.getCharacterActionModel(ccChar, actionId);
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).initByCam(cam);
-				
-				return;
+				this.cam = theme.getCharacterActionModel(ccChar, actionId);
+
+				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT, this.onLoaded);
+				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).visible = false;
+				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).initByCam(this.cam);	
+			}
+
+			private function onLoaded(event:LoadEmbedMovieEvent) : void
+			{
+				(event.target as IEventDispatcher).removeEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT, this.onLoaded);
+				this._isBuilding = 2;
+				NativeCursorManager.instance.removeBusyCursor();
+				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).visible = true;
 			}
 			
 			private function reloadCharSkin(param1:Event = null) : void
@@ -250,98 +241,7 @@
 				// 	}
 				// }
 			}
-			
-			public function initByCcCharAfterSkeleton(param1:CcCharacter, param2:String, param3:String = "") : void
-			{
-				// var _loc8_:int = 0;
-				// var _loc9_:Sprite = null;
-				// var _loc10_:CcComponent = null;
-				// var _loc4_:DisplayObjectContainer = UtilPlain.getInstance(this.myUI,AnimeConstants.MOVIECLIP_DEFAULT_HEAD);
-				// var _loc5_:Array = CcLibConstant.GET_COMPONENT_ORDER_IN_HEAD;
-				// CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).updateBodyScale(param1.bodyScale.x,param1.bodyScale.y);
-				// CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).updateHeadScale(param1.headScale.x,param1.headScale.y);
-				// CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).updateHeadPos(param1.headShift.x,param1.headShift.y);
-				// if(_loc4_ != null)
-				// {
-				// 	_loc8_ = 0;
-				// 	while(_loc8_ < _loc5_.length)
-				// 	{
-				// 		(_loc9_ = new Sprite()).name = _loc5_[_loc8_] + this.MC;
-				// 		_loc4_.addChild(_loc9_);
-				// 		_loc8_++;
-				// 	}
-				// }
-				// var _loc6_:Number = param1.getUserChosenComponentSize();
-				// var _loc7_:int = 0;
-				// while(_loc7_ < _loc6_)
-				// {
-				// 	_loc10_ = param1.getUserChosenComponentByIndex(_loc7_);
-				// 	if(CcLibConstant.ALL_LIBRARY_TYPES.indexOf(_loc10_.componentThumb.type) == -1)
-				// 	{
-				// 		this.switchComponent(_loc10_,param1,param2,param3);
-				// 	}
-				// 	_loc7_++;
-				// }
-			}
-			
-			private function onLoadSkeletonImageData(param1:LoadMgrEvent) : void
-			{
-				// var _loc2_:UtilLoadMgr = param1.target as UtilLoadMgr;
-				// var _loc3_:Object = _loc2_.getExtraData();
-				// var _loc4_:UtilLoadMgr;
-				// (_loc4_ = new UtilLoadMgr()).setExtraData(_loc3_);
-				// _loc4_.addEventListener(LoadMgrEvent.ALL_COMPLETE,this.onReadySkeleton);
-				// this.changeComponent(_loc3_["component"],_loc3_["actionId"],_loc3_["facialId"],_loc3_["ccChar"],_loc4_);
-				// _loc4_.commit();
-			}
-			
-			private function onReadySkeleton(param1:LoadMgrEvent) : void
-			{
-				// IEventDispatcher(param1.target).removeEventListener(param1.type,this.onReadySkeleton);
-				// NativeCursorManager.instance.removeBusyCursor();
-				// var _loc2_:UtilLoadMgr = param1.target as UtilLoadMgr;
-				// var _loc3_:Object = _loc2_.getExtraData();
-				// this.initByCcCharAfterSkeleton(_loc3_["ccChar"],_loc3_["actionId"],_loc3_["facialId"]);
-			}
-			
-			private function onLoadStateImageData(param1:LoadMgrEvent) : void
-			{
-				// IEventDispatcher(param1.target).removeEventListener(param1.type,this.onLoadStateImageData);
-				// var _loc2_:UtilLoadMgr = param1.target as UtilLoadMgr;
-				// var _loc3_:Object = _loc2_.getExtraData();
-				// var _loc4_:UtilLoadMgr;
-				// (_loc4_ = new UtilLoadMgr()).setExtraData(_loc3_);
-				// _loc4_.addEventListener(LoadMgrEvent.ALL_COMPLETE,this.onReadyComponent);
-				// this.changeComponent(_loc3_["component"],_loc3_["actionId"],_loc3_["facialId"],_loc3_["ccChar"],_loc4_);
-				// _loc4_.commit();
-			}
-			
-			private function onCCReady(param1:Event) : void
-			{
-				this.updateCCPosition();
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).visible = true;
-				this._isBuilding = 2;
-				if(this._isRandom)
-				{
-					this.onRandomCharacterComplete();
-					this._isRandom = false;
-				}
-				this.dispatchEvent(new LoadEmbedMovieEvent(LoadEmbedMovieEvent.COMPLETE_EVENT));
-			}
-			
-			private function onReadyComponent(param1:LoadMgrEvent) : void
-			{
-				try
-				{
-					CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).shouldPauseOnLoadBytesComplete = this.shouldPauseOnLoadBytesComplete;
-					CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.onCCReady);
-					CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).onReady();
-				}
-				catch(e:Error)
-				{
-				}
-			}
-			
+
 			public function onRandomCharacterComplete() : void
 			{
 				this.playBlurEffect();
@@ -352,16 +252,16 @@
 				this.fadeIn.play();
 			}
 			
-			public function updateColor(param1:CcColor) : void
+			public function updateColor(color:CCColor, newValue:uint) : void
 			{
 				var _loc2_:Object = null;
 				try
 				{
 					_loc2_ = new Object();
-					_loc2_["colorReference"] = param1.ccColorThumb.colorReference;
-					_loc2_["originalColor"] = param1.ccColorThumb.isOriginalColorExist ? param1.ccColorThumb.originalColor : uint.MAX_VALUE;
-					_loc2_["colorValue"] = param1.colorValue;
-					_loc2_["targetComponentId"] = param1.ccComponent == null ? "" : param1.ccComponent.id;
+					_loc2_["colorReference"] = color.type;
+					_loc2_["originalColor"] = color.oc != uint.MAX_VALUE ? color.oc : uint.MAX_VALUE;
+					_loc2_["colorValue"] = newValue;
+					_loc2_["targetComponentId"] = color.targetComponent == null ? "" : color.targetComponent;
 					CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).updateColor(_loc2_);
 				}
 				catch(e:Error)
@@ -546,20 +446,24 @@
 				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).removeHighlight(bodyCmpnt.id);
 			}
 			
-			public function removeComponent(bodyCmpnt:CCBodyComponentModel) : void
+			public function removeComponent(type:String, id:String) : void
 			{
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).removeComponentById(bodyCmpnt.id);
+				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).removeComponentById(type, id);
+			}
+			public function removeLibrary(type:String, id:String) : void
+			{
+				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).removeComponentById(type, id);
 			}
 			
 			public function updateLocation(param1:CcComponent) : void
 			{
 				var _loc2_:Object = {
 					"x":param1.x,
-						"y":param1.y,
-						"xscale":param1.xscale,
-						"yscale":param1.yscale,
-						"offset":param1.offset,
-						"rotation":param1.rotation
+					"y":param1.y,
+					"xscale":param1.xscale,
+					"yscale":param1.yscale,
+					"offset":param1.offset,
+					"rotation":param1.rotation
 				};
 				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).updateLocation(param1.componentThumb.type,_loc2_,CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(param1.componentThumb.type) > -1 ? param1.id : "");
 				if(param1.componentThumb.type == CcLibConstant.COMPONENT_TYPE_HAIR)

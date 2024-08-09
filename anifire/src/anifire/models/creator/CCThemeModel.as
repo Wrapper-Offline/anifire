@@ -16,7 +16,10 @@ package anifire.models.creator
 		public var defaultBodyShape:CCBodyShapeModel;
 		public var bodyShapes:Object;
 		public var components:Object;
+		public var version:int;
+		// they faces
 		public var faces:Object;
+		public var colors:Object;
 		public var completed:Boolean = false;
 		protected var loader:URLLoader;
 		private var _actionModels:Object;
@@ -57,12 +60,34 @@ package anifire.models.creator
 		{
 			var nodes:XMLList = ccThemeXml.children();
 			var totalNodes:int = nodes.length();
+			if (this.runwayMode)
+			{
+				this.colors = {};
+				if (ccThemeXml.@version)
+				{
+					this.version = int(ccThemeXml.@version);
+				}
+				else
+				{
+					this.version = 1;
+				}
+			}
 			for (var index:int = 0; index < totalNodes; index++)
 			{
 				var node:XML = nodes[index];
 				var tagName:String = node.localName() as String;
 				switch (tagName)
 				{
+					case "color":
+						if (this.runwayMode)
+						{
+							var color:CCColor = new CCColor();
+							color.parse(node);
+							if (node.@component_type)
+								color.targetComponent = node.@component_type;
+							this.colors[color.type] = color;
+						}
+						break;
 					case "facial":
 						var facialExpression:CCFaceModel = new CCFaceModel();
 						facialExpression.parse(node);

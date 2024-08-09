@@ -8,6 +8,7 @@ package anifire.models.creator
 		public var states:Object;
 		public var runwayMode:Boolean;
 		public var tags:Object;
+		public var displayOrder:int;
 		protected var _enable:Boolean;
 		
 		public function CCComponentModel(runway:Boolean = false)
@@ -63,6 +64,7 @@ package anifire.models.creator
 					this.addTag(tags[index]);
 				}
 				this._enable = xml.@enable != "N";
+				this.displayOrder = int(xml.@display_order);
 			}
 		}
 		

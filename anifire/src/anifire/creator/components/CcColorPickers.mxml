@@ -7,15 +7,12 @@
 	<fx:Script>
 		<![CDATA[
 			import anifire.creator.events.CcColorPickerEvent;
-			import anifire.creator.models.CcCharacter;
-			import anifire.creator.models.CcColor;
-			import anifire.creator.models.CcColorThumb;
-			import anifire.creator.models.CcComponent;
-			import anifire.creator.models.CcComponentThumb;
-			import anifire.creator.models.CcLibrary;
-			import anifire.creator.models.CcTheme;
+			import anifire.models.creator.CCBodyComponentModel;
+			import anifire.models.creator.CCThemeModel;
+			import anifire.models.creator.CCBodyModel;
+			import anifire.models.creator.CCColor;
 
-			private var colorThumb:CcColorThumb;
+			private var colorThumb:CCColor;
 			private var _biggerElementWidth:Number;
 			private var _smallerElementWidth:Number;
 			private const DELAY_BETWEEN_LOADING_EACH_THUMB:Number = 200;
@@ -29,109 +26,84 @@
 			{
 				this._smallerElementWidth = param1;
 			}
-			
-			public function addLibraryType(param1:CcLibrary, param2:CcTheme, param3:CcCharacter) : void
+
+			public function addLibraryType(type:String, theme:CCThemeModel, ccChar:CCBodyModel) : void
 			{
-				var _loc4_:Array = new Array();
-				var _loc6_:int = 0;
-				while(_loc6_ < param2.getColorThumbNum())
+				var color:CCColor;
+				var colors:Vector.<CCColor> = new Vector.<CCColor>();
+				for (var colorType:String in theme.colors)
 				{
-					var _loc5_:CcColorThumb = param2.getColorThumbByIndex(_loc6_);
-					if(_loc5_.componentType == param1.type)
+					color = theme.colors[colorType];
+					if (color.targetComponent == type)
 					{
-						_loc4_.push(_loc5_);
+						colors.push(color);
 					}
-					_loc6_++;
 				}
-				if(_loc4_.length > 0)
+				if (colors.length > 0)
 				{
-					var _loc7_:int = 0;
-					while(_loc7_ < _loc4_.length)
+					for (var index2:int = 0; index2 < colors.length; index2++)
 					{
-						_loc5_ = _loc4_[_loc7_] as CcColorThumb;
-						this.addColorPicker(_loc5_,null,param2,param3);
-						_loc7_++;
+						color = colors[index2] as CCColor;
+						this.addColorPicker(color, theme, ccChar);	
+					}
+				}
+			}
+
+			/**
+			 * Adds a component to the list of color pickers
+			 * using its type.
+			 */
+			public function addComponentType(type:String, theme:CCThemeModel, ccChar:CCBodyModel) : void
+			{
+				var color:CCColor;
+				var colors:Vector.<CCColor> = new Vector.<CCColor>();
+				for (var colorType:String in theme.colors)
+				{
+					color = theme.colors[colorType];
+					if (color.targetComponent == type)
+					{
+						colors.push(color);
+					}
+				}
+				if (colors.length > 0)
+				{
+					for (var index2:int = 0; index2 < colors.length; index2++)
+					{
+						color = colors[index2] as CCColor;
+						this.addColorPicker(color, theme, ccChar);	
 					}
 				}
 			}
 			
-			public function addComponentType(param1:CcComponent, param2:String, param3:CcTheme, param4:CcCharacter) : void
+			private function addColorPicker(color:CCColor, theme:CCThemeModel, ccChar:CCBodyModel) : void
 			{
-				var _loc6_:CcColorThumb = null;
-				var _loc8_:CcColorPickerElementSpark = null;
-				var _loc9_:int = 0;
-				var _loc5_:Array = new Array();
-				var _loc7_:int = 0;
-				while(_loc7_ < param3.getColorThumbNum())
+				var picker:CcColorPickerElementSpark = new CcColorPickerElementSpark();
+				if (color.choices.length > 4)
 				{
-					if((_loc6_ = param3.getColorThumbByIndex(_loc7_)).componentType == param2)
-					{
-						_loc5_.push(_loc6_);
-					}
-					_loc7_++;
-				}
-				if(_loc5_.length > 0)
-				{
-					_loc9_ = 0;
-					while(_loc9_ < _loc5_.length)
-					{
-						_loc6_ = _loc5_[_loc9_] as CcColorThumb;
-						this.addColorPicker(_loc6_,param1,param3,param4);
-						_loc9_++;
-					}
-				}
-			}
-			
-			public function addComponentThumb(param1:CcComponent, param2:CcComponentThumb, param3:CcTheme, param4:CcCharacter) : void
-			{
-				var _loc5_:CcColorPickerElementSpark = null;
-				var _loc6_:int = 0;
-				var _loc7_:CcColorThumb = null;
-				if(param2.getMyOwnColorNum() > 0)
-				{
-					_loc6_ = 0;
-					while(_loc6_ < param2.getMyOwnColorNum())
-					{
-						_loc7_ = param2.getMyOwnColorByIndex(_loc6_);
-						this.addColorPicker(_loc7_,param1,param3,param4);
-						_loc6_++;
-					}
-				}
-			}
-			
-			private function addColorPicker(param1:CcColorThumb, param2:CcComponent, param3:CcTheme, param4:CcCharacter) : void
-			{
-				var _loc5_:CcColorPickerElementSpark = null;
-				if(!param1.enable)
-				{
-					return;
-				}
-				_loc5_ = new CcColorPickerElementSpark();
-				if(param1.colorChoices.length > 4)
-				{
-					_loc5_.width = this._biggerElementWidth;
+					picker.width = this._biggerElementWidth;
 				}
 				else
 				{
-					_loc5_.width = this._smallerElementWidth;
+					picker.width = this._smallerElementWidth;
 				}
-				_loc5_.height = 30;
-				_loc5_.addEventListener(CcColorPickerEvent.COLOR_CHOSEN,this.onUserChooseColor);
-				_loc5_.callLater(_loc5_.initByColorThumb,[param2,param1,param3,param4]);
-				this._pickers.addElement(_loc5_);
+				picker.height = 30;
+				picker.addEventListener(CcColorPickerEvent.COLOR_CHOSEN, this.onUserChooseColor);
+				picker.callLater(picker.initByCcColor, [color]);
+				this._pickers.addElement(picker);
 			}
 			
-			private function onUserChooseColor(param1:CcColorPickerEvent) : void
+			private function onUserChooseColor(event:CcColorPickerEvent) : void
 			{
-				this.tellEveryBodyColorChosen(param1.colorChosen,param1.undoable);
+				this.tellEveryBodyColorChosen(event.color, event.colorValue, event.undoable);
 			}
 			
-			private function tellEveryBodyColorChosen(param1:CcColor, param2:Boolean = true) : void
+			private function tellEveryBodyColorChosen(color:CCColor, colorValue:uint, undoable:Boolean = true) : void
 			{
-				var _loc3_:CcColorPickerEvent = new CcColorPickerEvent(CcColorPickerEvent.COLOR_CHOSEN,this);
-				_loc3_.colorChosen = param1;
-				_loc3_.undoable = param2;
-				this.dispatchEvent(_loc3_);
+				var event:CcColorPickerEvent = new CcColorPickerEvent(CcColorPickerEvent.COLOR_CHOSEN, this);
+				event.color = color;
+				event.colorValue = colorValue;
+				event.undoable = undoable;
+				this.dispatchEvent(event);
 			}
 			
 			public function destroy() : void
@@ -141,11 +113,18 @@
 				while(_loc1_ < this._pickers.numChildren)
 				{
 					_loc2_ = this._pickers.getChildAt(_loc1_) as CcColorPickerElementSpark;
-					_loc2_.removeEventListener(CcColorPickerEvent.COLOR_CHOSEN,this.onUserChooseColor);
+					_loc2_.removeEventListener(CcColorPickerEvent.COLOR_CHOSEN, this.onUserChooseColor);
 					_loc1_++;
 				}
 				this._pickers.removeAllElements();
 			}
+
+			/**
+			 * Deprecated. Please use the `addComponentType` method
+			 * instead.
+			 */
+			public function addComponentThumb(bodyCmpnt:CCBodyComponentModel, cmpntThumb:*, theme:CCThemeModel, ccChar:CCBodyModel) : void
+			{}
 		]]>
 	</fx:Script>
 

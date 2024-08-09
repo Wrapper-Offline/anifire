@@ -21,10 +21,6 @@
 			{
 				return this.colorPicker;
 			}
-			public function get eui_buttonBar() : TopButtons
-			{
-				return this.sidebar;
-			}
 			public function get eui_componentChooserViewStack() : Group
 			{
 				return this.componentChooser;
@@ -62,35 +58,33 @@
 		
 	<s:Group id="previewer" width="100%" height="100%">
 		<components:CharPreviewer
-			id="charPreview" width="300" height="200" scaleX="1.5" scaleY="1.5" clipContent="false"
-			horizontalCenter="0" verticalCenter="20"/>
+			id="charPreview" width="100%" height="100%" clipContent="false"
+			horizontalCenter="0" verticalCenter="0"/>
 	</s:Group>
 
-	<s:HGroup id="slidingPanel" width="600" height="675" styleName="bgCharEditor">
-		<s:VGroup id="componentPanel" top="68" left="0" width="625" height="532">
-			<components:TypeChooserSpark
-				id="componentTypeChooser" left="4" top="0" width="100%" height="68"/>
-			<s:HGroup id="componentSettings" width="100%" height="100%">
-				<s:Group id="componentChooser">
-					<components:ComponentThumbChooserSpark
-						id="componentThumbChooser" biggerHeight="532" width="100%" height="532"
-						smallerHeight="{532 - _ce_selectedDecoration.height}"/>
-					<components:ClothesChooser
-						id="clothesChooser" y="10" width="100%" height="250" visible="false"
-						clipContent="false" thumbChooserWidth="463" biggerHeight="70" smallerHeight="70"
-						creationPolicy="all" verticalGap="50"/>
-					<components:DecorationPanel id="_ce_selectedDecoration" left="0" bottom="0" width="654" height="90"/>
-					<components:ScaleChooserSpark id="_ce_charScaleChooser" bottom="0" right="0"/>
-				</s:Group>
-				<s:VGroup id="componentTuner">
-					<components:CcColorPickers
-						id="colorPicker" bottom="10" right="45" width="248" height="62"
-						biggerElementWidth="248" smallerElementWidth="248"/>
-					<components:CcComponentPropertyInspectorSpark
-						id="propertyInspector" bottom="0" right="0"/>
-				</s:VGroup>
-			</s:HGroup>
-		</s:VGroup>
-		<components:TopButtons id="sidebar" right="0" width="300" height="68"/>
-	</s:HGroup>
+	<s:SkinnableContainer id="componentPanel" top="0" left="280" width="630" height="548" skinClass="anifire.creator.skins.SlidingComponentPanelSkin">
+		<s:layout>
+			<s:VerticalLayout/>
+		</s:layout>
+		<components:TypeChooserSpark
+			id="componentTypeChooser" left="0" top="0" width="100%" height="51"/>
+		<s:Group id="componentChooser">
+			<components:ComponentThumbChooserSpark
+				id="componentThumbChooser" biggerHeight="422" width="630" height="422"
+				smallerHeight="{422 - _ce_selectedDecoration.height}"/>
+			<components:ClothesChooser
+				id="clothesChooser" y="10" width="100%" height="250" visible="false"
+				clipContent="false" thumbChooserWidth="463" biggerHeight="70" smallerHeight="70"
+				creationPolicy="all" verticalGap="50"/>
+			<components:DecorationPanel id="_ce_selectedDecoration" left="0" bottom="0" width="654" height="90"/>
+			<components:ScaleChooserSpark id="_ce_charScaleChooser" bottom="0" right="0"/>
+		</s:Group>
+		<s:HGroup id="componentTuner">
+			<components:CcComponentPropertyInspectorSpark
+				id="propertyInspector" bottom="0" right="0"/>
+			<components:CcColorPickers
+				id="colorPicker" width="248" height="62"
+				biggerElementWidth="248" smallerElementWidth="248"/>
+		</s:HGroup>
+	</s:SkinnableContainer>
 </s:Group>

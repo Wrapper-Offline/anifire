@@ -1,6 +1,6 @@
 package anifire.creator.events
 {
-   import anifire.creator.models.CcComponentThumb;
+   import anifire.models.creator.CCComponentModel;
    import anifire.event.ExtraDataEvent;
    import flash.events.Event;
    
@@ -12,7 +12,7 @@ package anifire.creator.events
       public static const NONE_COMPONENT_THUMB_CHOSEN:String = "none_component_thumb_chosen";
        
       
-      public var componentThumb:CcComponentThumb;
+      public var componentThumb:CCComponentModel;
       
       public var noneComponentThumbType:String;
       

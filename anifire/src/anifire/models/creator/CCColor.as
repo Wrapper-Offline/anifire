@@ -6,6 +6,7 @@ package anifire.models.creator
 		public var dest:uint;
 		public var oc:uint = 4.294967295E9;
 		public var targetComponent:String = "";
+		public var choices:Vector.<String>;
 
 		public function CCColor()
 		{
@@ -17,7 +18,13 @@ package anifire.models.creator
 			this.type = xml.@r;
 			this.dest = uint(xml);
 			this.oc = xml.attribute("oc").length() == 0 ? uint.MAX_VALUE : uint(xml.@oc);
-			if(xml.attribute("targetComponent").length() != 0)
+			this.choices = new Vector.<String>;
+			var choices:XMLList = xml.choice;
+			for each (var choice in choices)
+			{
+				this.choices.push(choice)
+			}
+			if (xml.attribute("targetComponent").length() != 0)
 			{
 				this.targetComponent = xml.@targetComponent;
 			}

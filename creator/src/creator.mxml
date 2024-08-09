@@ -3,8 +3,8 @@
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:component="anifire.component.*"
 			   xmlns:components="anifire.creator.components.*"
-			   width="960" height="600" preinitialize="initApp()" applicationComplete="onApplicationComplete()"
-			   backgroundAlpha="0" backgroundColor="0xEDF2F6" creationPolicy="auto"
+			   width="910" height="549" preinitialize="initApp()" applicationComplete="onApplicationComplete()"
+			   backgroundAlpha="0" backgroundColor="0xE6E5F1" creationPolicy="auto"
 			   implements="anifire.creator.interfaces.ICcMainUiContainer"
 			   >
 

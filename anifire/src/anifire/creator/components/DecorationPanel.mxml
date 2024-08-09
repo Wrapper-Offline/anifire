@@ -22,7 +22,6 @@
 			public static const THUMB_OVER:String = "Over";
 			[Bindable]
 			private var _selectedList:List;
-			private var _selectedThumb:CcComponentThumbThumbnail;
 			[Bindable]
 			public var _thumbnailSource:ArrayCollection;
 			[Bindable]
@@ -46,17 +45,6 @@
 					this.selectedList.removeEventListener(IndexChangeEvent.CARET_CHANGE,this.onThumbDown);
 					this.selectedList.removeEventListener(CcSelectedDecorationEvent.DECORATION_DELETED,this.onThumbDelete);
 				}
-			}
-
-			public function set selectedThumb(param1:CcComponentThumbThumbnail) : void
-			{
-				var _loc2_:Number = Number(this.selectedList.numChildren);
-				var _loc3_:int = 0;
-				while(_loc3_ < _loc2_)
-				{
-					_loc3_++;
-				}
-				this._selectedThumb = param1;
 			}
 			
 			public function init() : void

@@ -103,6 +103,8 @@ package anifire.component
 		private var _libraries:UtilHashArray;
 		private var _isLoadingLipSyncMouth:Boolean = false;
 		private var _assetImageIdArray:UtilHashNumber;
+		// don't delete, we need it to be imported
+		private var _tempworker:GoBaseWorkerImp;
 		
 		public function CustomCharacterMaker()
 		{
@@ -1090,56 +1092,51 @@ package anifire.component
 			}
 		}
 		
-		private function onLoadImageData(param1:Event) : void
+		private function onLoadImageData(event:Event) : void
 		{
-			(param1.target as IEventDispatcher).removeEventListener(param1.type, this.onLoadImageData);
-			var _loc2_:ExtraDataLoader = ExtraDataLoader(LoaderInfo(param1.currentTarget).loader);
-			var _loc3_:Object = _loc2_.extraData;
-			var _loc4_:String = String(_loc3_["componentType"]);
-			if (this._useImageLibrary && this.shouldComponentBeBorrowed(_loc4_) && _loc4_ != "mouth")
+			(event.target as IEventDispatcher).removeEventListener(event.type, this.onLoadImageData);
+			var loader:ExtraDataLoader = ExtraDataLoader(LoaderInfo(event.currentTarget).loader);
+			var extraData:Object = loader.extraData;
+			var type:String = String(extraData["componentType"]);
+			if (this._useImageLibrary && this.shouldComponentBeBorrowed(type) && type != "mouth")
 			{
-				_loc2_.dispatchEvent(new Event(Event.INIT));
+				loader.dispatchEvent(new Event(Event.INIT));
 			}
 			else
 			{
-				this.doLoadImageData(_loc2_);
+				this.doLoadImageData(loader);
 			}
 		}
 		
-		private function doLoadImageData(param1:ExtraDataLoader) : void
+		private function doLoadImageData(loader:ExtraDataLoader) : void
 		{
-			var _loc2_:Object = param1.extraData;
-			var _loc3_:String = String(_loc2_["componentType"]);
-			var _loc4_:Object = _loc2_["properties"];
-			var _loc5_:Array = _loc2_["colors"];
-			var _loc6_:String = String(_loc2_["clipName"]);
-			var _loc7_:Number = Number(_loc2_["index"]);
-			var _loc8_:DisplayObjectContainer;
-			if (_loc6_ != "")
+			var _loc2_:Object = loader.extraData;
+			var type:String = String(_loc2_["componentType"]);
+			var clipName:String = String(_loc2_["clipName"]);
+			var container:DisplayObjectContainer;
+			if (clipName != "")
 			{
-				_loc8_ = UtilPlain.getInstance(this, _loc6_);
+				container = UtilPlain.getInstance(this, clipName);
 			}
 			else
 			{
-				_loc8_ = this;
+				container = this;
 			}
-			if (_loc8_ != null)
+			if (container != null)
 			{
-				if (this._componentOrder.indexOf(_loc3_) == -1)
+				if (this._componentOrder.indexOf(type) == -1)
 				{
-					this.doLoadedComponent(param1);
+					this.doLoadedComponent(loader);
 				}
-				else if (_loc6_ != this.DEFAULTHEAD)
+				else if (clipName != this.DEFAULTHEAD)
 				{
-					var _loc9_:int = _loc8_.numChildren;
-					while (_loc9_ > 0)
+					for (var index:int = container.numChildren; index > 0; index--)
 					{
-						_loc8_.removeChildAt(_loc9_ - 1);
-						_loc9_--;
+						container.removeChildAt(index - 1);
 					}
-					param1.addEventListener(Event.ADDED, this.loadedComponent);
-					_loc8_.addChild(param1);
-					if (_loc8_ == this)
+					loader.addEventListener(Event.ADDED, this.loadedComponent);
+					container.addChild(loader);
+					if (container == this)
 					{
 						this.redoWaitingImageData();
 					}
@@ -1151,7 +1148,7 @@ package anifire.component
 			}
 			else
 			{
-				this.waiting.push(param1);
+				this.waiting.push(loader);
 			}
 		}
 		
@@ -1657,22 +1654,48 @@ package anifire.component
 			}
 		}
 		
-		public function removeComponentById(param1:String) : void
+		public function removeComponentById(type:String, id:String) : void
 		{
-			var _loc2_:DisplayObjectContainer = UtilPlain.getInstance(this, this.DEFAULTHEAD);
-			var _loc3_:DisplayObjectContainer;
-			_loc3_ = UtilPlain.getInstance(_loc2_, param1);
-			if (_loc3_)
+			var clipName:String;
+			switch (type)
 			{
-				var _loc4_:DisplayObjectContainer = _loc3_.parent;
-				var _loc5_:int = _loc4_.numChildren - 1;
-				while (_loc5_ >= 0)
+				case CcLibConstant.COMPONENT_TYPE_UPPER_BODY:
+					clipName = this.UPPERBODY;
+					break;
+				case CcLibConstant.COMPONENT_TYPE_LOWER_BODY:
+					clipName = this.LOWERBODY;
+					break;
+				default:
+					clipName = this.DEFAULTHEAD;
+			}
+
+			// split components are separated
+			if (CcLibConstant.ALL_OFFSETABLE_COMPONENT_TYPES.indexOf(type) >= 0)
+			{
+				this.removeComponentById(type + CcLibConstant.LEFT, id);
+				this.removeComponentById(type + CcLibConstant.RIGHT, id);
+				return;
+			}
+
+			if (
+				CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) >= 0
+			)
+			{
+				type = id;
+			}
+			var bodyContainer:DisplayObjectContainer = UtilPlain.getInstance(this, clipName);
+			var component:DisplayObjectContainer;
+			component = UtilPlain.getInstance(bodyContainer, type);
+			if (component)
+			{
+				var cmpntParent:DisplayObjectContainer = component.parent;
+				var index:int = cmpntParent.numChildren - 1;
+				for (; index >= 0; index--)
 				{
-					if (_loc4_.getChildAt(_loc5_).name == param1)
+					if (cmpntParent.getChildAt(index).name == type)
 					{
-						_loc4_.removeChildAt(_loc5_);
+						cmpntParent.removeChildAt(index);
 					}
-					_loc5_--;
 				}
 			}
 		}

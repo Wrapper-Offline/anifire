@@ -227,7 +227,9 @@ package anifire.models.creator
 			this.headScale.scaley = Number(charXml.@hyscale);
 			this.headPos.dx = Number(charXml.@headdx);
 			this.headPos.dy = Number(charXml.@headdy);
-			this.version = Number(charXml.@version);
+			if (charXml.@version) {
+				this.version = Number(charXml.@version);
+			}
 			this.source = charXml;
 			this.completed = true;
 			dispatchEvent(new Event(Event.COMPLETE));

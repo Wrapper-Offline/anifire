@@ -4,8 +4,7 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
 	xmlns:components="anifire.creator.components.*"
-	verticalAlign="middle"
-	horizontalAlign="center">
+	verticalAlign="middle">
 
 	<fx:Script>
 		<![CDATA[
@@ -43,9 +42,9 @@
 				var displayList:Array = new Array();
 				var multipleBses:Boolean = ccTheme.bodyShapes.length > 1;
 				this.components = new Array();
-				var order:Array = ccChar.version == 1 ?
-					CcLibConstant.COMPONENT_TYPE_CHOOSER_ORDERING_VER1 :
-					CcLibConstant.COMPONENT_TYPE_CHOOSER_ORDERING_VER2;
+				var order:Array = ccChar.version == 2 ?
+					CcLibConstant.COMPONENT_TYPE_CHOOSER_ORDERING_VER2 :
+					CcLibConstant.COMPONENT_TYPE_CHOOSER_ORDERING_VER1;
 				for (var typeObj:String in this.typeList.source)
 				{
 					var type:String = this.typeList.source[typeObj].label;
@@ -57,9 +56,12 @@
 							pushType = true;
 						}
 					}
+					else if (CcLibConstant.COMPONENT_TYPE_CHOOSER_COMPONENT_GROUP.indexOf(type) >= 0)
+					{
+						pushType = true;
+					}
 					else
 					{
-						var matchCount:int = 0;
 						var searchArr:*;
 						if (CcLibConstant.ALL_LIBRARY_TYPES.indexOf(type) > -1)
 						{
@@ -68,17 +70,18 @@
 						else
 						{
 							searchArr = ccTheme.bodyShapes[ccChar.bodyShapeId].getComponentsByType(type);
-							if (!searchArr.length <= 0)
+							if (searchArr.length <= 0)
 							{
 								searchArr = ccTheme.getComponentsByType(type);
 							}
 						}
 
+						var matchCount:int = 0;
 						for (var index:int = 0; index < searchArr.length; index++)
 						{
 							if (searchArr[index].enable)
 							{
-								var filter:Function = CcConsole.instance.configuration.defaultThumbFilter.filter;
+								var filter:Function = CcConsole.instance.configuration.goTagFilter;
 								if (filter(searchArr[index]))
 								{
 									matchCount++;
@@ -86,17 +89,11 @@
 							}
 						}
 
-						if (CcLibConstant.COMPONENT_TYPE_CHOOSER_COMPONENT_GROUP.indexOf(type) >= 0)
+
+						var minCmpnts:Number = CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) > -1 ? 0 : 1;
+						if (matchCount >= minCmpnts)
 						{
 							pushType = true;
-						}
-						else
-						{
-							var minCmpnts:Number = CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) > -1 ? 0 : 1;
-							if (matchCount > minCmpnts)
-							{
-								pushType = true;
-							}
 						}
 					}
 					
@@ -133,27 +130,11 @@
 			{
 			}
 			
-			public function switchToComponentType(param1:String = "", param2:Boolean = true) : void
+			public function switchToComponentType(param1:String = "", dispatchEvent:Boolean = true) : void
 			{
 				this.currentComponentIndex = this.components.indexOf(param1);
 				this.canQuickBar.selectedIndex = this.currentComponentIndex;
-				if(this.components.indexOf(param1) == 0)
-				{
-					this.btnPrevious.enabled = false;
-				}
-				else
-				{
-					this.btnPrevious.enabled = true;
-				}
-				if(this.components.indexOf(param1) == this.components.length - 1)
-				{
-					this.btnNext.enabled = false;
-				}
-				else
-				{
-					this.btnNext.enabled = true;
-				}
-				if(param2)
+				if (dispatchEvent)
 				{
 					this.tellEverybodyComponentTypeChosen(param1);
 				}
@@ -164,23 +145,6 @@
 				var _loc2_:CcComponentTypeChooserEvent = new CcComponentTypeChooserEvent(CcComponentTypeChooserEvent.COMPONENT_TYPE_CHOSEN,this);
 				_loc2_.componentType = param1;
 				this.dispatchEvent(_loc2_);
-			}
-			
-			private function onBtnClick(param1:Event) : void
-			{
-				var _loc2_:int = 0;
-				if(param1.currentTarget == this.btnPrevious)
-				{
-					_loc2_ = this.currentComponentIndex - 1;
-				}
-				else if(param1.currentTarget == this.btnNext)
-				{
-					_loc2_ = this.currentComponentIndex + 1;
-				}
-				if(_loc2_ < this.components.length)
-				{
-					this.switchToComponentType(this.components[_loc2_]);
-				}
 			}
 			
 			private function onButtonBarChange(param1:IndexChangeEvent) : void
@@ -221,16 +185,6 @@
 		</s:ArrayList>
 	</fx:Declarations>
 
-	<components:IconButton
-		id="btnPrevious"
-		buttonMode="true"
-		enabled="false"
-		icon="@Embed('../images/componentIcons/lastStepIcon.png')"
-		iconOver="@Embed('../images/componentIcons/lastStepIcon_hover.png')"
-		iconDisabled="@Embed('../images/componentIcons/lastStepIcon_disabled.png')"
-		label="{UtilDict.toDisplay('go','Previous')}"
-		click="onBtnClick(event)"/>
-	<s:Spacer width="18"/>
 	<s:ButtonBar
 		id="canQuickBar"
 		x="0"
@@ -244,14 +198,4 @@
 			<s:ArrayList id="confirmTypeList"/>
 		</s:dataProvider>
 	</s:ButtonBar>
-	<s:Spacer width="18"/>
-	<components:IconButton
-		id="btnNext"
-		buttonMode="true"
-		enabled="false"
-		icon="@Embed('../images/componentIcons/nextStepIcon.png')"
-		iconOver="@Embed('../images/componentIcons/nextStepIcon_hover.png')"
-		iconDisabled="@Embed('../images/componentIcons/nextStepIcon_disabled.png')"
-		label="{UtilDict.toDisplay('go','Next')}"
-		click="onBtnClick(event)"/>
 </s:HGroup>

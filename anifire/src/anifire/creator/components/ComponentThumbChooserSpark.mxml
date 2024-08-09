@@ -9,26 +9,24 @@
 		<![CDATA[
 			import anifire.constant.CcLibConstant;
 			import anifire.creator.events.CcComponentThumbChooserEvent;
-			import anifire.creator.models.CcCharacter;
-			import anifire.creator.models.CcComponent;
 			import anifire.creator.models.CcComponentThumb;
-			import anifire.creator.models.CcLibrary;
-			import anifire.creator.models.CcTheme;
-			import anifire.creator.utils.ComponentThumbFilter;
 			import anifire.util.UtilHashArray;
 			import mx.collections.ArrayCollection;
 			import mx.events.FlexEvent;
 			import spark.events.IndexChangeEvent;
+			import anifire.models.creator.CCBodyModel;
+			import anifire.models.creator.CCComponentModel;
+			import anifire.models.creator.CCThemeModel;
+			import anifire.models.creator.CCBodyComponentModel;
+			import anifire.creator.config.GoAnimate;
 
 			private static const EVENT_TAG_FILTER_CHANGED:String = "evt_tag_changed";
-			private var componentThumbs:UtilHashArray;
+			private var componentThumbs:Object;
 			private var componentType:String;
-			private var currentPageNum:int = 0;
 			private var timeoutId:int = -1;
 			private var _biggerHeight:Number;
 			private var _smallerHeight:Number;
-			private var _filter:ComponentThumbFilter = null;
-			private var _filteredThumbs:UtilHashArray;
+			private var _filter:Function = null;
 			[Bindable]
 			public var _thumbnailSource:ArrayCollection;
 			private const DELAY_BETWEEN_LOADING_EACH_THUMB:Number = 200;
@@ -37,31 +35,20 @@
 
 			private function initTagFilter() : void
 			{
-				this.addEventListener(EVENT_TAG_FILTER_CHANGED,function(param1:Event):void
+				this._filter = (new GoAnimate()).goTagFilter;
+				this.addEventListener(EVENT_TAG_FILTER_CHANGED, function(param1:Event):void
 				{
 					var _loc2_:UtilHashArray = new UtilHashArray();
 					var _loc3_:int = 0;
-					while(_loc3_ < componentThumbs.length)
+					while (_loc3_ < componentThumbs.length)
 					{
-						if(!_filter || _filter.filter(componentThumbs.getValueByIndex(_loc3_) as CcComponentThumb))
+						if (!_filter || _filter(componentThumbs[_loc3_] as CcComponentThumb))
 						{
-							_loc2_.push(componentThumbs.getKey(_loc3_),componentThumbs.getValueByIndex(_loc3_));
+							_loc2_.push(componentThumbs[_loc3_].id, componentThumbs[_loc3_]);
 						}
 						_loc3_++;
 					}
-					_filteredThumbs = _loc2_;
-					initPage();
 				});
-			}
-			
-			public function set thumbFilter(param1:ComponentThumbFilter) : void
-			{
-				var _loc2_:* = this._filter != param1;
-				this._filter = param1;
-				if(_loc2_)
-				{
-					this.dispatchEvent(new Event(EVENT_TAG_FILTER_CHANGED));
-				}
 			}
 			
 			public function set biggerHeight(param1:Number) : void
@@ -74,7 +61,7 @@
 				this._smallerHeight = param1;
 			}
 			
-			public function init(ccChar:CcCharacter, ccTheme:CcTheme, componentType:String, shouldUseBiggerHeight:Boolean) : void
+			public function init(ccChar:CCBodyModel, ccTheme:CCThemeModel, componentType:String, shouldUseBiggerHeight:Boolean) : void
 			{
 				this.doClearTimeOut();
 				if(shouldUseBiggerHeight)
@@ -87,101 +74,101 @@
 					this.height = this._smallerHeight;
 					this.thumbnailTileSpark.height = this._smallerHeight;
 				}
+
 				this.componentType = componentType;
-				if(CcLibConstant.USER_CHOOSE_ABLE_HEAD_COMPONENT_TYPES.indexOf(componentType) >= 0)
+				if (CcLibConstant.USER_CHOOSE_ABLE_HEAD_COMPONENT_TYPES.indexOf(componentType) >= 0)
 				{
-					this.componentThumbs = ccTheme.getComponentThumbByType(componentType);
+					this.componentThumbs = ccTheme.getComponentsByType(componentType) as Object;
 				}
-				else if(CcLibConstant.USER_CHOOSE_ABLE_BODY_COMPONENT_TYPES.indexOf(componentType) >= 0)
+				else if (CcLibConstant.USER_CHOOSE_ABLE_BODY_COMPONENT_TYPES.indexOf(componentType) >= 0)
 				{
-					this.componentThumbs = ccChar.bodyShape.getComponentThumbByType(componentType);
+					this.componentThumbs = ccTheme.bodyShapes[ccChar.bodyShapeId].getComponentsByType(componentType) as Object;
 				}
-				if(this.componentThumbs == null)
+				else if (CcLibConstant.ALL_LIBRARY_TYPES.indexOf(componentType) >= 0)
 				{
-					this.componentThumbs = new UtilHashArray();
+					this.componentThumbs = ccTheme.bodyShapes[ccChar.bodyShapeId].getLibrariesByType(componentType) as Object;
+				}
+				if (this.componentThumbs == null)
+				{
+					this.componentThumbs = (new Vector.<CCComponentModel>()) as Object;
 				}
 				this.initTagFilter();
+
 				var _componentThumbs:Array = [];
-				var enabledComponentThumbs:UtilHashArray = new UtilHashArray();
-				var i:int = 0;
-				while(i < this.componentThumbs.length)
+				for (var i:int = 0; i < this.componentThumbs.length; i++)
 				{
-					if((this.componentThumbs.getValueByIndex(i) as CcComponentThumb).enable)
+					if ((this.componentThumbs[i] as CCComponentModel).enable)
 					{
-						if(!this._filter || this._filter.filter(this.componentThumbs.getValueByIndex(i) as CcComponentThumb))
+						if (!this._filter || this._filter(this.componentThumbs[i] as CCComponentModel))
 						{
 							_componentThumbs.push({
-								"key":this.componentThumbs.getKey(i),
-								"data":this.componentThumbs.getValueByIndex(i),
-								"order":i
+								"key": this.componentThumbs[i].id,
+								"data": this.componentThumbs[i],
+								"order": i
 							});
 						}
 					}
-					i++;
 				}
-				_componentThumbs.sort(function(param1:Object, param2:Object):Number
+				_componentThumbs.sort(function(thumb1:Object, thumb2:Object) : Number
 				{
-					var _loc3_:int = (param1.data as CcComponentThumb).displayOrder - (param2.data as CcComponentThumb).displayOrder;
-					return _loc3_ == 0 ? param1.order - param2.order : _loc3_;
+					var diff:int = (thumb1.data as CCComponentModel).displayOrder - (thumb2.data as CCComponentModel).displayOrder;
+					return diff == 0 ? thumb1.order - thumb2.order : diff;
 				});
 				this._thumbnailSource = new ArrayCollection();
-				var isNullThumbnailNeeded:Boolean = CcLibConstant.OPTIONAL_COMPONENTS.containsKey(componentType);
-				if(isNullThumbnailNeeded)
+				var isOptional:Boolean = CcLibConstant.OPTIONAL_COMPONENTS.containsKey(componentType);
+				if (isOptional)
 				{
 					this._thumbnailSource.addItem({
-						"key":"null",
-						"data":null
+						"key": "null",
+						"data": null
 					});
 				}
-				for each(var item:Object in _componentThumbs)
+				for each (var item:Object in _componentThumbs)
 				{
 					this._thumbnailSource.addItem({
-						"key":item.key,
-						"data":item.data
+						"key": item.key,
+						"data": item.data,
+						"themeId": ccTheme.themeId
 					});
 				}
 				_componentThumbs = null;
-				this.thumbnailTileSpark.setStyle("backgroundColor",null);
-				this.thumbnailTileSpark.setStyle("borderStyle",null);
+				this.thumbnailTileSpark.setStyle("backgroundColor", null);
+				this.thumbnailTileSpark.setStyle("borderStyle", null);
 				this.dispatchEvent(new Event(EVENT_TAG_FILTER_CHANGED));
-				this.thumbnailTileSpark.scroller.verticalScrollBar.addEventListener(Event.CHANGE,this.scrollerUpdate);
-				this.thumbnailTileSpark.addEventListener(FlexEvent.UPDATE_COMPLETE,this.scrollerUpdate);
+				this.thumbnailTileSpark.scroller.verticalScrollBar.addEventListener(Event.CHANGE, this.scrollerUpdate);
+				this.thumbnailTileSpark.addEventListener(FlexEvent.UPDATE_COMPLETE, this.scrollerUpdate);
 				this.scrollerUpdate();
-				this.thumbnailTileSpark.scroller.addEventListener(MouseEvent.MOUSE_WHEEL,this.disableScroll,true);
-				if(CcLibConstant.ALL_LIBRARY_TYPES.indexOf(this.componentType) > -1)
+				this.thumbnailTileSpark.scroller.addEventListener(MouseEvent.MOUSE_WHEEL, this.disableScroll, true);
+				if (CcLibConstant.ALL_LIBRARY_TYPES.indexOf(this.componentType) > -1)
 				{
-					var sLib:CcLibrary = ccChar.getUserChosenLibraryByType(this.componentType);
-					if(sLib)
+					var sLib:String = ccChar.libraries[this.componentType];
+					if (sLib)
 					{
-						i = 0;
-						while(i < this._thumbnailSource.length)
+						for (i = 0; i < this._thumbnailSource.length; i++)
 						{
-							if(this._thumbnailSource.getItemAt(i).key == this.componentType + "_" + sLib.component_id)
+							if (this._thumbnailSource.getItemAt(i).key == this.componentType + "_" + sLib)
 							{
 								this.thumbnailTileSpark.selectedIndex = i;
 								break;
 							}
-							i++;
 						}
 					}
 				}
 				else
 				{
-					var sComArray:Array = ccChar.getUserChosenComponentByComponentType(this.componentType);
-					if(sComArray.length == 1)
+					var sCom:CCBodyComponentModel = ccChar.components[this.componentType];
+					if (sCom)
 					{
-						var sCom:CcComponent = sComArray[0] as CcComponent;
-						i = 0;
-						while(i < this._thumbnailSource.length)
+						for (i = 0; i < this._thumbnailSource.length; i++)
 						{
-							if(this._thumbnailSource.getItemAt(i).key == sCom.componentThumb.internalId)
+							if (this._thumbnailSource.getItemAt(i).key == sCom.component_id)
 							{
 								this.thumbnailTileSpark.selectedIndex = i;
 								break;
 							}
-							i++;
 						}
 					}
+					
 				}
 				this.thumbnailTileSpark.removeEventListener(MouseEvent.CLICK,this.onDecoClick);
 				if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(this.componentType) > -1)
@@ -200,12 +187,6 @@
 			private function disableScroll(param1:MouseEvent) : void
 			{
 				param1.stopPropagation();
-			}
-			
-			private function initPage() : void
-			{
-				this.doClearTimeOut();
-				this.currentPageNum = 0;
 			}
 			
 			private function doClearTimeOut() : void
@@ -245,33 +226,14 @@
 			
 			private function onThumbSelect(param1:IndexChangeEvent) : void
 			{
-				var _loc2_:CcComponentThumbChooserEvent = null;
-				_loc2_ = new CcComponentThumbChooserEvent(CcComponentThumbChooserEvent.COMPONENT_THUMB_CHOSEN,this);
-				_loc2_.componentThumb = param1.currentTarget.selectedItem.data;
-				if(!_loc2_.componentThumb)
+				var event:CcComponentThumbChooserEvent = new CcComponentThumbChooserEvent(CcComponentThumbChooserEvent.COMPONENT_THUMB_CHOSEN, this);
+				event.componentThumb = param1.currentTarget.selectedItem.data;
+				if (!event.componentThumb)
 				{
-					_loc2_ = new CcComponentThumbChooserEvent(CcComponentThumbChooserEvent.NONE_COMPONENT_THUMB_CHOSEN,this);
-					_loc2_.noneComponentThumbType = this.componentType;
+					event = new CcComponentThumbChooserEvent(CcComponentThumbChooserEvent.NONE_COMPONENT_THUMB_CHOSEN, this);
+					event.noneComponentThumbType = this.componentType;
 				}
-				this.dispatchEvent(_loc2_);
-			}
-			
-			private function onThumbDown(param1:Event) : void
-			{
-				var _loc3_:CcComponentThumbChooserEvent = null;
-				var _loc2_:CcComponentThumbDetailThumbnail = param1.currentTarget as CcComponentThumbDetailThumbnail;
-				if(!_loc2_.isNullThumbnail)
-				{
-					_loc3_ = new CcComponentThumbChooserEvent(CcComponentThumbChooserEvent.COMPONENT_THUMB_CHOSEN,this);
-					_loc3_.componentThumb = _loc2_.componentThumb;
-					this.dispatchEvent(_loc3_);
-				}
-				else
-				{
-					_loc3_ = new CcComponentThumbChooserEvent(CcComponentThumbChooserEvent.NONE_COMPONENT_THUMB_CHOSEN,this);
-					_loc3_.noneComponentThumbType = _loc2_.componentType;
-					this.dispatchEvent(_loc3_);
-				}
+				this.dispatchEvent(event);
 			}
 			
 			private function initTile() : void
@@ -331,11 +293,11 @@
 		<components:layout>
 			<s:TileLayout
 				paddingTop="60"
-				paddingRight="60"
-				paddingBottom="45"
+				paddingRight="30"
+				paddingBottom="20"
 				paddingLeft="45"
-				verticalGap="4"
-				horizontalGap="2"
+				verticalGap="5"
+				horizontalGap="3"
 				columnAlign="justifyUsingGap"
 				orientation="rows"/>
 		</components:layout>

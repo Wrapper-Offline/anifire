@@ -12,48 +12,36 @@
 			import anifire.constant.CcLibConstant;
 			import anifire.creator.events.CcColorPickerEvent;
 			import anifire.creator.events.ColorPickerDropDownListEvent;
-			import anifire.creator.models.CcCharacter;
-			import anifire.creator.models.CcColor;
-			import anifire.creator.models.CcColorThumb;
-			import anifire.creator.models.CcComponent;
-			import anifire.creator.models.CcComponentThumb;
-			import anifire.creator.models.CcTheme;
+			import anifire.models.creator.CCColor;
 			import anifire.util.ExtraDataTimer;
 			import mx.containers.Canvas;
+	
+			private var color:CCColor;
 
-			private var component:CcComponent;
-			private var colorThumb:CcColorThumb;
-			private var char:CcCharacter;
-
-			public function init(param1:CcComponent, param2:CcComponentThumb, param3:CcTheme, param4:CcCharacter) : void
+			public function init() : void
 			{
-				var _loc6_:CcColorThumb = null;
-				var _loc5_:int = 0;
-				while(_loc5_ < param3.getColorThumbNum())
-				{
-					if((_loc6_ = param3.getColorThumbByIndex(_loc5_)).componentType == param2.type)
-					{
-						this.colorThumb = _loc6_;
-					}
-					_loc5_++;
-				}
-				this.initByColorThumb(param1,this.colorThumb,param3,param4);
+				// var _loc6_:CcColorThumb = null;
+				// var _loc5_:int = 0;
+				// while(_loc5_ < param3.getColorThumbNum())
+				// {
+				// 	if((_loc6_ = param3.getColorThumbByIndex(_loc5_)).componentType == param2.type)
+				// 	{
+				// 		this.color = _loc6_;
+				// 	}
+				// 	_loc5_++;
+				// }
+				// this.initByColorThumb(param1,this.color,param3,param4);
 			}
 			
-			public function initByColorThumb(param1:CcComponent, param2:CcColorThumb, param3:CcTheme, param4:CcCharacter) : void
+			public function initByCcColor(color:CCColor) : void
 			{
-				this.component = param1;
-				this.colorThumb = param2;
-				this["sico" + this.colorThumb.colorReference].visible = true;
-				this.char = param4;
-				var _loc5_:Array = new Array();
-				_loc5_ = this.colorThumb.colorChoices;
-				this.destroy();
-				var _loc6_:int = 0;
-				while(_loc6_ < Math.min(_loc5_.length,5))
+				this.color = color;
+				this["sico" + this.color.type].visible = true;
+				var choices:Vector.<String> = this.color.choices;
+				this.destroy();		
+				for (var index:int = 0; index < Math.min(choices.length, 5); index++)
 				{
-					this.insertColor(_loc5_[_loc6_]);
-					_loc6_++;
+					this.insertColor(uint(choices[index]));
 				}
 			}
 			
@@ -61,7 +49,7 @@
 			{
 				var _loc2_:ExtraDataTimer = param1.currentTarget as ExtraDataTimer;
 				var _loc3_:Object = _loc2_.getData();
-				var _loc4_:Array = _loc3_["colorThumbs"] as Array;
+				var _loc4_:Array = _loc3_["colors"] as Array;
 				this.insertColor(_loc4_[_loc2_.currentCount]);
 			}
 			
@@ -125,18 +113,12 @@
 				_loc2_.graphics.endFill();
 			}
 			
-			private function tellEveryBodyColorChosen(param1:uint, param2:Boolean = true) : void
+			private function tellEveryBodyColorChosen(colorValue:uint, undoable:Boolean = true) : void
 			{
-				var _loc3_:CcColor = new CcColor();
-				_loc3_.ccColorThumb = this.colorThumb;
-				if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(_loc3_.ccColorThumb.componentType) > -1)
-				{
-					_loc3_.ccComponent = this.component;
-				}
-				_loc3_.colorValue = param1;
-				var _loc4_:CcColorPickerEvent;
-				(_loc4_ = new CcColorPickerEvent(CcColorPickerEvent.COLOR_CHOSEN,this)).colorChosen = _loc3_;
-				_loc4_.undoable = param2;
+				var _loc4_:CcColorPickerEvent = new CcColorPickerEvent(CcColorPickerEvent.COLOR_CHOSEN, this);
+				_loc4_.color = this.color;
+				_loc4_.colorValue = colorValue;
+				_loc4_.undoable = undoable;
 				this.dispatchEvent(_loc4_);
 			}
 			
@@ -158,12 +140,12 @@
 			
 			private function followColor(param1:Event) : void
 			{
-				var _loc2_:CcColor = null;
-				if(this.colorThumb.parentComponentColorRef() != null)
-				{
-					_loc2_ = this.char.getUserChosenColorByColorReference(this.colorThumb.parentComponentColorRef());
-					this.tellEveryBodyColorChosen(_loc2_.colorValue);
-				}
+				// var _loc2_:CcColor = null;
+				// if(this.color.parentComponentColorRef() != null)
+				// {
+				// 	_loc2_ = this.char.getUserChosenColorByColorReference(this.color.parentComponentColorRef());
+				// 	this.tellEveryBodyColorChosen(_loc2_.colorValue);
+				// }
 			}
 		]]>
 	</fx:Script>

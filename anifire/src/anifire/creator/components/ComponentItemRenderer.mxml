@@ -13,12 +13,15 @@
 	<fx:Script>
 		<![CDATA[
 			import anifire.constant.LicenseConstants;
-			import anifire.creator.events.CcComponentLoadEvent;
-			import anifire.creator.models.CcComponentThumb;
 			import anifire.util.UtilUser;
+			import anifire.component.CcComponentLoader;
+			import anifire.component.CcActionLoader;
+			import anifire.models.creator.CCComponentModel;
+			import anifire.models.creator.CCLibraryModel;
 
 			private var cid:String;
-			private var thumb:CcComponentThumb;
+			private var themeId:String;
+			private var thumb:*;
 			[Bindable]
 			public var isNull:Boolean = false;
 			protected var _loader:Loader = new Loader();
@@ -36,6 +39,7 @@
 				}
 				this.cid = param1.key;
 				this.thumb = param1.data;
+				this.themeId = param1.themeId;
 				super.data = this.thumb;
 				if(!this.thumb)
 				{
@@ -49,6 +53,10 @@
 				}
 				if(this.thumb)
 				{
+					if (!(this.thumb is CCComponentModel) && !(this.thumb is CCLibraryModel))
+					{
+						return;
+					}
 					this.imageDisplay.source = null;
 					this.updateThumbData();
 				}
@@ -56,7 +64,7 @@
 				{
 					this.imageDisplay.source = null;
 				}
-				if(UtilUser.hasAdminFeatures || LicenseConstants.isThumbnailTestHost())
+				if (UtilUser.hasAdminFeatures || LicenseConstants.isThumbnailTestHost())
 				{
 					this.toolTip = this.cid;
 				}
@@ -64,22 +72,42 @@
 			
 			private function updateThumbData() : void
 			{
-				this.thumb.addEventListener(CcComponentLoadEvent.LOAD_THUMBNAIL_IMAGE_DATA_COMPLETE,this.onLoadThumbImage);
-				this.thumb.loadThumbnailImageData();
-				this._loading.visible = true;
-			}
-			
-			private function onLoadThumbImage(param1:Event) : void
-			{
-				if(Boolean(this.thumb) && this.thumb.thumbnailImageData is ByteArray)
+				var storeUrl:String = CcActionLoader.getStoreUrl(this.themeId + "/" + this.thumb.type + "/" + this.thumb.basePath);
+				if (this.thumb is CCComponentModel)
 				{
-					this._loader.contentLoaderInfo.addEventListener(Event.INIT,this.onImageLoaderInit);
-					this._loader.loadBytes(this.thumb.thumbnailImageData);
+					storeUrl += "/" + "thumbnail.swf";
 				}
 				else
 				{
-					this.imageDisplay.source = null;
+					storeUrl += "_thumbnail.swf";
 				}
+				var compLoader:CcComponentLoader = CcComponentLoader.getComponentLoader(this.thumb.basePath, storeUrl);
+				compLoader.addEventListener(Event.COMPLETE, this.onLoadThumbImage);
+				compLoader.addEventListener(IOErrorEvent.IO_ERROR, this.onFailThumbImage);
+				compLoader.startProcess();
+				this._loading.visible = true;
+			}
+			
+			private function onLoadThumbImage(e:Event) : void
+			{
+				var loader:CcComponentLoader = CcComponentLoader(e.target);
+				if (loader)
+				{
+					if (Boolean(this.thumb) && loader.swfBytes is ByteArray)
+					{
+						this._loader.contentLoaderInfo.addEventListener(Event.INIT, this.onImageLoaderInit);
+						this._loader.loadBytes(loader.swfBytes);
+					}
+					else
+					{
+						this.imageDisplay.source = null;
+					}
+				}				
+			}
+
+			private function onFailThumbImage(e:Event) : void
+			{
+				//you.. have FAILED
 			}
 			
 			protected function onImageLoaderInit(param1:Event = null) : void
@@ -117,7 +145,7 @@
 
 	<s:Rect top="0" right="0" bottom="0" left="0" radiusX="3" radiusY="3">
 		<s:fill>
-			<s:SolidColor color="0xF3F7FC"/>
+			<s:SolidColor color="0xE6E5F1" color.hovered="0xFFEAF4" color.selectedAndShowsCaret="0xFFDBE8"/>
 		</s:fill>
 	</s:Rect>
 	<s:Group id="nullIcon" visible="false" horizontalCenter="0" verticalCenter="0">
@@ -127,18 +155,16 @@
 	<components:BusyIndicator id="_loading" horizontalCenter="0" verticalCenter="0" visible="false" symbolColor="0"/>
 	<s:BitmapImage
 		id="imageDisplay"
-		width="90"
-		width.hovered="105"
-		height="90"
-		height.hovered="105"
+		width="95"
+		height="95"
 		scaleX="-1"
 		horizontalCenter="0"
 		verticalCenter="0"
 		smoothingQuality="high"
 		smooth="true"/>
-	<s:Rect top="0" right="0" bottom="0" left="0" radiusX="3" radiusY="3" visible="false" visible.hovered="true" visible.selectedAndShowsCaret="true">
+	<s:Rect top="0" right="0" bottom="0" left="0" radiusX="3" radiusY="3">
 		<s:stroke>
-			<s:SolidColorStroke color="0x21BBA6" weight="2" alpha="1"/>
+			<s:SolidColorStroke color="0xCECCDE" color.hovered="0xE4B0C5" color.selectedAndShowsCaret="0xE686A9" weight="1" alpha="1"/>
 		</s:stroke>
 	</s:Rect>
 
