@@ -1,17 +1,15 @@
 {
 	"compilerOptions": {
-		"output": "../output/cc.swf",
-		"accessible": true,
 		"source-path": [
 			"src"
 		],
 		"library-path": [
-			"../anifire/bin/anifire.swc"
-		]
+			"libs"
+		],
+		"output": "../output/darkStyling.swf"
 	},
 	"files": [
-		"src/creator.mxml"
+		"src/darkStyling.css"
 	],
-	"copySourcePathAssets": true,
 	"additionalOptions": "-locale en_US -managers=flash.fonts.CFFFontManager"
 }

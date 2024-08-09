@@ -163,10 +163,11 @@
 
 			private function onLoaded(event:LoadEmbedMovieEvent) : void
 			{
-				(event.target as IEventDispatcher).removeEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT, this.onLoaded);
+				(event.target as IEventDispatcher).removeEventListener(event.type, this.onLoaded);
 				this._isBuilding = 2;
 				NativeCursorManager.instance.removeBusyCursor();
 				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).visible = true;
+				this.dispatchEvent(new LoadEmbedMovieEvent(LoadEmbedMovieEvent.COMPLETE_EVENT, this));
 			}
 			
 			private function reloadCharSkin(param1:Event = null) : void

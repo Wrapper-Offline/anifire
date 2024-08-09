@@ -143,11 +143,6 @@
 		<s:State name="selectedAndShowsCaret"/>
 	</s:states>
 
-	<s:Rect top="0" right="0" bottom="0" left="0" radiusX="3" radiusY="3">
-		<s:fill>
-			<s:SolidColor color="0xE6E5F1" color.hovered="0xFFEAF4" color.selectedAndShowsCaret="0xFFDBE8"/>
-		</s:fill>
-	</s:Rect>
 	<s:Group id="nullIcon" visible="false" horizontalCenter="0" verticalCenter="0">
 		<s:Image source="@Embed('../images/componentIcons/nullIcon.png')" visible="true" visible.hovered="false"/>
 		<s:Image source="@Embed('../images/componentIcons/nullIcon_hover.png')" visible="false" visible.hovered="true"/>
@@ -162,10 +157,5 @@
 		verticalCenter="0"
 		smoothingQuality="high"
 		smooth="true"/>
-	<s:Rect top="0" right="0" bottom="0" left="0" radiusX="3" radiusY="3">
-		<s:stroke>
-			<s:SolidColorStroke color="0xCECCDE" color.hovered="0xE4B0C5" color.selectedAndShowsCaret="0xE686A9" weight="1" alpha="1"/>
-		</s:stroke>
-	</s:Rect>
 
 </s:ItemRenderer>

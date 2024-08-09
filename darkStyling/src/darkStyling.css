@@ -1,0 +1,20 @@
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+@namespace cComponents "anifire.creator.components.*";
+
+s|Application
+{
+	backgroundColor: #1E1D25;
+}
+
+#componentPanel
+{
+	backgroundColor: #14121D;
+	borderColor: #2B2742;
+}
+
+cComponents|ComponentItemRenderer
+{
+	backgroundColor: #1E1D25;
+	borderColor: #343242;
+}

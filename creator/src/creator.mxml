@@ -4,7 +4,7 @@
 			   xmlns:component="anifire.component.*"
 			   xmlns:components="anifire.creator.components.*"
 			   width="100%" height="549" preinitialize="initApp()" applicationComplete="onApplicationComplete()"
-			   backgroundAlpha="0" backgroundColor="0xE6E5F1" creationPolicy="auto"
+			   backgroundAlpha="0" creationPolicy="auto"
 			   implements="anifire.creator.interfaces.ICcMainUiContainer"
 			   >
 
@@ -20,6 +20,7 @@
 		}
 		s|Application
 		{
+			backgroundColor: #E6E5F1;
 			font-size: 13;
 		}
 		s|HScrollBar
@@ -80,6 +81,21 @@
 		{
 			skinClass: ClassReference("anifire.creator.skins.ArrowTipContainerSkin");
 		}
+		components|ComponentItemRenderer
+		{
+			backgroundColor: #E6E5F1;
+			borderColor: #CECCDE;
+		}
+		components|ComponentItemRenderer:hovered
+		{
+			backgroundColor: #FFEAF4;
+			borderColor: #E4B0C5;
+		}
+		components|ComponentItemRenderer:selectedAndShowsCaret
+		{
+			backgroundColor: #FFDBE8;
+			borderColor: #E686A9;
+		}
 		s|DropDownList
 		{
 			skinClass: ClassReference("anifire.creator.skins.DefaultDropDownListSkin");
@@ -116,7 +132,6 @@
 	<fx:Script>
 		<![CDATA[
 			import anifire.constant.ServerConstants;
-			import anifire.creator.config.GoAnimate;
 			import anifire.creator.core.CcConsole;
 			import anifire.creator.events.CcCoreEvent;
 			import anifire.creator.components.EditView;
@@ -124,6 +139,7 @@
 			import anifire.util.Util;
 			import anifire.util.UtilErrorLogger;
 			import anifire.utils.SecurityUtils;
+			import flash.external.ExternalInterface;
 
 			private var _ccConsole:CcConsole;
 			private var _componentInit:Boolean;
@@ -136,27 +152,47 @@
 				Util.loadClientLocale("go", this.onResourceComplete);
 			}
 
+			private function loadDarkMode() : void
+			{
+				if (!ExternalInterface.available)
+				{
+					return;
+				}
+				var darkMode:Boolean = ExternalInterface.call("Page.isDarkMode");
+				if (!darkMode)
+				{
+					return;
+				}
+				var config:AppConfigManager = AppConfigManager.instance;
+				var path:String = config.getValue(ServerConstants.FLASHVAR_CLIENT_THEME_PATH);
+				var match:RegExp = new RegExp(ServerConstants.FLASHVAR_CLIENT_THEME_PLACEHOLDER, "g");
+				path = path.replace(match, "client_theme/darkStyling.swf");
+				styleManager.loadStyleDeclarations(path, true, false, ApplicationDomain.currentDomain);
+			}
+
 			private function onResourceComplete(param1:Event = null) : void
 			{
 				// make sure the resources and the application
 				// are ready before we get things up and running
 				this._resourceInit = true;
-				if (this._componentInit) {
+				if (this._componentInit)
+				{
 					this.initConsole();
 				}
 			}
 
 			private function onApplicationComplete() : void
 			{
+				this.loadDarkMode();
 				this._componentInit = true;
-				if (this._resourceInit) {
+				if (this._resourceInit)
+				{
 					this.initConsole();
 				}
 			}
 
 			private function initConsole() : void
 			{
-				CcConsole.setConfiguration(new GoAnimate());
 				CcConsole.init(this);
 				this._ccConsole = CcConsole.instance;
 				this._ccConsole.addEventListener(CcCoreEvent.LOAD_EVERYTHING_COMPLETE, this.loadComplete);
@@ -184,7 +220,7 @@
 		<s:State name="editor"/>
 	</s:states>
 
-	<components:EditView id="editView" width="100%" height="100%" visible="true" visible.editor="true"/>
+	<components:EditView id="editView" width="100%" height="100%" visible="false" visible.editor="true"/>
 	<component:EyeDropperScreenOverlay id="eyedropperScreenCap"/>
 	<components:CCLoadingScreen includeIn="loading"/>
 

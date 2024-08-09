@@ -7,10 +7,8 @@ package anifire.creator.core
 	import anifire.creator.config.GoAnimate;
 	import anifire.models.creator.CCBodyModel;
 	import anifire.models.creator.CCThemeModel;
-	import anifire.creator.theme.Theme;
 	import anifire.managers.AppConfigManager;
 	import anifire.managers.ServerConnector;
-	import anifire.util.UtilHashArray;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -20,6 +18,17 @@ package anifire.creator.core
 	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
 	import anifire.models.creator.CCBodyShapeModel;
+	import anifire.managers.NativeCursorManager;
+	import flash.external.ExternalInterface;
+	import flash.utils.ByteArray;
+	import mx.utils.Base64Encoder;
+	import anifire.constant.CcServerConstant;
+	import flash.events.IOErrorEvent;
+	import flash.events.SecurityErrorEvent;
+	import anifire.creator.events.CcSaveCharEvent;
+	import mx.core.FlexGlobals;
+	import flash.utils.setTimeout;
+	import anifire.event.LoadEmbedMovieEvent;
 	
 	public class CcConsole extends EventDispatcher
 	{
@@ -42,6 +51,8 @@ package anifire.creator.core
 		private var _original_assetId:String;
 
 		private var _isEditing:Boolean = true;
+
+		private var title:String;
 
 		public function CcConsole(iMainUi:ICcMainUiContainer)
 		{
@@ -66,19 +77,16 @@ package anifire.creator.core
 				CcLibConstant.USER_LEVEL_SUPER :
 				CcLibConstant.USER_LEVEL_NORMAL;
 
+			this.addJsCallbacks();
 			this.addEventListener(CcCoreEvent.LOAD_THEME_COMPLETE, this.prepareCharacter);
 			this.loadCcTheme(this._themeId);
-		}
-
-		public static function setConfiguration(config:GoAnimate) : void
-		{
-			_cfg = config;
 		}
 
 		public static function init(mainUi:ICcMainUiContainer) : CcConsole
 		{
 			if (_instance == null)
 			{
+				_cfg = new GoAnimate();
 				_instance = new CcConsole(mainUi);
 			}
 			return _instance;
@@ -133,113 +141,166 @@ package anifire.creator.core
 			ServerConnector.instance.refreshUserType();
 		}
 
-		public function isCopyingChar() : Boolean
+		public function get isCopyingChar() : Boolean
 		{
 			return this.originalAssetId == null ? false : true;
 		}
 
-		private function switchToEditor() : void
+		private function serialize() : String
 		{
-			this.editUiController.initTheme(this._theme);
-			this.editUiController.initMode(this.userLevel);
-			this.editUiController.start(this.ccChar, !this.isCopyingChar());
-			this._isEditing = true;
-			if (_configManager.getValue(ServerConstants.FLASHVAR_CC_START_PAGE) == "save")
+			return "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + this.ccChar.serialize().toXMLString();
+		}
+
+		/**
+		 * Adds functions to be called in JS. These will be used
+		 * to create a button bar outside the Flash object.
+		 */
+		private function addJsCallbacks() : void
+		{
+			if (ExternalInterface.available)
 			{
-				//this.onUserWantToPreview(param1);
+				ExternalInterface.addCallback("undo", this.undo);
+				ExternalInterface.addCallback("redo", this.redo);
+				ExternalInterface.addCallback("switchBodyShape", this.switchBodyShape);
+				ExternalInterface.addCallback("randomize", this.randomizeCharacter);
+				ExternalInterface.addCallback("reset", this.editUiController.resetCharacter);
+				ExternalInterface.addCallback("preview", this.preview);
+				ExternalInterface.addCallback("save", this.timeToSave);
 			}
-			this.dispatchEvent(new CcCoreEvent(CcCoreEvent.LOAD_EVERYTHING_COMPLETE, this));
 		}
 
-		// private function onUserWantToModify() : void
-		// {
-		// 	this._isEditing = true;
-		// 	this.mainUi.ui_main_ccCharEditor.visible = true;
-		// 	this.mainUi.ui_main_ccCharPreviewAndSaveScreen.visible = false;
-		// 	this.cceditUiControllerController.proceedToShow();
-		// }
-
-		// private function onUserWantToPreview() : void
-		// {
-		// 	this._isEditing = false;
-		// 	this.mainUi.ui_main_ccCharEditor.visible = false;
-		// 	this.mainUi.ui_main_ccCharPreviewAndSaveScreen.visible = true;
-		// 	this.ccPreviewAndSaveController.proceedToShow();
-		// }
-
-		// private function onUserWantToSave(param1:Event) : void
-		// {
-		// 	this.addEventListener(CcSaveCharEvent.SAVE_CHAR_COMPLETE,this.doTellUserSaveStatus);
-		// 	this.addEventListener(CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR,this.doTellUserSaveStatus);
-		// 	if(this._isEditing)
-		// 	{
-		// 		this.cceditUiControllerController.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.doSave);
-		// 		this.cceditUiControllerController.resetCCAction();
-		// 	}
-		// 	else
-		// 	{
-		// 		this.ccPreviewAndSaveController.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.doSave);
-		// 		this.ccPreviewAndSaveController.resetCCAction();
-		// 	}
-		// }
-
-		// private function doSave(param1:Event) : void
-		// {
-		// 	NativeCursorManager.instance.setBusyCursor();
-		// 	FlexGlobals.topLevelApplication.enabled = false;
-		// 	setTimeout(this.save, 5000);
-		// }
-
-		// private function doTellUserSaveStatus(param1:CcSaveCharEvent) : void
-		// {
-		// 	var isTemplate:Boolean = false;
-		// 	var js:String = null;
-		// 	var event:CcSaveCharEvent = param1;
-		// 	this.removeEventListener(CcSaveCharEvent.SAVE_CHAR_COMPLETE,this.doTellUserSaveStatus);
-		// 	this.removeEventListener(CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR,this.doTellUserSaveStatus);
-		// 	if(event.type == CcSaveCharEvent.SAVE_CHAR_COMPLETE)
-		// 	{
-		// 		this.ccPreviewAndSaveController.proceedToSaveComplete(event.assetId);
-		// 		try
-		// 		{
-		// 			isTemplate = false;
-		// 			if(this.ccChar.copiedFromTemplate)
-		// 			{
-		// 				try
-		// 				{
-		// 					isTemplate = !this.ccChar.isTemplateModified();
-		// 				}
-		// 				catch(e2:Error)
-		// 				{
-		// 				}
-		// 			}
-		// 		// a lot of yapping
-		// 			js = StringUtil.substitute("CCStandaloneBannerAdUI.gaLogTx.logCCPartsNormal({0}, {1}, {2})",event.assetId,com.adobe.serialization.json.JSON.encode(event.gaTrackModel.parts.filter(function(param1:*, param2:int, param3:Array):Boolean
-		// 			{
-		// 				return (["GoUpper","GoLower","upper_body","lower_body","hair"] as Array).indexOf(param1.ctype) >= 0;
-		// 			})),isTemplate ? this.ccChar.templateId : "0");
-		// 			ExternalInterface.call(js);
-		// 		}
-		// 		catch(e:Error)
-		// 		{
-		// 		}
-		// 	} else if(event.type == CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR)
-		// 	{
-		// 		this.ccPreviewAndSaveController.proceedToSaveError();
-		// 	}
-		// }
-
-		private function listenForCharacterLoad() : void
+		/* stubs for planned features in the button bar */
+		private function undo() : void
 		{
-			var self:CcConsole = this;
-			var proceedHandler:Function = function proceedHandler(e:CcCoreEvent):void
-			{
-				self.removeEventListener(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, proceedHandler);
-				self.switchToEditor();
-			};
-			this.addEventListener(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, proceedHandler);
+			
+		}
+		private function redo() : void
+		{
+			
+		}
+		private function switchBodyShape() : void
+		{
+			
+		}
+		private function randomizeCharacter() : void
+		{
+			
+		}
+		private function preview() : void
+		{
+			
 		}
 
+		/**
+		 * Resets the character action in preparation for the
+		 * snapshots and calls `this.save`.
+		 */
+		private function timeToSave(title:String) : void
+		{
+			this.title = title;
+			this.editUiController.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT, this.save);
+			this.editUiController.resetCCAction();
+		}
+
+		/**
+		 * Captures images of the character and sends them to
+		 * server, along with the character body XML.
+		 */
+		private function save(e:Event) : void
+		{
+			(e.target as IEventDispatcher).removeEventListener(e.type, this.save);
+			NativeCursorManager.instance.setBusyCursor();
+			FlexGlobals.topLevelApplication.enabled = false;
+
+			var headB64:Base64Encoder = new Base64Encoder();
+			var headshot:ByteArray = this.editUiController.saveSnapShot();
+			headB64.encodeBytes(headshot);
+			var bodyB64:Base64Encoder = new Base64Encoder();
+			var body:ByteArray = this.editUiController.saveSnapShot(true);
+			bodyB64.encodeBytes(body);
+
+			var vars:URLVariables = new URLVariables();
+			_configManager.appendURLVariables(vars);
+			vars["body"] = this.serialize();
+			vars["title"] = this.title;
+			vars["imagedata"] = headB64.flush();
+			vars["thumbdata"] = bodyB64.flush();
+			if (this.ccChar.assetId != "")
+			{
+				vars["assetId"] = this.ccChar.assetId;
+			}
+			var request:URLRequest = new URLRequest(CcServerConstant.ACTION_SAVE_CC_CHAR);
+			request.data = vars;
+			request.method = URLRequestMethod.POST;
+			var loader:URLLoader = new URLLoader();
+			loader.dataFormat = URLLoaderDataFormat.TEXT;
+			loader.addEventListener(Event.COMPLETE, this.saveCharacter_completeHandler);
+			loader.addEventListener(IOErrorEvent.IO_ERROR, this.saveCharacter_errorHandler);
+			loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, this.saveCharacter_errorHandler);
+			loader.load(request);
+		}
+
+		/**
+		 * Called when the character has been saved successfully.
+		 * @param event `Event.COMPLETE`
+		 */
+		private function saveCharacter_completeHandler(event:Event) : void
+		{
+			NativeCursorManager.instance.removeBusyCursor();
+			var loader:URLLoader = event.target as URLLoader;
+			loader.removeEventListener(Event.COMPLETE, this.saveCharacter_completeHandler);
+			loader.removeEventListener(IOErrorEvent.IO_ERROR, this.saveCharacter_errorHandler);
+			loader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, this.saveCharacter_errorHandler);
+			var responseText:String = loader.data as String;
+			var status:String = responseText.slice(0,1);
+			var id:String = responseText.slice(1);
+			if (ExternalInterface.available)
+			{
+				ExternalInterface.call("onCharacterSave", id);
+			}
+		}
+
+		/**
+		 * Called when the not character did not successfully.
+		 * @param event `IOErrorEvent.IO_ERROR` or
+		 * `SecurityErrorEvent.SECURITY_ERROR`
+		 */
+		private function saveCharacter_errorHandler(event:Event) : void
+		{
+			var loader:URLLoader = event.target as URLLoader;
+			loader.removeEventListener(Event.COMPLETE, this.saveCharacter_completeHandler);
+			loader.removeEventListener(IOErrorEvent.IO_ERROR, this.saveCharacter_errorHandler);
+			loader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, this.saveCharacter_errorHandler);
+			this.dispatchEvent(new CcSaveCharEvent(CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR, this));
+		}
+
+		/**
+		 * Loads a CC theme from the store.
+		 * @param themeId ID of the CC theme to load.
+		 */
+		private function loadCcTheme(themeId:String) : void
+		{
+			var ccTheme:CCThemeModel = new CCThemeModel(themeId);
+			this._theme = ccTheme;
+			ccTheme.runwayMode = true;
+			ccTheme.addEventListener(Event.COMPLETE, this.onLoadCcThemeComplete);
+			ccTheme.load();
+		}
+
+		/**
+		 * Called when the CC theme has successfully been
+		 * loaded and parsed.
+		 * @param event `Event.COMPLETE`
+		 */
+		private function onLoadCcThemeComplete(event:Event) : void
+		{
+			(event.target as IEventDispatcher).removeEventListener(event.type, this.onLoadCcThemeComplete);
+			this.dispatchEvent(new CcCoreEvent(CcCoreEvent.LOAD_THEME_COMPLETE, this));
+		}
+
+		/**
+		 * Prepares a character for editing.
+		 */
 		private function prepareCharacter(event:Event) : void
 		{
 			(event.target as IEventDispatcher).removeEventListener(event.type, this.prepareCharacter);
@@ -254,6 +315,10 @@ package anifire.creator.core
 			}
 		}
 
+		/**
+		 * Pulls a default character from a bodyshape to use as
+		 * our character.
+		 */
 		private function loadDefaultChar() : void
 		{
 			var ccTheme:CCThemeModel = this._theme;
@@ -276,11 +341,18 @@ package anifire.creator.core
 			this._ccChar = new CCBodyModel("");
 			this._ccChar.addEventListener(Event.COMPLETE, this.onLoadCharXmlComplete);
 			this._ccChar.parse(new XML(bodyShape.defaultCharacterXML));
+			this._ccChar.bodyScale.scalex = 1;
+			this._ccChar.bodyScale.scaley = 1;
+			this._ccChar.headScale.scalex = 1;
+			this._ccChar.headScale.scaley = 1;
+			this._ccChar.headPos.dx = 0;
+			this._ccChar.headPos.dy = 0;
+			this._ccChar.version = this._theme.version;
 		}
 
 		/**
-		 * Requests a character body XML from the server.
-		 * @param ID of the character to load.
+		 * Requests a character body XML from the API server.
+		 * @param assetId ID of the character to load.
 		 */
 		private function loadCharXml(assetId:String) : void
 		{
@@ -291,111 +363,45 @@ package anifire.creator.core
 
 		/**
 		 * Requests a character body XML from the server.
-		 * @param ID of the character to load.
+		 * @param e ID of the character to load.
 		 */
 		private function onLoadCharXmlComplete(e:Event) : void
 		{
 			(e.target as IEventDispatcher).removeEventListener(e.type, this.onLoadCharXmlComplete);
-			this._ccChar.bodyScale.scalex = 1;
-			this._ccChar.bodyScale.scaley = 1;
-			this._ccChar.headScale.scalex = 1;
-			this._ccChar.headScale.scaley = 1;
-			this._ccChar.headPos.dx = 0;
-			this._ccChar.headPos.dy = 0;
-			this._ccChar.version = this._theme.version;
 			var loadEvent = new CcCoreEvent(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, this);
 			this.dispatchEvent(loadEvent);
 		}
 
-		// private function save() : void
-		// {
-		// 	var _loc1_:ByteArray = null;
-		// 	var _loc2_:Base64Encoder = null;
-		// 	var _loc3_:ByteArray = null;
-		// 	var _loc4_:Base64Encoder = null;
-		// 	NativeCursorManager.instance.setBusyCursor();
-		// 	AmplitudeAnalyticsManager.instance.log(AmplitudeAnalyticsManager.EVENT_NAME_CREATED_CHARACTER);
-		// 	if(this._isEditing)
-		// 	{
-		// 		_loc1_ = this._cceditUiControllerController.saveSnapShot();
-		// 		_loc3_ = this._cceditUiControllerController.saveSnapShot(true);
-		// 	}
-		// 	else
-		// 	{
-		// 		_loc1_ = this._ccPreviewAndSaveController.saveSnapShot();
-		// 		_loc3_ = this._ccPreviewAndSaveController.saveSnapShot(true);
-		// 	}
-		// 	_loc2_ = new Base64Encoder();
-		// 	_loc2_.encodeBytes(_loc1_);
-		// 	(_loc4_ = new Base64Encoder()).encodeBytes(_loc3_);
-		// 	var _loc5_:URLLoader = new URLLoader();
-		// 	var _loc6_:URLRequest = new URLRequest(CcServerConstant.ACTION_SAVE_CC_CHAR);
-		// 	var _loc7_:URLVariables = new URLVariables();
-		// 	_configManager.appendURLVariables(_loc7_);
-		// 	_loc7_["body"] = this.serialize();
-		// 	_loc7_["title"] = "Untitled";
-		// 	_loc7_["imagedata"] = _loc2_.flush();
-		// 	_loc7_["thumbdata"] = _loc4_.flush();
-		// 	if(this.ccChar.assetId != "")
-		// 	{
-		// 		_loc7_["assetId"] = this.ccChar.assetId;
-		// 	}
-		// 	_loc6_.data = _loc7_;
-		// 	_loc6_.method = URLRequestMethod.POST;
-		// 	_loc5_.dataFormat = URLLoaderDataFormat.TEXT;
-		// 	_loc5_.addEventListener(Event.COMPLETE,this.saveCharacter_completeHandler);
-		// 	_loc5_.addEventListener(IOErrorEvent.IO_ERROR,this.saveCharacter_errorHandler);
-		// 	_loc5_.addEventListener(SecurityErrorEvent.SECURITY_ERROR,this.saveCharacter_errorHandler);
-		// 	_loc5_.load(_loc6_);
-		// }
-
-		// private function saveCharacter_completeHandler(param1:Event) : void
-		// {
-		// 	NativeCursorManager.instance.removeBusyCursor();
-		// 	var _loc2_:URLLoader = param1.target as URLLoader;
-		// 	var _loc3_:String = _loc2_.data as String;
-		// 	_loc2_.removeEventListener(Event.COMPLETE,this.saveCharacter_completeHandler);
-		// 	_loc2_.removeEventListener(IOErrorEvent.IO_ERROR,this.saveCharacter_errorHandler);
-		// 	_loc2_.removeEventListener(SecurityErrorEvent.SECURITY_ERROR,this.saveCharacter_errorHandler);
-		// 	var _loc4_:String = _loc3_.slice(0,1);
-		// 	var _loc5_:String = _loc3_.slice(1);
-		// 	if(_loc4_ == "1" && _loc5_ == ServerConstants.ERROR_CODE_LOGGED_OUT)
-		// 	{
-		// 		this.showLoggedOutPopUp();
-		// 	}
-		// 	else if(ExternalInterface.available)
-		// 	{
-		// 		ExternalInterface.call("characterSaved",_loc5_);
-		// 	}
-		// }
-
-		// private function saveCharacter_errorHandler(param1:Event) : void
-		// {
-		// 	var _loc2_:URLLoader = param1.target as URLLoader;
-		// 	_loc2_.removeEventListener(Event.COMPLETE,this.saveCharacter_completeHandler);
-		// 	_loc2_.removeEventListener(IOErrorEvent.IO_ERROR,this.saveCharacter_errorHandler);
-		// 	_loc2_.removeEventListener(SecurityErrorEvent.SECURITY_ERROR,this.saveCharacter_errorHandler);
-		// 	this.dispatchEvent(new CcSaveCharEvent(CcSaveCharEvent.SAVE_CHAR_ERROR_OCCUR,this));
-		// }
-
-		private function serialize() : String
+		/**
+		 * Listens for the `CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE`
+		 * event and calls `proceedHandler` when it is dispatched.
+		 */
+		private function listenForCharacterLoad() : void
 		{
-			return "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + this.ccChar.serialize().toXmlString();
+			var self:CcConsole = this;
+			var proceedHandler:Function = function proceedHandler(e:CcCoreEvent):void
+			{
+				self.removeEventListener(e.type, proceedHandler);
+				self.switchToEditor();
+			};
+			this.addEventListener(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, proceedHandler);
 		}
 
-		private function loadCcTheme(themeId:String) : void
+		/**
+		 * Dispatches the `CcCoreEvent.LOAD_EVERYTHING_COMPLETE`
+		 * event.
+		 */
+		private function switchToEditor() : void
 		{
-			var ccTheme:CCThemeModel = new CCThemeModel(themeId);
-			this._theme = ccTheme;
-			ccTheme.runwayMode = true;
-			ccTheme.addEventListener(Event.COMPLETE, this.onLoadCcThemeComplete);
-			ccTheme.load();
-		}
-
-		private function onLoadCcThemeComplete(event:Event) : void
-		{
-			(event.target as IEventDispatcher).removeEventListener(event.type, this.onLoadCcThemeComplete);
-			this.dispatchEvent(new CcCoreEvent(CcCoreEvent.LOAD_THEME_COMPLETE, this));
+			this.editUiController.initTheme(this._theme);
+			this.editUiController.initMode(this.userLevel);
+			this.editUiController.start(this.ccChar, !this.isCopyingChar);
+			this._isEditing = true;
+			if (_configManager.getValue(ServerConstants.FLASHVAR_CC_START_PAGE) == "preview")
+			{
+				this.preview();
+			}
+			this.dispatchEvent(new CcCoreEvent(CcCoreEvent.LOAD_EVERYTHING_COMPLETE, this));
 		}
 	}
 }

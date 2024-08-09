@@ -138,7 +138,6 @@ package anifire.creator.core
 			// this.editUi.eui_buttonBar.addEventListener(CcButtonBarEvent.SAVE_BUTTON_CLICK,this.onUserClickSaveButton);
 			// this.editUi.eui_buttonBar.addEventListener(CcButtonBarEvent.RANDOMIZE_BUTTON_CLICK,this.onUserClickRandomizeButton);
 			// this.editUi.eui_buttonBar.addEventListener(CcButtonBarEvent.SCALE_BUTTON_CLICK,this.onUserClickScaleButton);
-			// this.editUi.eui_buttonBar.addEventListener(CcButtonBarEvent.RESET_BUTTON_CLICK,this.onUserWantToReset);
 			this.editUi.eui_componentTypeChooser.addEventListener(CcComponentTypeChooserEvent.COMPONENT_TYPE_CHOSEN, this.onUserChooseType);
 			this.editUi.eui_colorPicker.addEventListener(CcColorPickerEvent.COLOR_CHOSEN, this.onUserChooseColor);
 			this.editUi.eui_componentThumbChooser.addEventListener(CcComponentThumbChooserEvent.COMPONENT_THUMB_CHOSEN, this.onThumbClick);
@@ -171,17 +170,26 @@ package anifire.creator.core
 		{
 			
 		}
-		
+
+		/**
+		 * Resets the character action. Dispatches the
+		 * `LoadEmbedMovieEvent.COMPLETE_EVENT` event when completed.
+		 */
 		public function resetCCAction() : void
 		{
-			this.editUi.eui_charPreviewer.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.onResetCCActionComplete);
+			this.editUi.eui_charPreviewer.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT, this.onResetCCActionComplete);
 			this.editUi.eui_charPreviewer.initByCcBody(this.ccChar, this.currentTheme);
 		}
-		
-		private function onResetCCActionComplete(param1:Event) : void
+
+		/**
+		 * Called when the character action has been reset.
+		 * Dispatches the `LoadEmbedMovieEvent.COMPLETE_EVENT` event.
+		 * @param event `LoadEmbedMovieEvent.COMPLETE_EVENT`
+		 */
+		private function onResetCCActionComplete(event:Event) : void
 		{
-			this.editUi.eui_charPreviewer.removeEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT,this.onResetCCActionComplete);
-			this.dispatchEvent(param1);
+			(event.target as IEventDispatcher).removeEventListener(event.type, this.onResetCCActionComplete);
+			this.dispatchEvent(event);
 		}
 		
 		private function onUserClickScaleButton(param1:Event) : void
@@ -225,12 +233,13 @@ package anifire.creator.core
 			// this.editUi.eui_charPreviewer.reloadSkin();
 		}
 		
-		private function onUserWantToReset(param1:Event) : void
+		public function resetCharacter() : void
 		{
-			// this.ccChar.cloneFromSourceToMe(this.ccCharCopyForReset);
-			// this.propagateNewCharToUi(this.ccChar);
-			// this.refreshCurrentUi();
-			// this.addCommand(this.ccChar);
+			this._ccChar = new CCBodyModel("");
+			this._ccChar.parse(this.ccCharCopyForReset.serialize());
+			this.propagateNewCharToUi(this.ccChar);
+			this.refreshCurrentUi();
+			//this.addCommand(this.ccChar);
 		}
 		
 		private function onUserOverDecoration(event:CcSelectedDecorationEvent) : void
@@ -789,20 +798,25 @@ package anifire.creator.core
 		{
 			
 		}
-		
-		public function saveSnapShot(param1:Boolean = false) : ByteArray
+
+		/**
+		 * Takes a snapshot of the character being edited.
+		 * @param fullBody Whether or not to capture the
+		 * entire character.
+		 */
+		public function saveSnapShot(fullBody:Boolean = false) : ByteArray
 		{
-			var _loc2_:BitmapData = null;
-			if(!param1)
+			var image:BitmapData;
+			if (fullBody)
 			{
-				_loc2_ = this.editUi.eui_charPreviewer.capFaceAsBitmap();
+				image = this.editUi.eui_charPreviewer.capCharAsBitmap();
 			}
 			else
 			{
-				_loc2_ = this.editUi.eui_charPreviewer.capCharAsBitmap();
+				image = this.editUi.eui_charPreviewer.capFaceAsBitmap();
 			}
-			var _loc3_:PNGEncoder = new PNGEncoder();
-			return _loc3_.encode(_loc2_);
+			var encoder:PNGEncoder = new PNGEncoder();
+			return encoder.encode(image);
 		}
 	}
 }
