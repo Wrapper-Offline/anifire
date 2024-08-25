@@ -14,10 +14,10 @@
 
 	<s:Rect id="backgroundRect" radiusX="4" radiusY="4" left="0" right="0" height="100%" top="0">
 		<s:fill>
-			<s:SolidColor color="0xDFDEEF"/>
+			<s:SolidColor color="{getStyle('backgroundColor')}"/>
 		</s:fill>
 		<s:stroke>
-			<s:SolidColorStroke color="0xCAC9D4"/>
+			<s:SolidColorStroke color="{getStyle('borderColor')}"/>
 		</s:stroke>
 	</s:Rect>	
 

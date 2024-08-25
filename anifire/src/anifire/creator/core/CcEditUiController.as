@@ -30,6 +30,7 @@ package anifire.creator.core
 	import anifire.models.creator.CCComponentModel;
 	import anifire.models.creator.CCBodyComponentModel;
 	import anifire.models.creator.CCColor;
+	import anifire.models.creator.CCLibraryModel;
 	
 	public class CcEditUiController extends EventDispatcher
 	{
@@ -580,29 +581,56 @@ package anifire.creator.core
 			var newValue:uint = event.colorValue;
 			this.editUi.eui_charPreviewer.updateColor(color, newValue);
 			this.ccChar.colors[color.type].dest = newValue;
-			// TODO ADD CHECK IF COLOR DOESN'T EXIST
+			// TODO ADD CHECK IF COLOR DOESN'T EXIST IN CHAR BODY
 			// if(param1.undoable)
 			// {
 			//    this.addCommand(this.ccChar);
 			// }
 		}
 		
-		private function onThumbClick(param1:CcComponentThumbChooserEvent) : void
+		private function onThumbClick(event:CcComponentThumbChooserEvent) : void
 		{
-			// var _loc3_:CcComponent = null;
-			// this.resetPanels();
-			// var _loc2_:CcComponent = new CcComponent();
-			// _loc2_.componentThumb = param1.componentThumb;
-			// this.onThumbClickCommon(_loc2_);
-			// this.editUi.eui_colorPicker.destroy();
-			// if(_loc2_.componentThumb.type == CcLibConstant.COMPONENT_TYPE_FACESHAPE)
-			// {
-			//    _loc3_ = this.ccChar.getUserChosenComponentByComponentType(CcLibConstant.COMPONENT_TYPE_BODYSHAPE)[0] as CcComponent;
-			//    this.editUi.eui_colorPicker.addComponentType(_loc3_.componentThumb.type,this.currentTheme,this.ccChar);
-			//    this.editUi.eui_colorPicker.addComponentThumb(_loc3_,_loc3_.componentThumb,this.currentTheme,this.ccChar);
-			// }
-			// this.editUi.eui_colorPicker.addComponentType(_loc2_.componentThumb.type,this.currentTheme,this.ccChar);
-			// this.editUi.eui_colorPicker.addComponentThumb(_loc2_,_loc2_.componentThumb,this.currentTheme,this.ccChar);
+			this.resetPanels();
+			var thumb:* = event.componentThumb;
+			if (thumb is CCLibraryModel)
+			{
+				this.swapLibrary(thumb);
+			}
+			else
+			{
+				this.swapComponent(thumb)
+			}
+			this.editUi.eui_colorPicker.destroy();
+			this.editUi.eui_colorPicker.addComponentType(thumb.type, this.currentTheme, this.ccChar);
+		}
+
+		private function swapLibrary(library:CCLibraryModel) : void
+		{
+			this.ccChar.libraries[library.type] = library.id;
+		}
+
+		private function swapComponent(component:CCComponentModel) : void
+		{
+			var bodyCmpnt:CCBodyComponentModel = this.ccChar.components[component.type];
+			if (!bodyCmpnt)
+			{
+				bodyCmpnt = new CCBodyComponentModel();
+				bodyCmpnt.id = component.id;
+				bodyCmpnt.theme_id = this.ccChar.themeId;
+				bodyCmpnt.initDefaultValues();
+			}
+			bodyCmpnt.id = component.id;
+			bodyCmpnt.type = component.type;
+			var properties:Object = {
+				x: bodyCmpnt.x,
+				y: bodyCmpnt.y,
+				xscale: bodyCmpnt.xscale,
+				yscale: bodyCmpnt.yscale,
+				offset: bodyCmpnt.offset,
+				rotation: bodyCmpnt.rotation
+			};
+			this.ccChar.addComponent(bodyCmpnt);
+			this.editUi.eui_charPreviewer.addComponent(bodyCmpnt, this.ccChar, properties);
 		}
 		
 		private function onUserEditScale(param1:CcThumbScaleEvent) : void

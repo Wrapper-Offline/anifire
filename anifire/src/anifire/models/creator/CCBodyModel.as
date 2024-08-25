@@ -179,24 +179,7 @@ package anifire.models.creator
 					this.bodyShapeId = component.component_id;
 					this.themeId = component.theme_id;
 				}
-				
-				if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(component.type) > -1)
-				{
-					var cmpntArray:Vector.<CCBodyComponentModel>;
-					if (!this.components[component.type])
-					{
-						cmpntArray = this.components[component.type] = new Vector.<CCBodyComponentModel>();
-					}
-					else
-					{
-						cmpntArray = this.components[component.type];
-					}
-					cmpntArray.push(component);
-				}
-				else
-				{
-					this.components[component.type] = component;
-				}
+				this.addComponent(component);
 			}
 			elements = charXml.library;
 			length = elements.length();
@@ -233,6 +216,27 @@ package anifire.models.creator
 			this.source = charXml;
 			this.completed = true;
 			dispatchEvent(new Event(Event.COMPLETE));
+		}
+
+		public function addComponent(component:CCBodyComponentModel) : void
+		{
+			if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(component.type) > -1)
+			{
+				var cmpntArray:Vector.<CCBodyComponentModel>;
+				if (!this.components[component.type])
+				{
+					cmpntArray = this.components[component.type] = new Vector.<CCBodyComponentModel>();
+				}
+				else
+				{
+					cmpntArray = this.components[component.type];
+				}
+				cmpntArray.push(component);
+			}
+			else
+			{
+				this.components[component.type] = component;
+			}
 		}
 
 		/**

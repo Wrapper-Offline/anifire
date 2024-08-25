@@ -109,6 +109,12 @@
 		{
 			skinClass: ClassReference("anifire.creator.skins.ConfirmPanelSkin");
 		}
+
+		#componentPanel
+		{
+			backgroundColor: #DFDEEF;
+			borderColor: #CAC9D4;
+		}
 		
 		@font-face {
             src: url("../fonts/files/Lato-Regular.ttf");

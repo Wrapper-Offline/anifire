@@ -3,7 +3,7 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009"
 	xmlns:s="library://ns.adobe.com/flex/spark"
 	width="45"
-	height="45"
+	height="52"
 	alpha.disabled="0.5">
 
 	<fx:Metadata>
@@ -40,12 +40,17 @@
 		<s:State name="disabledAndSelected" stateGroups="selectedStates, selectedUpStates"/>
 	</s:states>
 
-	<s:Ellipse width="30" height="30" height.over="35" width.over="35" height.selectedStates="45" width.selectedStates="45" horizontalCenter="0" verticalCenter="0">
+	<s:Ellipse width="38" height="38" horizontalCenter="0" verticalCenter="0">
 		<s:fill>
-			<s:SolidColor color="0x21BBA6" color.over="0x059A85" color.selectedStates="0xF27935"/>
+			<s:SolidColor color="0x21BBA6" color.over="0x059A85" color.selectedStates="0xF27938"/>
 		</s:fill>
 	</s:Ellipse>
-	<s:Graphic id="gr" horizontalCenter="0" verticalCenter="0" height="30" width="30" height.over="35" width.over="35" height.selectedStates="45" width.selectedStates="45" creationComplete="gr_creationComplete(event)">
+	<s:Rect radiusX="3" radiusY="3" width="44" height="4" bottom="0" left="1" includeIn="selectedStates">
+		<s:fill>
+			<s:SolidColor color="0xF27938"/>
+		</s:fill>
+	</s:Rect>
+	<s:Graphic id="gr" horizontalCenter="0" verticalCenter="0" height="38" width="38" creationComplete="gr_creationComplete(event)">
 		<s:BitmapImage id="img" smooth="true"/>
 	</s:Graphic>
 

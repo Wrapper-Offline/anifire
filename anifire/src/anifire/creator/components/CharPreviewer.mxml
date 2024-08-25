@@ -20,33 +20,31 @@
 			import anifire.constant.ServerConstants;
 			import anifire.constant.ThemeConstants;
 			import anifire.creator.events.CcCharPreviewerEvent;
-			import anifire.creator.events.CcComponentLoadEvent;
 			import anifire.creator.models.CcAction;
 			import anifire.creator.models.CcCharacter;
 			import anifire.creator.models.CcColor;
 			import anifire.creator.models.CcComponent;
-			import anifire.creator.models.CcComponentThumb;
 			import anifire.creator.models.CcFacial;
-			import anifire.creator.models.CcLibrary;
 			import anifire.creator.models.CcSelection;
 			import anifire.creator.models.CcState;
 			import anifire.event.LoadEmbedMovieEvent;
-			import anifire.event.LoadMgrEvent;
 			import anifire.managers.AppConfigManager;
 			import anifire.managers.NativeCursorManager;
-			import anifire.util.ExtraDataLoader;
 			import anifire.util.UtilHashArray;
 			import anifire.util.UtilLicense;
 			import anifire.util.UtilLoadMgr;
-			import anifire.util.UtilNetwork;
-			import anifire.util.UtilPlain;
 			import mx.core.UIComponent;
-			import nochump.util.zip.ZipFile;
 			import anifire.models.creator.CCBodyModel;
 			import anifire.models.creator.CCBodyComponentModel;
 			import anifire.models.creator.CCThemeModel;
 			import anifire.models.creator.CCCharacterActionModel;
 			import anifire.models.creator.CCColor;
+			import anifire.models.creator.CCComponentModel;
+			import anifire.models.creator.CCBodyShapeModel;
+			import anifire.component.CcActionLoader;
+			import anifire.component.CcComponentLoader;
+			import anifire.creator.components.CharPreviewer;
+			import anifire.util.UtilHashUint;
 
 			private static var _configManager:AppConfigManager = AppConfigManager.instance;
 			private static var _themeId:String;
@@ -60,13 +58,13 @@
 			private var _orgRatio:Number = 1;
 			private var _zoomRatio:Number = 2;
 			private var _orgHeight:Number = 240;
-			private const MC:String = "MC";
 			private var _isBuilding:int = 0;
 			private var _isRandom:Boolean = false;
 			public var showFace:Boolean = false;
 			private var _shouldPauseOnLoadByteComplete:Boolean = false;
 			private var _charCanvasHeight:Number;
 			private var cam:CCCharacterActionModel;
+			private var theme:CCThemeModel;
 
 			private static function get themeId() : String
 			{
@@ -132,10 +130,6 @@
 				this.addChild(this.myUI);
 				this.charCanvasHeight = this.height;
 			}
-			
-			private function loadCCCharComplete(param1:Event) : void
-			{
-			}
 
 			/**
 			 * @param ccChar cc char
@@ -158,7 +152,8 @@
 
 				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT, this.onLoaded);
 				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).visible = false;
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).initByCam(this.cam);	
+				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).initByCam(this.cam);
+				this.theme = theme;	
 			}
 
 			private function onLoaded(event:LoadEmbedMovieEvent) : void
@@ -189,59 +184,7 @@
 				// _loc4_.load(UtilNetwork.getGetCcLibraryFileRequest(_loc3_.theme_id,_loc3_.type,_loc3_.component_id));
 			}
 			
-			public function switchComponent(param1:CcComponent, param2:CcCharacter, param3:String, param4:String = "") : void
-			{
-				// var _loc5_:CcAction = null;
-				// var _loc6_:CcSelection = null;
-				// var _loc7_:CcState = null;
-				// var _loc8_:CcFacial = null;
-				// var _loc9_:CcSelection = null;
-				// var _loc10_:CcSelection = null;
-				// var _loc11_:CcComponentThumb = null;
-				// var _loc12_:UtilLoadMgr = null;
-				// if(param1 != null && param1.componentThumb.type != CcLibConstant.COMPONENT_TYPE_FREEACTION && param1.componentThumb.type != CcLibConstant.COMPONENT_TYPE_SKELETON && param1.componentThumb.type != CcLibConstant.COMPONENT_TYPE_BODYSHAPE)
-				// {
-				// 	_loc6_ = (_loc5_ = param2.bodyShape.getActionById(param3)).getSelectionByComponentType(param1.componentThumb.type);
-				// 	_loc7_ = null;
-				// 	if(_loc6_ != null)
-				// 	{
-				// 		_loc7_ = param1.componentThumb.getStateByStateId(_loc6_.stateId);
-				// 	}
-				// 	else if(param4 == "")
-				// 	{
-				// 		_loc10_ = _loc5_.getSelectionByComponentType("facial");
-				// 		_loc9_ = (_loc8_ = param2.getFacialByFacialId(_loc10_.facialId)).selections.getValueByKey(param1.componentThumb.type) as CcSelection;
-				// 		_loc7_ = param1.componentThumb.getStateByStateId(_loc9_.stateId);
-				// 	}
-				// 	else
-				// 	{
-				// 		_loc9_ = (_loc8_ = param2.getFacialByFacialId(param4)).selections.getValueByKey(param1.componentThumb.type) as CcSelection;
-				// 		_loc7_ = param1.componentThumb.getStateByStateId(_loc9_.stateId);
-				// 	}
-				// 	if(_loc7_ != null)
-				// 	{
-				// 		_loc11_ = param1.componentThumb;
-				// 		(_loc12_ = new UtilLoadMgr()).setExtraData({
-				// 			"component":param1,
-				// 			"ccChar":param2,
-				// 			"actionId":param3,
-				// 			"facialId":param4
-				// 		});
-				// 		if(_loc7_.imageData == null)
-				// 		{
-				// 			_loc12_.addEventListener(LoadMgrEvent.ALL_COMPLETE,this.onLoadStateImageData);
-				// 			_loc12_.addEventDispatcher(_loc7_,CcComponentLoadEvent.LOAD_STATE_IMAGE_DATA_COMPLETE);
-				// 			_loc7_.loadImageData(UtilNetwork.getGetCcComponentStateFileRequest(param1.componentThumb.themeId,param1.componentThumb.type,param1.componentThumb.path,_loc7_.filename));
-				// 		}
-				// 		else
-				// 		{
-				// 			_loc12_.addEventListener(LoadMgrEvent.ALL_COMPLETE,this.onReadyComponent);
-				// 			this.changeComponent(param1,param3,param4,param2,_loc12_);
-				// 		}
-				// 		_loc12_.commit();
-				// 	}
-				// }
-			}
+			
 
 			public function onRandomCharacterComplete() : void
 			{
@@ -352,89 +295,68 @@
 			{
 			}
 
-			public function changeComponent(param1:CcComponent, param2:String, param3:String, param4:CcCharacter, param5:UtilLoadMgr) : void
+			public function addComponent(bodyCmpnt:CCBodyComponentModel, ccChar:CCBodyModel, properties:Object) : void
 			{
-				var properties:Object;
-				var colors:Array;
-				var num:Number;
-				var i:int;
-				var stateId:String = null;
-				var selection:CcSelection = null;
-				var state:CcState = null;
-				var facialSelection:CcSelection = null;
-				var facial:CcFacial = null;
-				var fSelection:CcSelection = null;
-				var color:CcColor = null;
-				var colorObj:Object = null;
-				var ccComponent:CcComponent = param1;
-				var actionId:String = param2;
-				var facialId:String = param3;
-				var ccChar:CcCharacter = param4;
-				var loadMgr:UtilLoadMgr = param5;
-				var action:CcAction = ccChar.bodyShape.getActionById(actionId);
-				if(ccComponent.componentThumb.type != CcLibConstant.COMPONENT_TYPE_FREEACTION)
+				var bodyShape:CCBodyShapeModel = this.theme.bodyShapes[ccChar.bodyShapeId];
+				var component:CCComponentModel = bodyShape.getComponent(bodyCmpnt.type, bodyCmpnt.id);
+				var actionId:String = theme.getCharacterDefaultActionId(ccChar.bodyShapeId);
+				var state:String = this.theme.getActions(bodyShape.bodyShapeId)[actionId].componentStates[bodyCmpnt.type];
+				this.cam.addComponent(
+					bodyCmpnt,
+					component.getFilenameByState(state),
+					this.theme.themeId + "/" + component.getPathByState(state)
+				);
+				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).myActionModel = this.cam;
+
+				var colors:Array = new Array();
+				var num:Number = ccChar.colors.length;
+				var i:int = 0;
+				while (i < num)
 				{
-					selection = action.getSelectionByComponentType(ccComponent.componentThumb.type);
-					if(selection == null)
+					var color:CCColor = ccChar.colors[i];
+					if(color.targetComponent == bodyCmpnt.type || color.type == "ccSkinColor" || color.type == "ccFaceHairColor")
 					{
-						facialSelection = action.getSelectionByComponentType("facial");
-						if(facialId != null && facialId.length > 0)
-						{
-							facial = ccChar.getFacialByFacialId(facialId);
-						}
-						else
-						{
-							facial = ccChar.getFacialByFacialId(facialSelection.facialId);
-						}
-						fSelection = facial.selections.getValueByKey(ccComponent.componentThumb.type) as CcSelection;
-						state = ccComponent.componentThumb.getStateByStateId(fSelection.stateId);
-						stateId = state.stateId;
-					}
-					else
-					{
-						stateId = selection.stateId;
-					}
-				}
-				properties = {
-					"x":ccComponent.x,
-						"y":ccComponent.y,
-						"xscale":ccComponent.xscale,
-						"yscale":ccComponent.yscale,
-						"offset":ccComponent.offset,
-						"rotation":ccComponent.rotation,
-						"split":ccComponent.split
-				};
-				colors = new Array();
-				num = ccChar.getUserChosenColorNum();
-				i = 0;
-				while(i < num)
-				{
-					color = ccChar.getUserChosenColorByIndex(i);
-					if(color.ccColorThumb.componentType == ccComponent.componentThumb.type || color.ccColorThumb.colorReference == "ccSkinColor" || color.ccColorThumb.colorReference == "ccFaceHairColor")
-					{
-						colorObj = new Object();
-						colorObj["colorReference"] = color.ccColorThumb.colorReference;
-						colorObj["originalColor"] = color.ccColorThumb.isOriginalColorExist ? color.ccColorThumb.originalColor : uint.MAX_VALUE;
-						colorObj["colorValue"] = color.colorValue;
-						colorObj["targetComponentId"] = color.ccComponent == null ? "" : color.ccComponent.id;
+						var colorObj:Object = new Object();
+						colorObj["colorReference"] = color.type;
+						colorObj["originalColor"] = color.oc ? color.oc : uint.MAX_VALUE;
+						colorObj["colorValue"] = color.dest;
+						colorObj["targetComponentId"] = color.targetComponent == null ? "" : color.targetComponent;
 						colors.push(colorObj);
 					}
 					i++;
 				}
-				try
+
+
+
+var path:String = this.cam.getComponentByType(bodyCmpnt.type).path;
+var storeUrl:String = CcActionLoader.getStoreUrl(this.cam.getComponentByType(bodyCmpnt.type).path);
+
+				var compLoader:CcComponentLoader = CcComponentLoader.getComponentLoader(path, storeUrl);
+				var self:CharPreviewer = this;
+				compLoader.addEventListener(Event.COMPLETE, function onloaded(e:Event) : void
 				{
-					if(stateId == null)
+					var loader:CcComponentLoader = CcComponentLoader(e.target);
+					if (loader)
 					{
-						CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).updateComponentImageData(ccComponent.componentThumb.type,action.imageData,properties,loadMgr,colors,ccComponent.id);
+						loader.removeEventListener(e.type, onloaded);
+						var loadMgr:UtilLoadMgr = new UtilLoadMgr();
+						CustomCharacterMaker(self.myUI.getChildByName(self.LOADER))
+							.updateComponentImageData(bodyCmpnt.type, loader.swfBytes, properties, loadMgr, colors, path)
+							.addEventListener(Event.INIT, self.updateComponented);
+						loadMgr.commit();
 					}
-					else
-					{
-						CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).updateComponentImageData(ccComponent.componentThumb.type,ccComponent.componentThumb.getStateByStateId(stateId).imageData,properties,loadMgr,colors,ccComponent.id);
-					}
-				}
-				catch(e:Error)
-				{
-				}
+				});
+				compLoader.addEventListener(IOErrorEvent.IO_ERROR, this.onCcComponentFailed);
+				compLoader.load();
+				
+			}
+			public function updateComponented(e:Event) : void
+			{
+				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).onReady();
+			}
+			public function onCcComponentFailed(e:Event) : void
+			{
+				throw "gssd";
 			}
 			
 			public function highlightComponent(bodyCmpnt:CCBodyComponentModel) : void
@@ -449,11 +371,11 @@
 			
 			public function removeComponent(type:String, id:String) : void
 			{
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).removeComponentById(type, id);
+				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).removeComponent(type, id);
 			}
 			public function removeLibrary(type:String, id:String) : void
 			{
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).removeComponentById(type, id);
+				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).removeComponent(type, id);
 			}
 			
 			public function updateLocation(param1:CcComponent) : void

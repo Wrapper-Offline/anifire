@@ -113,7 +113,8 @@ package anifire.models.creator
 		}
 
 		/**
-		 * returns a list of actions for a specified bodyshape
+		 * Returns an object containing a bodyshape's actions
+		 * indexed by their ID.
 		 */
 		public function getActions(bodyShapeId:String) : Object
 		{
@@ -176,106 +177,105 @@ package anifire.models.creator
 			return components;
 		}
 
-		public function createCharacterActionModel(param1:CCBodyModel, param2:CCActionModel) : CCCharacterActionModel
+		public function createCharacterActionModel(char:CCBodyModel, action:CCActionModel) : CCCharacterActionModel
 		{
-			var _loc3_:CCBodyShapeModel = this.bodyShapes[param1.bodyShapeId];
 			if (!this.runwayMode)
 			{
-				var _loc13_:Object = this._actionModels[param1.assetId];
-				if (_loc13_)
+				var charActions:Object = this._actionModels[char.assetId];
+				if (charActions)
 				{
-					var _loc14_:CCCharacterActionModel = _loc13_[_loc6_];
-					if (_loc14_)
+					var existing:CCCharacterActionModel = charActions[shortId];
+					if (existing)
 					{
-						return _loc14_;
+						return existing;
 					}
 				}
 			}
-			var _loc4_:CCBodyShapeModel = this.bodyShapes[param1.bodyShapeId];
-			if (!_loc4_)
+			var bodyshape:CCBodyShapeModel = this.bodyShapes[char.bodyShapeId];
+			if (!bodyshape)
 			{
 				return null;
 			}
-			var _loc5_:CCCharacterActionModel = new CCCharacterActionModel();
-			_loc5_.actionModel = param2;
-			_loc5_.enabled = param2.enabled;
-			var _loc6_:String = param2.shortId;
-			var _loc7_:Object = param2.componentStates;
-			var _loc15_:CCBodyComponentModel;
-			var _loc17_:String;
-			var _loc18_:CCComponentModel;
-			for (var _loc8_:* in _loc7_)
+			var cam:CCCharacterActionModel = new CCCharacterActionModel();
+			cam.actionModel = action;
+			cam.enabled = action.enabled;
+			var shortId:String = action.shortId;
+			var states:Object = action.componentStates;
+			var bodyCmpnt:CCBodyComponentModel;
+			var id:String;
+			var component:CCComponentModel;
+			for (var type:String in states)
 			{
-				if (_loc8_ == "freeaction")
+				if (type == "freeaction")
 				{
-					var _loc16_:CCComponentModel = this.getComponent(_loc3_, "freeaction", _loc6_);
-					if (_loc16_)
+					var faCmpnt:CCComponentModel = this.getComponent(bodyshape, "freeaction", shortId);
+					if (faCmpnt)
 					{
-						_loc15_ = param1.getComponentId("freeaction") as CCBodyComponentModel;
-						_loc5_.addComponent(_loc15_, _loc6_ + ".swf", this.themeId + "/freeaction/" + _loc15_.folder + "/" + _loc6_ + ".swf");
-						_loc5_.freeactionFolderName = _loc15_.folder;
+						bodyCmpnt = char.getComponentId("freeaction") as CCBodyComponentModel;
+						cam.addComponent(bodyCmpnt, shortId + ".swf", this.themeId + "/freeaction/" + bodyCmpnt.folder + "/" + shortId + ".swf");
+						cam.freeactionFolderName = bodyCmpnt.folder;
 					}
 				}
-				else if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(_loc8_) > -1)
+				else if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) > -1)
 				{
-					var _loc19_:Object = param1.getComponentId(_loc8_);
-					for (var _loc20_:* in _loc19_)
+					var components:Object = char.getComponentId(type);
+					for (var index:String in components)
 					{
-						_loc15_ = _loc19_[_loc20_] as CCBodyComponentModel;
-						if (_loc15_)
+						bodyCmpnt = components[index] as CCBodyComponentModel;
+						if (bodyCmpnt)
 						{
-							_loc17_ = _loc15_.component_id;
-							_loc18_ = this.getComponent(_loc3_, _loc8_, _loc17_);
-							if (_loc18_)
+							id = bodyCmpnt.component_id;
+							component = this.getComponent(bodyshape, type, id);
+							if (component)
 							{
-								_loc5_.addComponent(_loc15_, _loc18_.getFilenameByState(_loc7_[_loc8_]), this.themeId + "/" + _loc18_.getPathByState(_loc7_[_loc8_]));
+								cam.addComponent(bodyCmpnt, component.getFilenameByState(states[type]), this.themeId + "/" + component.getPathByState(states[type]));
 							}
 						}
 					}
 				}
 				else
 				{
-					_loc15_ = param1.getComponentId(_loc8_) as CCBodyComponentModel;
-					if (_loc15_)
+					bodyCmpnt = char.getComponentId(type) as CCBodyComponentModel;
+					if (bodyCmpnt)
 					{
-						_loc17_ = _loc15_.component_id;
-						_loc18_ = this.getComponent(_loc3_, _loc8_, _loc17_);
-						if (_loc18_)
+						id = bodyCmpnt.component_id;
+						component = this.getComponent(bodyshape, type, id);
+						if (component)
 						{
-							_loc5_.addComponent(_loc15_, _loc18_.getFilenameByState(_loc7_[_loc8_]),this.themeId + "/" + _loc18_.getPathByState(_loc7_[_loc8_]));
+							cam.addComponent(bodyCmpnt, component.getFilenameByState(states[type]), this.themeId + "/" + component.getPathByState(states[type]));
 						}
 					}
 				}
 			}
-			var _loc9_:Object = param1.libraries;
-			for (var _loc10_:* in _loc9_)
+			var libraries:Object = char.libraries;
+			for (var lType:String in libraries)
 			{
-				var _loc21_:String = param1.getLibraryId(_loc10_);
-				var _loc22_:CCLibraryModel = _loc3_.getLibrary(_loc10_, _loc21_);
-				if (_loc22_)
+				var lId:String = char.getLibraryId(lType);
+				var libreal:CCLibraryModel = bodyshape.getLibrary(lType, lId);
+				if (libreal)
 				{
-					_loc5_.addLibrary(_loc10_, this.themeId + "/" + _loc22_.getPath());
+					cam.addLibrary(lType, this.themeId + "/" + libreal.getPath());
 				}
 			}
-			var _loc11_:Object = param1.colors;
-			for (var _loc12_:* in _loc11_)
+			var colors:Object = char.colors;
+			for (var cType:String in colors)
 			{
-				_loc5_.addColor(_loc12_, _loc11_[_loc12_]);
+				cam.addColor(cType, colors[cType]);
 			}
-			_loc5_.bodyScale.scalex = param1.bodyScale.scalex;
-			_loc5_.bodyScale.scaley = param1.bodyScale.scalex;
-			_loc5_.headScale.scalex = param1.headScale.scalex;
-			_loc5_.headScale.scaley = param1.headScale.scaley;
-			_loc5_.headPos.dx = param1.headPos.dx;
-			_loc5_.headPos.dy = param1.headPos.dy;
-			_loc5_.version = param1.version;
-			if (!_loc5_.propXML)
+			cam.bodyScale.scalex = char.bodyScale.scalex;
+			cam.bodyScale.scaley = char.bodyScale.scalex;
+			cam.headScale.scalex = char.headScale.scalex;
+			cam.headScale.scaley = char.headScale.scaley;
+			cam.headPos.dx = char.headPos.dx;
+			cam.headPos.dy = char.headPos.dy;
+			cam.version = char.version;
+			if (!cam.propXML)
 			{
-				_loc5_.propXML = param2.propXML;
+				cam.propXML = action.propXML;
 			}
-			_loc5_.themeId = this.themeId;
-			_loc5_.defaultActionId = _loc3_.defaultActionId;
-			return _loc5_;
+			cam.themeId = this.themeId;
+			cam.defaultActionId = bodyshape.defaultActionId;
+			return cam;
 		}
 		
 		protected function getCache(param1:String, param2:String) : CCCharacterActionModel
@@ -287,14 +287,18 @@ package anifire.models.creator
 			}
 			return null;
 		}
-		
-		protected function putCache(param1:String, param2:String, param3:CCCharacterActionModel) : void
+
+		/**
+		 * Stores a cam in a character's action object, which is
+		 * indexed by the character ID in the `actionModels` object.
+		 */
+		protected function putCache(assetId:String, actionId:String, cam:CCCharacterActionModel) : void
 		{
-			if(!this._actionModels[param1])
+			if (!this._actionModels[assetId])
 			{
-				this._actionModels[param1] = {};
+				this._actionModels[assetId] = {};
 			}
-			this._actionModels[param1][param2] = param3;
+			this._actionModels[assetId][actionId] = cam;
 		}
 
 		/**

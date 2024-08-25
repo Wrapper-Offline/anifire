@@ -46,43 +46,42 @@ package anifire.models.creator
 			this.enabled = true;
 		}
 		
-		public function addComponent(param1:CCBodyComponentModel, param2:String, param3:String) : void
+		public function addComponent(bodyCmpnt:CCBodyComponentModel, file:String, state:String) : void
 		{
-			var _loc4_:CCCharActionComponentModel = null;
-			var _loc5_:Vector.<CCBodyComponentModel> = null;
-			_loc4_ = new CCCharActionComponentModel();
-			_loc4_.type = param1.type;
-			_loc4_.path = param3;
-			_loc4_.file = param2;
-			_loc4_.x = param1.x;
-			_loc4_.y = param1.y;
-			_loc4_.xscale = param1.xscale;
-			_loc4_.yscale = param1.yscale;
-			_loc4_.offset = param1.offset;
-			_loc4_.rotation = param1.rotation;
-			_loc4_.split = param1.split;
-			_loc4_.theme_id = param1.theme_id;
-			_loc4_.component_id = param1.component_id;
-			_loc4_.folder = param1.folder;
-			if(param1.id)
+			var actCmpnt:CCCharActionComponentModel = new CCCharActionComponentModel();
+			actCmpnt.type = bodyCmpnt.type;
+			actCmpnt.path = state;
+			actCmpnt.file = file;
+			actCmpnt.x = bodyCmpnt.x;
+			actCmpnt.y = bodyCmpnt.y;
+			actCmpnt.xscale = bodyCmpnt.xscale;
+			actCmpnt.yscale = bodyCmpnt.yscale;
+			actCmpnt.offset = bodyCmpnt.offset;
+			actCmpnt.rotation = bodyCmpnt.rotation;
+			actCmpnt.split = bodyCmpnt.split;
+			actCmpnt.theme_id = bodyCmpnt.theme_id;
+			actCmpnt.component_id = bodyCmpnt.component_id;
+			actCmpnt.folder = bodyCmpnt.folder;
+			if (bodyCmpnt.id)
 			{
-				_loc4_.id = param1.id;
+				actCmpnt.id = bodyCmpnt.id;
 			}
-			if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(_loc4_.type) > -1)
+			if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(actCmpnt.type) > -1)
 			{
-				if(!this.components[_loc4_.type])
+				var cmpntArray:Vector.<CCBodyComponentModel>;
+				if (!this.components[actCmpnt.type])
 				{
-					_loc5_ = this.components[_loc4_.type] = new Vector.<CCBodyComponentModel>();
+					cmpntArray = this.components[actCmpnt.type] = new Vector.<CCBodyComponentModel>();
 				}
 				else
 				{
-					_loc5_ = this.components[_loc4_.type];
+					cmpntArray = this.components[actCmpnt.type];
 				}
-				_loc5_.push(_loc4_);
+				cmpntArray.push(actCmpnt);
 			}
 			else
 			{
-				this.components[_loc4_.type] = _loc4_;
+				this.components[actCmpnt.type] = actCmpnt;
 			}
 		}
 		

@@ -4,17 +4,27 @@
 
 s|Application
 {
-	backgroundColor: #1E1D25;
+	backgroundColor: #1e1d25;
 }
 
 #componentPanel
 {
-	backgroundColor: #14121D;
-	borderColor: #2B2742;
+	backgroundColor: #18181f;
+	borderColor: #323041;
 }
 
 cComponents|ComponentItemRenderer
 {
 	backgroundColor: #1E1D25;
-	borderColor: #343242;
+	borderColor: #2b2935;
+}
+cComponents|ComponentItemRenderer:hovered
+{
+	backgroundColor: #422b3d;
+	borderColor: #6b3f56;
+}
+cComponents|ComponentItemRenderer:selectedAndShowsCaret
+{
+	backgroundColor: #3c2234;
+	borderColor: #732a46;
 }

@@ -452,14 +452,12 @@ package anifire.component
 		
 		private function doPrepareFinishedByCam(param1:Event) : void
 		{
-			var _loc2_:Date = new Date();
 			(param1.target as IEventDispatcher).removeEventListener(param1.type, this.doPrepareFinishedByCam);
 			this.loadAllComponentsByCam(null);
 		}
 		
 		private function doPrepareFinished(param1:Event) : void
 		{
-			var _loc2_:Date = new Date();
 			(param1.target as IEventDispatcher).removeEventListener(param1.type, this.doPrepareFinished);
 			this.loadAllComponents(null);
 		}
@@ -690,7 +688,6 @@ package anifire.component
 		
 		public function initBySwfCam(param1:CCCharacterActionModel, param2:UtilHashBytes, param3:UtilHashBytes = null) : void
 		{
-			var _loc4_:Date = new Date();
 			if (this.state == STATE_NULL)
 			{
 				this.state = STATE_LOADING;
@@ -798,6 +795,11 @@ package anifire.component
 			_loc2_.addEventListener(Event.COMPLETE, this.onCcActionLoadedByCam);
 			_loc2_.addEventListener(IOErrorEvent.IO_ERROR, this.onCcActionFailed);
 			_loc2_.loadCcComponentsByCam(param1);
+		}
+
+		public function set myActionModel(cam:CCCharacterActionModel) : void
+		{
+			this._myActionModel = cam;
 		}
 		
 		private function onCcActionFailed(param1:IOErrorEvent) : void
@@ -930,12 +932,12 @@ package anifire.component
 				case CcLibConstant.COMPONENT_TYPE_FREEACTION:
 					clipName = "";
 					properties = {
-					"x":0, 
-					"y":0, 
-					"xscale":1, 
-					"yscale":1, 
-					"offset":0
-				};
+						"x": 0, 
+						"y": 0, 
+						"xscale": 1, 
+						"yscale": 1, 
+						"offset": 0
+					};
 					break;
 				case this.UPPERBODY:
 					clipName = this.CLIPUPPER;
@@ -1430,7 +1432,6 @@ package anifire.component
 			{
 				this.dispatchComplete();
 			}
-			var _loc6_:Date = new Date();
 		}
 		
 		public function resume() : void
@@ -1496,47 +1497,46 @@ package anifire.component
 		
 		private function updateHeadRect() : void
 		{
-			var _loc1_:DisplayObjectContainer = UtilPlain.getInstance(this, this.DEFAULTHEAD);
-			if (_loc1_)
+			var head:DisplayObjectContainer = UtilPlain.getInstance(this, this.DEFAULTHEAD);
+			if (head)
 			{
-				var _loc2_:Rectangle = _loc1_.getBounds(this);
-				var _loc3_:Point = new Point(_loc2_.x + _loc2_.width / 2, _loc2_.y + _loc2_.height / 2);
-				var _loc4_:Number = CcLibConstant.PHOTO_SIZE;
-				this._headRect = new Rectangle(_loc3_.x - _loc4_ * 0.4, _loc3_.y - _loc4_ * 1 / 2, _loc4_, _loc4_);
+				var bounds:Rectangle = head.getBounds(this);
+				var midpoint:Point = new Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+				var size:Number = CcLibConstant.PHOTO_SIZE;
+				this._headRect = new Rectangle(midpoint.x - size * 0.4, midpoint.y - size * 1 / 2, size, size);
 			}
 			this.updateEyesRect();
 		}
-		
+
 		private function updateEyesRect() : void
 		{
-			var _loc1_:Boolean = false;
-			var _loc2_:DisplayObjectContainer = this._head;
-			if (!_loc2_)
+			var head:DisplayObjectContainer = this._head;
+			if (!head)
 			{
-				_loc2_ = this._head2;
+				head = this._head2;
 			}
-			if (_loc2_)
+			if (head)
 			{
-				var _loc3_:DisplayObjectContainer = UtilPlain.getInstance(_loc2_, CcLibConstant.COMPONENT_TYPE_EYE + CcLibConstant.LEFT + this.MC);
-				var _loc4_:DisplayObjectContainer = UtilPlain.getInstance(_loc2_, CcLibConstant.COMPONENT_TYPE_EYE + CcLibConstant.RIGHT + this.MC);
-				var _loc5_:Rectangle = _loc3_.getBounds(this);
-				var _loc6_:Rectangle = _loc4_.getBounds(this);
-				var _loc7_:DisplayObjectContainer = UtilPlain.getInstance(_loc2_, CcLibConstant.COMPONENT_TYPE_NOSE + this.MC);
-				var _loc8_:Rectangle = _loc7_.getBounds(this);
-				if (_loc5_.width != 0 && _loc6_.width != 0)
+				var leftEye:DisplayObjectContainer = UtilPlain.getInstance(head, CcLibConstant.COMPONENT_TYPE_EYE + CcLibConstant.LEFT + this.MC);
+				var rightEye:DisplayObjectContainer = UtilPlain.getInstance(head, CcLibConstant.COMPONENT_TYPE_EYE + CcLibConstant.RIGHT + this.MC);
+				var lBounds:Rectangle = leftEye.getBounds(this);
+				var rBounds:Rectangle = rightEye.getBounds(this);
+				var nose:DisplayObjectContainer = UtilPlain.getInstance(head, CcLibConstant.COMPONENT_TYPE_NOSE + this.MC);
+				var noseBounds:Rectangle = nose.getBounds(this);
+				if (lBounds.width != 0 && rBounds.width != 0)
 				{
-					var _loc9_:Point = new Point((_loc5_.x + _loc6_.x + _loc5_.width) / 2, (_loc5_.y + _loc6_.y) / 2);
-					var _loc10_:Number = 100;
-					var _loc11_:Number = 100;
+					var midpoint:Point = new Point((lBounds.x + rBounds.x + lBounds.width) / 2, (lBounds.y + rBounds.y) / 2);
+					var width:Number = 100;
+					var height:Number = 100;
 					var _loc12_:Number = 2 / 5;
 					var _loc13_:Number = 2 / 5;
-					this._headRect = new Rectangle(_loc9_.x - _loc10_ * _loc12_, _loc9_.y - _loc11_ * _loc13_, _loc10_, _loc11_);
+					this._headRect = new Rectangle(midpoint.x - width * _loc12_, midpoint.y - height * _loc13_, width, height);
 				}
-				else if (_loc8_.width != 0)
+				else if (noseBounds.width != 0)
 				{
-					var _loc14_:Point = new Point(_loc8_.x, _loc8_.y);
-					var _loc15_:Number = CcLibConstant.PHOTO_SIZE;
-					this._headRect = new Rectangle(_loc14_.x - _loc15_ * 0.4, _loc14_.y - _loc15_ * 1 / 2, _loc15_, _loc15_);
+					var noseCoord:Point = new Point(noseBounds.x, noseBounds.y);
+					var size:Number = CcLibConstant.PHOTO_SIZE;
+					this._headRect = new Rectangle(noseCoord.x - size * 0.4, noseCoord.y - size * 1 / 2, size, size);
 				}
 			}
 		}
@@ -1654,19 +1654,19 @@ package anifire.component
 			}
 		}
 		
-		public function removeComponentById(type:String, id:String) : void
+		public function removeComponent(type:String, id:String) : void
 		{
-			// split components are separated
+			// offsettable components are separated by sides
 			if (CcLibConstant.ALL_OFFSETABLE_COMPONENT_TYPES.indexOf(type) >= 0)
 			{
-				this.removeComponentById(type + CcLibConstant.LEFT, id);
-				this.removeComponentById(type + CcLibConstant.RIGHT, id);
+				this.removeComponent(type + CcLibConstant.LEFT, id);
+				this.removeComponent(type + CcLibConstant.RIGHT, id);
 				return;
 			}
 			else if (type == CcLibConstant.COMPONENT_TYPE_HAIR)
 			{
-				this.removeComponentById(CcLibConstant.COMPONENT_TYPE_FRONT_HAIR, id);
-				this.removeComponentById(CcLibConstant.COMPONENT_TYPE_BACK_HAIR, id);
+				this.removeComponent(CcLibConstant.COMPONENT_TYPE_FRONT_HAIR, id);
+				this.removeComponent(CcLibConstant.COMPONENT_TYPE_BACK_HAIR, id);
 			}
 			else if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) >= 0)
 			{

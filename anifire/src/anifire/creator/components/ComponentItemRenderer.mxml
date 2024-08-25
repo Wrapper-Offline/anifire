@@ -143,6 +143,23 @@
 		<s:State name="selectedAndShowsCaret"/>
 	</s:states>
 
+	<s:transitions>
+		<s:Transition>
+			<s:AnimateColor target="{fill}" duration="0.15"/>
+		</s:Transition>
+		<s:Transition>
+			<s:AnimateColor target="{stroke}" duration="0.15"/>
+		</s:Transition>
+	</s:transitions>	
+
+	<s:Rect top="0" right="0" bottom="0" left="0" radiusX="3" radiusY="3">
+		<s:fill>
+			<s:SolidColor id="fill" color="{getStyle('backgroundColor')}"/>
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke id="stroke" color="{getStyle('borderColor')}" weight="1" alpha="1"/>
+		</s:stroke>
+	</s:Rect>
 	<s:Group id="nullIcon" visible="false" horizontalCenter="0" verticalCenter="0">
 		<s:Image source="@Embed('../images/componentIcons/nullIcon.png')" visible="true" visible.hovered="false"/>
 		<s:Image source="@Embed('../images/componentIcons/nullIcon_hover.png')" visible="false" visible.hovered="true"/>

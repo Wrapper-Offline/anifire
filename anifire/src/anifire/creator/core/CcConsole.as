@@ -77,7 +77,6 @@ package anifire.creator.core
 				CcLibConstant.USER_LEVEL_SUPER :
 				CcLibConstant.USER_LEVEL_NORMAL;
 
-			this.addJsCallbacks();
 			this.addEventListener(CcCoreEvent.LOAD_THEME_COMPLETE, this.prepareCharacter);
 			this.loadCcTheme(this._themeId);
 		}
@@ -382,6 +381,7 @@ package anifire.creator.core
 			var proceedHandler:Function = function proceedHandler(e:CcCoreEvent):void
 			{
 				self.removeEventListener(e.type, proceedHandler);
+				self.addJsCallbacks();
 				self.switchToEditor();
 			};
 			this.addEventListener(CcCoreEvent.LOAD_EXISTING_CHAR_COMPLETE, proceedHandler);
