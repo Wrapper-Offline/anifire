@@ -579,9 +579,9 @@ package anifire.creator.core
 		{
 			var color:CCColor = event.color;
 			var newValue:uint = event.colorValue;
+			color.dest = newValue;
 			this.editUi.eui_charPreviewer.updateColor(color, newValue);
-			this.ccChar.colors[color.type].dest = newValue;
-			// TODO ADD CHECK IF COLOR DOESN'T EXIST IN CHAR BODY
+			this.ccChar.colors[color.type] = color;
 			// if(param1.undoable)
 			// {
 			//    this.addCommand(this.ccChar);
@@ -619,7 +619,7 @@ package anifire.creator.core
 				bodyCmpnt.theme_id = this.ccChar.themeId;
 				bodyCmpnt.initDefaultValues();
 			}
-			bodyCmpnt.id = component.id;
+			bodyCmpnt.component_id = component.id;
 			bodyCmpnt.type = component.type;
 			var properties:Object = {
 				x: bodyCmpnt.x,

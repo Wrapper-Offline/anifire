@@ -105,7 +105,10 @@ package anifire.component
 		private var _assetImageIdArray:UtilHashNumber;
 		// don't delete, we need it to be imported
 		private var _tempworker:GoBaseWorkerImp;
-		
+
+		/**
+		 * handles rendering of custom characters
+		 */
 		public function CustomCharacterMaker()
 		{
 			this.GoColorMapShaderClass = GoColorMapShaderClass;
@@ -248,7 +251,10 @@ package anifire.component
 		{
 			return this._eventDispatcher;
 		}
-		
+
+		/**
+		 * status of the ccm. 
+		 */
 		private function get state() : String
 		{
 			return this._state;
@@ -263,15 +269,19 @@ package anifire.component
 		{
 			return this._waiting;
 		}
-		
+
+		/**
+		 * character version. 1 indicates a skeletal theme being used,
+		 * and 2 indicates a freeaction cc theme
+		 */
 		public function get ver() : Number
 		{
 			return this._ver;
 		}
 		
-		public function set ver(param1:Number) : void
+		public function set ver(version:Number) : void
 		{
-			this._ver = param1;
+			this._ver = version;
 		}
 		
 		private function doUpdateState(param1:Event) : void
@@ -361,10 +371,10 @@ package anifire.component
 		{
 			var loadMgr:UtilLoadMgr = new UtilLoadMgr();
 			loadMgr.addEventListener(LoadMgrEvent.ALL_COMPLETE, this.doPrepareFinishedByCam);
-			for (var i:String in this._myActionModel.libraryPaths)
+			for (var index:String in this._myActionModel.libraryPaths)
 			{
 				var loader:ExtraDataLoader = new ExtraDataLoader();
-				var libraryPath:String = this._myActionModel.libraryPaths[i];
+				var libraryPath:String = this._myActionModel.libraryPaths[index];
 				if (this._useImageLibrary)
 				{
 					if (CcImageLibrary.library.requestImage(libraryPath, this._sceneId, loader) > 0)
@@ -372,17 +382,17 @@ package anifire.component
 						continue;
 					}
 				}
-				var _loc3_:ByteArray = this.charSwfs.getValueByKey(libraryPath);
+				var swfBytes:ByteArray = this.charSwfs.getValueByKey(libraryPath);
 				var lc:LoaderContext = new LoaderContext();
 				lc.allowCodeImport = true;
-				if (_loc3_ != null)
+				if (swfBytes != null)
 				{
 					var data:Object = new Object();
-					data["part"] = i;
+					data["part"] = index;
 					loader.extraData = data;
 					loadMgr.addEventDispatcher(loader.contentLoaderInfo, Event.COMPLETE);
 					loader.contentLoaderInfo.addEventListener(Event.COMPLETE, this.onLoadStyleDone);
-					loader.loadBytes(_loc3_, lc);
+					loader.loadBytes(swfBytes, lc);
 					_numTotalLoadBytes++;
 				}
 			}
@@ -453,7 +463,7 @@ package anifire.component
 		private function doPrepareFinishedByCam(param1:Event) : void
 		{
 			(param1.target as IEventDispatcher).removeEventListener(param1.type, this.doPrepareFinishedByCam);
-			this.loadAllComponentsByCam(null);
+			this.loadAllComponentsByCam();
 		}
 		
 		private function doPrepareFinished(param1:Event) : void
@@ -685,8 +695,12 @@ package anifire.component
 			this.prepareXML(this.charXML);
 			this.prepareSkin(param3);
 		}
-		
-		public function initBySwfCam(param1:CCCharacterActionModel, param2:UtilHashBytes, param3:UtilHashBytes = null) : void
+
+		/**
+		 * begins rendering the character using a
+		 * characteractionmodel and an array of swfs the char uses
+		 */
+		public function initBySwfCam(cam:CCCharacterActionModel, imageData:UtilHashBytes, unused:UtilHashBytes = null) : void
 		{
 			if (this.state == STATE_NULL)
 			{
@@ -716,8 +730,8 @@ package anifire.component
 				}
 			}
 			this.should_decrypt = false;
-			this._myActionModel = param1;
-			this.charSwfs = param2.clone();
+			this._myActionModel = cam;
+			this.charSwfs = imageData.clone();
 			this._waiting = new Array();
 			this.visible = false;
 			this.destroy();
@@ -778,40 +792,51 @@ package anifire.component
 			{
 				return;
 			}
-			var _loc5_:CcActionLoader = new CcActionLoader();
-			_loc5_.addEventListener(Event.COMPLETE, this.onCcActionLoaded);
-			_loc5_.addEventListener(IOErrorEvent.IO_ERROR, this.onCcActionFailed);
-			_loc5_.loadCcComponents(charXml, startMs, endMs, null, this.ver);
+			var aLoader:CcActionLoader = new CcActionLoader();
+			aLoader.addEventListener(Event.COMPLETE, this.onCcActionLoaded);
+			aLoader.addEventListener(IOErrorEvent.IO_ERROR, this.onCcActionFailed);
+			aLoader.loadCcComponents(charXml, startMs, endMs, null, this.ver);
 		}
-		
-		public function initByCam(param1:CCCharacterActionModel) : void
+
+		/**
+		 * initializes using a characteractionmodel
+		 */
+		public function initByCam(cam:CCCharacterActionModel) : void
 		{
-			if (!param1)
+			if (!cam)
 			{
 				return;
 			}
-			this._myActionModel = param1;
-			var _loc2_:CcActionLoader = new CcActionLoader();
-			_loc2_.addEventListener(Event.COMPLETE, this.onCcActionLoadedByCam);
-			_loc2_.addEventListener(IOErrorEvent.IO_ERROR, this.onCcActionFailed);
-			_loc2_.loadCcComponentsByCam(param1);
+			this._myActionModel = cam;
+			var aLoader:CcActionLoader = new CcActionLoader();
+			aLoader.addEventListener(Event.COMPLETE, this.onCcActionLoadedByCam);
+			aLoader.addEventListener(IOErrorEvent.IO_ERROR, this.onCcActionFailed);
+			aLoader.loadCcComponentsByCam(cam);
 		}
 
 		public function set myActionModel(cam:CCCharacterActionModel) : void
 		{
 			this._myActionModel = cam;
 		}
-		
-		private function onCcActionFailed(param1:IOErrorEvent) : void
+
+		/**
+		 * called when loading action components fails
+		 * @param e `IOErrorEvent.IO_ERROR`
+		 */
+		private function onCcActionFailed(e:IOErrorEvent) : void
 		{
-			(param1.target as IEventDispatcher).removeEventListener(param1.type, this.onCcActionFailed);
+			(e.target as IEventDispatcher).removeEventListener(e.type, this.onCcActionFailed);
 			dispatchEvent(new IOErrorEvent(IOErrorEvent.IO_ERROR));
 		}
-		
+
+		/**
+		 * called when all action components have been loaded
+		 * using a characteractionmodel
+		 * @param e `Event.COMPLETE`
+		 */
 		private function onCcActionLoadedByCam(e:Event) : void
 		{
 			(e.target as IEventDispatcher).removeEventListener(e.type, this.onCcActionLoadedByCam);
-			var cDate:Date = new Date();
 			try
 			{
 				var loader:CcActionLoader = CcActionLoader(e.target);
@@ -826,7 +851,12 @@ package anifire.component
 				UtilErrorLogger.getInstance().appendCustomError("CCM:onCcActionLoaded:", e);
 			}
 		}
-		
+
+		/**
+		 * called when all action components have been loaded
+		 * using a character thumb xml
+		 * @param e `Event.COMPLETE`
+		 */
 		private function onCcActionLoaded(e:Event) : void
 		{
 			(e.target as IEventDispatcher).removeEventListener(e.type, this.onCcActionLoaded);
@@ -845,8 +875,11 @@ package anifire.component
 				UtilErrorLogger.getInstance().appendCustomError("CCM:onCcActionLoaded:", e);
 			}
 		}
-		
-		private function loadAllComponentsByCam(e:Event) : void
+
+		/**
+		 * loads body components from a characteractionmodel
+		 */
+		private function loadAllComponentsByCam() : void
 		{
 			if (!this._myActionModel)
 			{
@@ -859,7 +892,7 @@ package anifire.component
 			{
 				if (CcLibConstant.ALL_BODY_COMPONENT_TYPES.indexOf(type) > -1)
 				{
-					var _loc6_:ExtraDataLoader = this.updateComponentImageData(type, null, null, loadMgr, null, this._myActionModel.getComponentByType(type).path);
+					this.updateComponentImageData(type, null, null, loadMgr, null, this._myActionModel.getComponentByType(type).path);
 				}
 			}
 			loadMgr.commit();
@@ -884,15 +917,13 @@ package anifire.component
 		{
 			if (CcLibConstant.ALL_BODY_COMPONENT_TYPES.indexOf(componentType) < 0)
 			{
-				if (!this._head)
+				if (!this._head2)
 				{
-					this._head = new CcHeadComponent();
+					this._head2 = new CCHeadView();
 				}
-				var model:CcComponentModel = CcComponentModel.createModelByType(componentType);
-				model.initProperties(id, componentType, properties.x, properties.y, properties.xscale, properties.yscale, properties.rotation, properties.offset, properties.split);
-				model.initColors(colors);
-				this._head.addEventListener(Event.COMPLETE, this.onHeadLoaded);
-				this._head.setComponent(model, swfByteArray);
+				this._head2.initByCam(this._myActionModel, this._sceneId, this._useImageLibrary);
+				this._head2.addEventListener(Event.COMPLETE, this.onHeadLoaded);
+				this._head2.setComponent(componentType, id, swfByteArray);
 				return null;
 			}
 			var loader:ExtraDataLoader = new ExtraDataLoader();
@@ -1202,21 +1233,21 @@ package anifire.component
 			}
 		}
 		
-		public function updateColor(param1:Object) : void
+		public function updateColor(colorObj:Object) : void
 		{
-			var _loc2_:UtilHashUint = new UtilHashUint();
-			var _loc3_:SelectedColor = new SelectedColor(param1["colorReference"], param1["originalColor"], param1["colorValue"]);
-			this.changeColor(_loc3_, param1["targetComponentId"]);
-			if (param1["originalColor"] != uint.MAX_VALUE)
+			var todoReplaces:UtilHashUint = new UtilHashUint();
+			var selColor:SelectedColor = new SelectedColor(colorObj["colorReference"], colorObj["originalColor"], colorObj["colorValue"]);
+			this.changeColor(selColor, colorObj["targetComponentId"]);
+			if (colorObj["originalColor"] != uint.MAX_VALUE)
 			{
-				this._customColor.push(_loc3_.areaName, _loc3_);
-				_loc2_.push("0x" + _loc3_.orgColor.toString(16), _loc3_.dstColor);
+				this._customColor.push(selColor.areaName, selColor);
+				todoReplaces.push("0x" + selColor.orgColor.toString(16), selColor.dstColor);
 			}
-			if (_loc2_.length > 0)
+			if (todoReplaces.length > 0)
 			{
-				this.changeColorForShader(_loc2_);
+				this.changeColorForShader(todoReplaces);
 			}
-			this.addColor(_loc3_.areaName, _loc3_.orgColor, _loc3_.dstColor);
+			this.addColor(selColor.areaName, selColor.orgColor, selColor.dstColor);
 		}
 		
 		public function deleteColorByArea(param1:String) : void
@@ -1335,8 +1366,10 @@ package anifire.component
 		
 		private function onBodyLoadedByCam(param1:Event) : void
 		{
-			IEventDispatcher(param1.target).removeEventListener(param1.type, this.onBodyLoadedByCam);
-			var _loc2_:Date = new Date();
+			if (param1)
+			{
+				IEventDispatcher(param1.target).removeEventListener(param1.type, this.onBodyLoadedByCam);
+			}
 			if (this._loadHead)
 			{
 				this._head2 = new CCHeadView();

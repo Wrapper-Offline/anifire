@@ -45,6 +45,8 @@
 			import anifire.component.CcComponentLoader;
 			import anifire.creator.components.CharPreviewer;
 			import anifire.util.UtilHashUint;
+			import anifire.util.UtilErrorLogger;
+			import anifire.models.creator.CCCharActionComponentModel;
 
 			private static var _configManager:AppConfigManager = AppConfigManager.instance;
 			private static var _themeId:String;
@@ -64,7 +66,10 @@
 			private var _shouldPauseOnLoadByteComplete:Boolean = false;
 			private var _charCanvasHeight:Number;
 			private var cam:CCCharacterActionModel;
+			private var faceCam:CCCharacterActionModel;
 			private var theme:CCThemeModel;
+			private var actionId:String;
+			private var facialId:String;
 
 			private static function get themeId() : String
 			{
@@ -132,9 +137,10 @@
 			}
 
 			/**
-			 * @param ccChar cc char
-			 * @param actionId action id
-			 * @param param3 facial id
+			 * Replaces the character currently being previewed
+			 * with another.
+			 * @param ccChar CC character body
+			 * @param theme Character theme
 			 */
 			public function initByCcBody(ccChar:CCBodyModel, theme:CCThemeModel) : void
 			{
@@ -142,32 +148,40 @@
 				{
 					return;
 				}
+				this.theme = theme;
+				this.actionId = theme.getCharacterDefaultActionId(ccChar.bodyShapeId);
+				this.cam = theme.getCharacterActionModel(ccChar, this.actionId);
+
+				// merge the facial model into the action model
+				this.facialId = this.cam.actionModel.defaultFacialId.replace(/\.xml$/, "");
+				this.faceCam = theme.getCharacterFacialModel(ccChar, this.facialId);
+				for (var type:String in this.faceCam.components)
+				{
+					this.cam.components[type] = this.faceCam.components[type];
+				}
+
 				this._isBuilding = 1;
 				NativeCursorManager.instance.setBusyCursor();
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).destroy();
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).ver = ccChar.version;
-
-				var actionId:String = theme.getCharacterDefaultActionId(ccChar.bodyShapeId);
-				this.cam = theme.getCharacterActionModel(ccChar, actionId);
-
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT, this.onLoaded);
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).visible = false;
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).initByCam(this.cam);
-				this.theme = theme;	
+				this.ccMaker.visible = false;
+				this.ccMaker.destroy();
+				
+				this.ccMaker.ver = ccChar.version;
+				this.ccMaker.addEventListener(LoadEmbedMovieEvent.COMPLETE_EVENT, this.onLoaded);
+				this.ccMaker.initByCam(this.cam);
 			}
 
+			/**
+			 * Called by `initByCcBody` when `CustomCharacterMaker`
+			 * has finished loading the character, and it is ready
+			 * to be displayed.
+			 */
 			private function onLoaded(event:LoadEmbedMovieEvent) : void
 			{
 				(event.target as IEventDispatcher).removeEventListener(event.type, this.onLoaded);
 				this._isBuilding = 2;
 				NativeCursorManager.instance.removeBusyCursor();
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).visible = true;
+				this.ccMaker.visible = true;
 				this.dispatchEvent(new LoadEmbedMovieEvent(LoadEmbedMovieEvent.COMPLETE_EVENT, this));
-			}
-			
-			private function reloadCharSkin(param1:Event = null) : void
-			{
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).reloadSkin();
 			}
 			
 			public function switchLibrary(param1:CcComponent, param2:CcCharacter) : void
@@ -195,168 +209,127 @@
 			{
 				this.fadeIn.play();
 			}
-			
+
+			/**
+			 * Replaces a color in the CAM and calls for the
+			 * `CustomCharacterMaker` to update the color type
+			 * accordingly.
+			 */
 			public function updateColor(color:CCColor, newValue:uint) : void
 			{
-				var _loc2_:Object = null;
 				try
 				{
-					_loc2_ = new Object();
-					_loc2_["colorReference"] = color.type;
-					_loc2_["originalColor"] = color.oc != uint.MAX_VALUE ? color.oc : uint.MAX_VALUE;
-					_loc2_["colorValue"] = newValue;
-					_loc2_["targetComponentId"] = color.targetComponent == null ? "" : color.targetComponent;
-					CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).updateColor(_loc2_);
+					var colorObj:Object = new Object();
+					colorObj["colorReference"] = color.type;
+					colorObj["originalColor"] = color.oc != uint.MAX_VALUE ? color.oc : uint.MAX_VALUE;
+					colorObj["colorValue"] = newValue;
+					colorObj["targetComponentId"] = color.targetComponent == null ? "" : color.targetComponent;
+					this.cam.addColor(color.type, color);
+					this.ccMaker.myActionModel = this.cam;
+					this.ccMaker.updateColor(colorObj);
 				}
 				catch(e:Error)
 				{
+					UtilErrorLogger.getInstance().appendCustomError("CharPreviewer:updateColor:", e);
 				}
-			}
-			
-			public function removeColorOfThumb(param1:CcComponent, param2:CcCharacter) : Array
-			{
-				var _loc6_:CcColor = null;
-				var _loc3_:Number = param2.getUserChosenColorNum();
-				var _loc4_:Array = new Array();
-				var _loc5_:int = _loc3_ - 1;
-				while(_loc5_ >= 0)
-				{
-					if((_loc6_ = param2.getUserChosenColorByIndex(_loc5_)).ccColorThumb.componentType == param1.componentThumb.type)
-					{
-						param2.removeUserChosenColorByIndex(_loc5_);
-						_loc4_.push(_loc6_.ccColorThumb.colorReference);
-						CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).deleteColorByArea(_loc6_.ccColorThumb.colorReference);
-					}
-					_loc5_--;
-				}
-				return _loc4_;
-			}
-			
-			public function removeColorByRefs(param1:Array) : void
-			{
-				var _loc4_:String = null;
-				var _loc2_:Number = param1.length;
-				var _loc3_:int = _loc2_ - 1;
-				while(_loc3_ >= 0)
-				{
-					_loc4_ = String(param1[_loc3_]);
-					CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).deleteColorByArea(_loc4_);
-					_loc3_--;
-				}
-			}
-			
-			private function zoomEffectCompleted() : void
-			{
-				dispatchEvent(new CcCharPreviewerEvent(CcCharPreviewerEvent.ZOOM_EFFECT_COMPLETED,this));
-			}
-			
-			public function zoomInFacialWithoutDisplacement() : void
-			{
-			}
-			
-			public function zoomInFacial() : void
-			{
-			}
-			
-			private function getZoomedScale() : Number
-			{
-				var _loc1_:Number = NaN;
-				if(UtilLicense.getCurrentLicenseId() == "8")
-				{
-					_loc1_ = 0.9;
-				}
-				else if(themeId == ThemeConstants.ANIME_THEME_ID)
-				{
-					_loc1_ = 1.2;
-				}
-				else if(themeId == ThemeConstants.NINJAANIME_THEME_ID)
-				{
-					_loc1_ = 1.2;
-				}
-				else
-				{
-					_loc1_ = 1;
-				}
-				try
-				{
-				}
-				catch(e:Error)
-				{
-				}
-				return _loc1_;
-			}
-			
-			private function getZoomedPosition(param1:Number) : Point
-			{
-				return new Point();
-			}
-			
-			public function zoomOutFacial() : void
-			{
 			}
 
+			/**
+			 * Adds a component to the CAM and updates the
+			 * `CustomCharacterMaker`. If a component of the
+			 * specified type already exists, and multiples of the
+			 * type are not allowed, it will be replaced.
+			 */
 			public function addComponent(bodyCmpnt:CCBodyComponentModel, ccChar:CCBodyModel, properties:Object) : void
 			{
 				var bodyShape:CCBodyShapeModel = this.theme.bodyShapes[ccChar.bodyShapeId];
-				var component:CCComponentModel = bodyShape.getComponent(bodyCmpnt.type, bodyCmpnt.id);
-				var actionId:String = theme.getCharacterDefaultActionId(ccChar.bodyShapeId);
-				var state:String = this.theme.getActions(bodyShape.bodyShapeId)[actionId].componentStates[bodyCmpnt.type];
+				var component:CCComponentModel = this.theme.components[bodyCmpnt.type + ":" + bodyCmpnt.component_id];
+				if (!component)
+				{
+					// component is not shared, look into the character's bs instead
+					component = bodyShape.getComponent(bodyCmpnt.type, bodyCmpnt.component_id);
+				}
+
+				// we have to get the right component state requested by the action
+				var state:String = this.theme.faces[this.facialId].componentStates[bodyCmpnt.type];
+				if (!state)
+				{
+					state = this.cam.actionModel.componentStates[bodyCmpnt.type];
+					if (!state)
+					{
+						state = "default";
+					}
+				}
 				this.cam.addComponent(
 					bodyCmpnt,
 					component.getFilenameByState(state),
 					this.theme.themeId + "/" + component.getPathByState(state)
 				);
-				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).myActionModel = this.cam;
+				// not sure if it updates without this, better to be safe
+				// (i'm not wasting my time to check. you go ahead if you want to, though.
+				//  maybe optimize this piece of garbage.)
+				this.ccMaker.myActionModel = this.cam;
 
-				var colors:Array = new Array();
-				var num:Number = ccChar.colors.length;
-				var i:int = 0;
-				while (i < num)
+				// finally, we'll load the component and give it to the cc character maker
+				var path:String;
+				if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(bodyCmpnt.type) > -1)
 				{
-					var color:CCColor = ccChar.colors[i];
-					if(color.targetComponent == bodyCmpnt.type || color.type == "ccSkinColor" || color.type == "ccFaceHairColor")
+					var components:Object = this.cam.getComponentByType(bodyCmpnt.type);
+					for each (var actCmpnt:CCCharActionComponentModel in components)
 					{
-						var colorObj:Object = new Object();
-						colorObj["colorReference"] = color.type;
-						colorObj["originalColor"] = color.oc ? color.oc : uint.MAX_VALUE;
-						colorObj["colorValue"] = color.dest;
-						colorObj["targetComponentId"] = color.targetComponent == null ? "" : color.targetComponent;
-						colors.push(colorObj);
+						if (actCmpnt.id == bodyCmpnt.id)
+						{
+							path = actCmpnt.path;
+						}
 					}
-					i++;
+					if (!path)
+					{
+						return;
+					}
 				}
-
-
-
-var path:String = this.cam.getComponentByType(bodyCmpnt.type).path;
-var storeUrl:String = CcActionLoader.getStoreUrl(this.cam.getComponentByType(bodyCmpnt.type).path);
-
-				var compLoader:CcComponentLoader = CcComponentLoader.getComponentLoader(path, storeUrl);
-				var self:CharPreviewer = this;
-				compLoader.addEventListener(Event.COMPLETE, function onloaded(e:Event) : void
+				else
 				{
+					path = this.cam.getComponentByType(bodyCmpnt.type).path;
+				}
+				var storeUrl:String = CcActionLoader.getStoreUrl(this.cam.getComponentByType(bodyCmpnt.type).path);
+				var compLoader:CcComponentLoader = CcComponentLoader.getComponentLoader(path, storeUrl);
+
+				var self:CharPreviewer = this;
+				compLoader.addEventListener(Event.COMPLETE, function addComponent_successHandler(e:Event) : void
+				{
+					(e.target as IEventDispatcher).removeEventListener(e.type, addComponent_successHandler);
 					var loader:CcComponentLoader = CcComponentLoader(e.target);
-					if (loader)
+					if (!loader)
 					{
-						loader.removeEventListener(e.type, onloaded);
-						var loadMgr:UtilLoadMgr = new UtilLoadMgr();
-						CustomCharacterMaker(self.myUI.getChildByName(self.LOADER))
-							.updateComponentImageData(bodyCmpnt.type, loader.swfBytes, properties, loadMgr, colors, path)
-							.addEventListener(Event.INIT, self.updateComponented);
-						loadMgr.commit();
+						return;
 					}
+					var loadMgr:UtilLoadMgr = new UtilLoadMgr();
+					self.ccMaker
+						.updateComponentImageData(bodyCmpnt.type, loader.swfBytes, null, loadMgr, null, path)
+						.addEventListener(Event.INIT, self.refreshColors);
+					loadMgr.commit();
 				});
-				compLoader.addEventListener(IOErrorEvent.IO_ERROR, this.onCcComponentFailed);
+				compLoader.addEventListener(IOErrorEvent.IO_ERROR, this.addComponent_failHandler);
 				compLoader.load();
-				
 			}
-			public function updateComponented(e:Event) : void
+
+			/**
+			 * Called when an error occurs in `addComponent` while
+			 * trying to load the component.
+			 * @param event `IOErrorEvent.IO_ERROR`
+			 */
+			private function addComponent_failHandler(event:IOErrorEvent) : void
+			{
+				UtilErrorLogger.getInstance().appendCustomError("CharPreviewer:addComponent:", new Error(event.errorID));
+			}
+
+			/**
+			 * Called to have `CustomCharacterMaker` update a
+			 * component's colors after it is successfully loaded.
+			 */
+			protected function refreshColors(e:Event = null) : void
 			{
 				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).onReady();
-			}
-			public function onCcComponentFailed(e:Event) : void
-			{
-				throw "gssd";
 			}
 			
 			public function highlightComponent(bodyCmpnt:CCBodyComponentModel) : void
@@ -371,10 +344,12 @@ var storeUrl:String = CcActionLoader.getStoreUrl(this.cam.getComponentByType(bod
 			
 			public function removeComponent(type:String, id:String) : void
 			{
+				delete this.cam.components[type];
 				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).removeComponent(type, id);
 			}
 			public function removeLibrary(type:String, id:String) : void
 			{
+				delete this.cam.libraryPaths[type];
 				CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).removeComponent(type, id);
 			}
 			
@@ -396,11 +371,7 @@ var storeUrl:String = CcActionLoader.getStoreUrl(this.cam.getComponentByType(bod
 				}
 			}
 			
-			public function capCharAsBitmap() : BitmapData
-			{
-				var _loc1_:BitmapData = null;
-				return CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).getBitmap();
-			}
+			
 			
 			public function setHeadScale(param1:Number, param2:Number) : void
 			{
@@ -457,6 +428,12 @@ var storeUrl:String = CcActionLoader.getStoreUrl(this.cam.getComponentByType(bod
 			public function get ccMaker() : CustomCharacterMaker
 			{
 				return CustomCharacterMaker(this.myUI.getChildByName(this.LOADER));
+			}
+
+			public function capCharAsBitmap() : BitmapData
+			{
+				var _loc1_:BitmapData = null;
+				return CustomCharacterMaker(this.myUI.getChildByName(this.LOADER)).getBitmap();
 			}
 			
 			public function capFaceAsBitmap() : BitmapData

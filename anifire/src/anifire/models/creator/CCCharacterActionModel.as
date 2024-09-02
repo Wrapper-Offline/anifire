@@ -4,34 +4,35 @@ package anifire.models.creator
 	
 	public class CCCharacterActionModel
 	{
-		 
-		
+		/**
+		 * object of either `Vector.<CCCharActionComponentModel>`s
+		 * or `CCCharActionComponentModel`s indexed by their type.
+		 * if the type supports multiples of itself, it will be a
+		 * `Vector.<CCCharActionComponentModel>`. otherwise, it will
+		 * be a `CCCharActionComponentModel`.
+		 */
 		public var components:Object;
-		
+
+		/**
+		 * object of file paths for a library starting from the type
+		 * folder indexed by their type
+		 */
 		public var libraryPaths:Object;
-		
 		public var colorCodes:Object;
-		
 		public var bodyScale:Object;
-		
 		public var headScale:Object;
-		
 		public var headPos:Object;
-		
 		public var version:Number;
-		
 		public var themeId:String;
-		
 		public var actionModel:CCActionModel;
-		
 		public var propXML:XMLList;
-		
 		public var defaultActionId:String;
-		
 		public var enabled:Boolean;
-		
-		public var freeactionFolderName:String;
-		
+
+		/**
+		 * stores the component/library state paths and colors
+		 * for a specific character on an action or facial 
+		 */
 		public function CCCharacterActionModel()
 		{
 			super();
@@ -45,13 +46,19 @@ package anifire.models.creator
 			this.themeId = "";
 			this.enabled = true;
 		}
-		
-		public function addComponent(bodyCmpnt:CCBodyComponentModel, file:String, state:String) : void
+
+		/**
+		 * adds a component to the cam
+		 * @param bodyCmpnt component from the character body
+		 * @param stateFile filename of the component state
+		 * @param path path to the state file
+		 */
+		public function addComponent(bodyCmpnt:CCBodyComponentModel, stateFile:String, path:String) : void
 		{
 			var actCmpnt:CCCharActionComponentModel = new CCCharActionComponentModel();
 			actCmpnt.type = bodyCmpnt.type;
-			actCmpnt.path = state;
-			actCmpnt.file = file;
+			actCmpnt.path = path;
+			actCmpnt.file = stateFile;
 			actCmpnt.x = bodyCmpnt.x;
 			actCmpnt.y = bodyCmpnt.y;
 			actCmpnt.xscale = bodyCmpnt.xscale;
@@ -68,10 +75,10 @@ package anifire.models.creator
 			}
 			if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(actCmpnt.type) > -1)
 			{
-				var cmpntArray:Vector.<CCBodyComponentModel>;
+				var cmpntArray:Vector.<CCCharActionComponentModel>;
 				if (!this.components[actCmpnt.type])
 				{
-					cmpntArray = this.components[actCmpnt.type] = new Vector.<CCBodyComponentModel>();
+					cmpntArray = this.components[actCmpnt.type] = new Vector.<CCCharActionComponentModel>();
 				}
 				else
 				{
@@ -84,25 +91,47 @@ package anifire.models.creator
 				this.components[actCmpnt.type] = actCmpnt;
 			}
 		}
-		
-		public function getComponentByType(param1:String) : Object
+
+		/**
+		 * add a path to a library
+		 * @param type library type
+		 * @param path path to the library starting from the type
+		 * folder
+		 */
+		public function addLibrary(type:String, path:String) : void
 		{
-			return this.components[param1];
+			this.libraryPaths[type] = path;
 		}
-		
-		public function addLibrary(param1:String, param2:String) : void
+
+		/**
+		 * store a color selection
+		 * @param type color type
+		 * @param type color model
+		 */
+		public function addColor(type:String, color:CCColor) : void
 		{
-			this.libraryPaths[param1] = param2;
+			this.colorCodes[type] = color;
 		}
-		
-		public function getLibraryFilename(param1:String) : String
+
+		/**
+		 * returns either a `Vector.<CCCharActionComponentModel>` if
+		 * multiple components of the specified type are allowed or a
+		 * `CCCharActionComponentModel` if only one is allowed
+		 * @param type component type to return
+		 */
+		public function getComponentByType(type:String) : Object
 		{
-			return this.libraryPaths[param1];
+			return this.components[type];
 		}
-		
-		public function addColor(param1:String, param2:CCColor) : void
+
+		/**
+		 * returns the store path of a library, starting from the
+		 * theme folder
+		 * @param type library type
+		 */
+		public function getLibraryFilename(type:String) : String
 		{
-			this.colorCodes[param1] = param2;
+			return this.libraryPaths[type];
 		}
 		
 		public function getColor(param1:String) : CCColor

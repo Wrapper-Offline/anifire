@@ -21,7 +21,16 @@ package anifire.models.creator
 		public var faces:Object;
 		public var colors:Object;
 		public var completed:Boolean = false;
-		protected var loader:URLLoader;
+		/**
+		 * an object of objects of character actions indexed by
+		 * their id indexed by the character id
+		 * ```{
+		 * 	[key:characterid]:
+		 * 	{
+		 * 	 [key:actionid]: CCCharacterActionModel
+		 * 	}
+		 * }```
+		 */
 		private var _actionModels:Object;
 		
 		public function CCThemeModel(themeId:String)
@@ -35,22 +44,25 @@ package anifire.models.creator
 		}
 
 		/**
-		 * Retrieves a theme XML from the store.
+		 * retrieves a theme xml from the asset server
 		 */
 		public function load() : void
 		{
-			if (!this.loader)
-			{
-				this.loader = new URLLoader();
-				this.loader.addEventListener(Event.COMPLETE, this.onLoaderComplete);
-				this.loader.load(UtilNetwork.getGetCcThemeRequest(this.themeId));
-			}
+			var loader:URLLoader = new URLLoader();
+			loader.addEventListener(Event.COMPLETE, this.onLoaderComplete);
+			loader.load(UtilNetwork.getGetCcThemeRequest(this.themeId));
 		}
-		
+
+		/**
+		 * called when the theme xml has successfully been loaded
+		 * from the asset server
+		 * @param event `Event.COMPLETE`
+		 */
 		protected function onLoaderComplete(event:Event) : void
 		{
-			this.loader.removeEventListener(Event.COMPLETE, this.onLoaderComplete);
-			this.parse(XML(this.loader.data));
+			var loader:URLLoader = event.target as URLLoader;
+			loader.removeEventListener(Event.COMPLETE, this.onLoaderComplete);
+			this.parse(XML(loader.data));
 		}
 
 		/**
@@ -166,6 +178,9 @@ package anifire.models.creator
 			return component;
 		}
 
+		/**
+		 * returns an array of components with the specified type
+		 */
 		public function getComponentsByType(type:String) : Vector.<CCComponentModel>
 		{
 			var components:Vector.<CCComponentModel> = new Vector.<CCComponentModel>();
@@ -213,7 +228,6 @@ package anifire.models.creator
 					{
 						bodyCmpnt = char.getComponentId("freeaction") as CCBodyComponentModel;
 						cam.addComponent(bodyCmpnt, shortId + ".swf", this.themeId + "/freeaction/" + bodyCmpnt.folder + "/" + shortId + ".swf");
-						cam.freeactionFolderName = bodyCmpnt.folder;
 					}
 				}
 				else if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) > -1)

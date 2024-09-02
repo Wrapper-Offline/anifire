@@ -487,48 +487,6 @@ package anifire.cc.view
 			}
 		}
 		
-		public function setComponent(param1:ICcComponent, param2:ByteArray) : Boolean
-		{
-			var _loc3_:CcComponent = CcComponentFactory.create(param1.type);
-			if(_loc3_)
-			{
-				_loc3_.init(param1);
-				var _loc4_:String = param1.type;
-				if(_loc4_ == "facedecoration")
-				{
-					_loc4_ = param1.id;
-					var _loc5_:String = param1.id + CcLibConstant.MC_NAME_EXT;
-					var _loc6_:DisplayObjectContainer = UtilPlain.getInstance(this,_loc5_);
-					if(!_loc6_)
-					{
-						var _loc7_:Sprite = this._containers.getValueByKey("facedecorationMC");
-						if(_loc7_)
-						{
-							var _loc8_:Sprite = new Sprite();
-							_loc8_.name = _loc5_;
-							_loc7_.addChild(_loc8_);
-						}
-					}
-				}
-				this._componentList.push(_loc4_,_loc3_);
-				_loc3_.addEventListener(Event.COMPLETE,this.onComponentLoaded);
-				_loc3_.loadFromBytes(param2,true);
-				return true;
-			}
-			return false;
-		}
-		
-		private function onComponentLoaded(param1:Event) : void
-		{
-			var _loc2_:CcComponent = param1.target as CcComponent;
-			if(_loc2_)
-			{
-				_loc2_.removeEventListener(Event.COMPLETE,this.onComponentLoaded);
-				this.addComponent(_loc2_);
-			}
-			this.dispatchEvent(new Event(Event.COMPLETE));
-		}
-		
 		public function prepareImage(sceneId:String, isFirstBehaviour:Boolean = true) : void
 		{
 			try
