@@ -8,6 +8,7 @@ package anifire.models.creator
 		public var states:Object;
 		public var runwayMode:Boolean;
 		public var tags:Object;
+		public var split:Boolean;
 		public var displayOrder:int;
 		protected var _enable:Boolean;
 		
@@ -64,7 +65,8 @@ package anifire.models.creator
 					this.addTag(tags[index]);
 				}
 				this._enable = xml.@enable != "N";
-				this.displayOrder = int(xml.@display_order);
+				this.split = xml.@split != "N";
+				this.displayOrder = int(xml.@display_order) || 0;
 			}
 		}
 		

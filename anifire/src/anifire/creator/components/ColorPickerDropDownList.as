@@ -12,8 +12,6 @@ package anifire.creator.components
 	[Event(name="colorCommit", type="anifire.creator.events.ColorPickerDropDownListEvent")]
 	public class ColorPickerDropDownList extends DropDownList
 	{
-		
-		
 		[SkinPart(required="false")]
 		public var colorInputPanel:ColorInputPanel;
 		
@@ -23,65 +21,86 @@ package anifire.creator.components
 		public function ColorPickerDropDownList()
 		{
 			super();
-			setStyle("skinClass",ColorPickerDropDownListSkin);
+			setStyle("skinClass", ColorPickerDropDownListSkin);
 		}
-		
-		override protected function partAdded(param1:String, param2:Object) : void
+
+		/**
+		 * Called when a skin part is added. 
+		 * You do not call this method directly. 
+		 * For static parts, Flex calls it automatically when it calls the <code>attachSkin()</code> method. 
+		 * For dynamic parts, Flex calls it automatically when it calls 
+		 * the <code>createDynamicPartInstance()</code> method. 
+		 *
+		 * @param partName The name of the part.
+		 * @param instance The instance of the part.
+		 */
+		override protected function partAdded(partName:String, instance:Object) : void
 		{
-			super.partAdded(param1,param2);
-			if(param2 == this.colorInputPanel)
-			{
-				this.colorInputPanel.addEventListener(ColorPaletteEvent.COLOR_PREVIEW,this.colorInputPanel_colorPreviewHandler);
-				this.colorInputPanel.addEventListener(ColorPaletteEvent.COLOR_CHANGE,this.colorInputPanel_colorChangeHandler);
-				this.colorInputPanel.addEventListener(FlexEvent.CREATION_COMPLETE,this.colorInputPanel_creationCompleteHandler);
+			super.partAdded(partName, instance);
+			if (instance == this.colorInputPanel) {
+				this.colorInputPanel.addEventListener(ColorPaletteEvent.COLOR_PREVIEW, this.colorInputPanel_colorPreviewHandler);
+				this.colorInputPanel.addEventListener(ColorPaletteEvent.COLOR_CHANGE, this.colorInputPanel_colorChangeHandler);
+				this.colorInputPanel.addEventListener(FlexEvent.CREATION_COMPLETE, this.colorInputPanel_creationCompleteHandler);
+			}
+		}
+
+		/**
+		 * Called when an instance of a skin part is being removed. 
+		 * You do not call this method directly. 
+		 * For static parts, Flex calls it automatically when it calls the <code>detachSkin()</code> method. 
+		 * For dynamic parts, Flex calls it automatically when it calls 
+		 * the <code>removeDynamicPartInstance()</code> method. 
+		 *
+		 * @param partname The name of the part.
+		 * @param instance The instance of the part.
+		 */
+		override protected function partRemoved(partName:String, instance:Object) : void
+		{
+			super.partRemoved(partName, instance);
+			if (instance == this.colorInputPanel) {
+				this.colorInputPanel.removeEventListener(ColorPaletteEvent.COLOR_PREVIEW, this.colorInputPanel_colorPreviewHandler);
+				this.colorInputPanel.removeEventListener(ColorPaletteEvent.COLOR_CHANGE, this.colorInputPanel_colorChangeHandler);
+				this.colorInputPanel.removeEventListener(FlexEvent.CREATION_COMPLETE, this.colorInputPanel_creationCompleteHandler);
 			}
 		}
 		
-		override protected function partRemoved(param1:String, param2:Object) : void
-		{
-			super.partRemoved(param1,param2);
-			if(param2 == this.colorInputPanel)
-			{
-				this.colorInputPanel.removeEventListener(ColorPaletteEvent.COLOR_PREVIEW,this.colorInputPanel_colorPreviewHandler);
-				this.colorInputPanel.removeEventListener(ColorPaletteEvent.COLOR_CHANGE,this.colorInputPanel_colorChangeHandler);
-				this.colorInputPanel.removeEventListener(FlexEvent.CREATION_COMPLETE,this.colorInputPanel_creationCompleteHandler);
-			}
-		}
-		
-		private function colorInputPanel_creationCompleteHandler(param1:FlexEvent) : void
+		private function colorInputPanel_creationCompleteHandler(event:FlexEvent) : void
 		{
 			this.colorInputPanel.currentColor = this.colorDisplay.color;
 		}
 		
-		private function colorInputPanel_colorChangeHandler(param1:ColorPaletteEvent) : void
+		private function colorInputPanel_colorChangeHandler(event:ColorPaletteEvent) : void
 		{
 			this.updateColorFromColorInputPanel();
 		}
 		
-		private function colorInputPanel_colorPreviewHandler(param1:ColorPaletteEvent) : void
+		private function colorInputPanel_colorPreviewHandler(event:ColorPaletteEvent) : void
 		{
 			this.updateColorFromColorInputPanel();
 		}
 		
 		private function updateColorFromColorInputPanel() : void
 		{
-			if(this.colorInputPanel)
-			{
-				if(this.colorDisplay)
-				{
+			if (this.colorInputPanel) {
+				if (this.colorDisplay) {
 					this.colorDisplay.color = this.colorInputPanel.currentColor;
 				}
-				this.dispatchEvent(new ColorPickerDropDownListEvent(ColorPickerDropDownListEvent.COLOR_CHANGE,this.colorInputPanel.currentColor));
+				this.dispatchEvent(new ColorPickerDropDownListEvent(ColorPickerDropDownListEvent.COLOR_CHANGE, this.colorInputPanel.currentColor));
 			}
 		}
-		
-		override protected function dropDownController_closeHandler(param1:DropDownEvent) : void
+
+		/**
+		 * @private
+		 * Event handler for the <code>dropDownController</code> 
+		 * <code>DropDownEvent.OPEN</code> event. Updates the skin's state and 
+		 * ensures that the selectedItem is visible. 
+		 */
+		override protected function dropDownController_closeHandler(event:DropDownEvent) : void
 		{
-			if(this.colorInputPanel)
-			{
-				this.dispatchEvent(new ColorPickerDropDownListEvent(ColorPickerDropDownListEvent.COLOR_COMMIT,this.colorInputPanel.currentColor));
+			if (this.colorInputPanel) {
+				this.dispatchEvent(new ColorPickerDropDownListEvent(ColorPickerDropDownListEvent.COLOR_COMMIT, this.colorInputPanel.currentColor));
 			}
-			super.dropDownController_closeHandler(param1);
+			super.dropDownController_closeHandler(event);
 		}
 	}
 }

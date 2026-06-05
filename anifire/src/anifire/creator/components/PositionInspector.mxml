@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	xmlns:components="anifire.creator.components.*">
+
+	<fx:Script>
+		<![CDATA[
+			import anifire.constant.CcLibConstant;
+			import anifire.creator.events.PositionInspectorEvent;
+			import anifire.models.creator.CCBodyComponentModel;
+			import flash.events.MouseEvent;
+			import anifire.creator.components.CharPreview;
+
+			private static const SCALEUP_BUTTON_CLICK:String = "scaleup_button_click";
+			private static const SCALEDOWN_BUTTON_CLICK:String = "scaledown_button_click";
+			private static const SCALEXUP_BUTTON_CLICK:String = "scalexup_button_click";
+			private static const SCALEXDOWN_BUTTON_CLICK:String = "scalexdown_button_click";
+			private static const SCALEYUP_BUTTON_CLICK:String = "scaleyup_button_click";
+			private static const SCALEYDOWN_BUTTON_CLICK:String = "scaleydown_button_click";
+			private static const ROTATEUP_BUTTON_CLICK:String = "rotateup_button_click";
+			private static const ROTATEDOWN_BUTTON_CLICK:String = "rotatedown_button_click";
+			private static const OFFSETUP_BUTTON_CLICK:String = "offsetup_button_click";
+			private static const OFFSETDOWN_BUTTON_CLICK:String = "offsetdown_button_click";
+			private var bodyComponent:CCBodyComponentModel;
+			private var timer:Timer;
+			private var actionType:String;
+
+			public function init(component:CCBodyComponentModel, advancedMode:Boolean) : Boolean
+			{
+				if (!CcLibConstant.HAS_DETAIL_CONTROL) {
+					return false;
+				}
+				timer = new Timer(200, 1);
+				clone(component);
+				if (CcLibConstant.ALL_HEAD_COMPONENT_TYPES.indexOf(bodyComponent.type) == -1) {
+					return false;
+				}
+				if (CcLibConstant.ALL_OFFSETABLE_COMPONENT_TYPES.indexOf(bodyComponent.type) > -1) {
+					btnOffsetUp.visible = true;
+					btnOffsetDown.visible = true;
+				} else {
+					btnOffsetUp.visible = false;
+					btnOffsetDown.visible = false;
+				}
+				if (advancedMode) {
+					setCurrentState("advanced");
+				} else {
+					setCurrentState("simple");
+				}
+				dpad.addEventListener(PositionInspectorEvent.DPAD_MOUSE_DOWN, dpad_mouseDown);
+				dpad.addEventListener(PositionInspectorEvent.DPAD_MOUSE_UP, mouseUp);
+				return true;
+			}
+
+			private function clone(component:CCBodyComponentModel) : void
+			{
+				var clone:CCBodyComponentModel = new CCBodyComponentModel();
+				clone.parse(component.serialize());
+				bodyComponent = clone;
+			}
+
+			private function applyAction(action:String) : void
+			{
+				switch (action) {
+					case PositionInspectorEvent.UP_BUTTON_CLICK:
+						--bodyComponent.y;
+						break;
+					case PositionInspectorEvent.DOWN_BUTTON_CLICK:
+						++bodyComponent.y;
+						break;
+					case PositionInspectorEvent.LEFT_BUTTON_CLICK:
+						bodyComponent.x += -1 * CharPreview.facing;
+						break;
+					case PositionInspectorEvent.RIGHT_BUTTON_CLICK:
+						bodyComponent.x += 1 * CharPreview.facing;
+						break;
+					case SCALEUP_BUTTON_CLICK:
+						bodyComponent.xscale += 0.01;
+						bodyComponent.yscale += 0.01;
+						break;
+					case SCALEDOWN_BUTTON_CLICK:
+						bodyComponent.xscale -= 0.01;
+						bodyComponent.yscale -= 0.01;
+						break;
+					case SCALEXUP_BUTTON_CLICK:
+						bodyComponent.xscale += 0.01;
+						break;
+					case SCALEXDOWN_BUTTON_CLICK:
+						bodyComponent.xscale -= 0.01;
+						break;
+					case SCALEYUP_BUTTON_CLICK:
+						bodyComponent.yscale += 0.01;
+						break;
+					case SCALEYDOWN_BUTTON_CLICK:
+						bodyComponent.yscale -= 0.01;
+						break;
+					case ROTATEUP_BUTTON_CLICK:
+						if (rotation == 180) { // TODO add option to disable check
+							rotation = -180;
+						}
+						bodyComponent.rotation += 1;
+						break;
+					case ROTATEDOWN_BUTTON_CLICK:
+						if (rotation == -180) { // TODO add option to disable check
+							rotation = 180;
+						}
+						--bodyComponent.rotation;
+						break;
+					case OFFSETUP_BUTTON_CLICK:
+						++bodyComponent.offset;
+						break;
+					case OFFSETDOWN_BUTTON_CLICK:
+						--bodyComponent.offset;
+				}
+			}
+
+			private function startTimer() : void
+			{
+				if (!actionType) {
+					return;
+				}
+				applyAction(actionType);
+				timer = new Timer(800, 1);
+				timer.addEventListener(TimerEvent.TIMER, waitFinished);
+				timer.start();
+			}
+			
+			private function waitFinished(e:TimerEvent) : void
+			{
+				timer.stop();
+				timer.removeEventListener(TimerEvent.TIMER, waitFinished);
+				timer = new Timer(20);
+				timer.addEventListener(TimerEvent.TIMER, doTimer);
+				timer.start();
+			}
+			
+			private function doTimer(e:TimerEvent) : void
+			{
+				applyAction(actionType);
+				dispatchLocationUpdateEvent(false);
+			}
+			
+			private function dispatchLocationUpdateEvent(undoable:Boolean = true) : void
+			{
+				var event:PositionInspectorEvent = new PositionInspectorEvent(PositionInspectorEvent.LOCATION_UPDATE, this, null, true);
+				event.bodyComponent = bodyComponent;
+				event.undoable = undoable;
+				dispatchEvent(event);
+				if (undoable)
+					clone(bodyComponent);
+			}
+			
+			private function getTypeByEventTarget(obj:Object) : String
+			{
+				var actionType:String = "";
+				switch (obj) {
+					case btnRotateUp:
+						actionType = ROTATEUP_BUTTON_CLICK;
+						break;
+					case btnRotateDown:
+						actionType = ROTATEDOWN_BUTTON_CLICK;
+						break;
+					case btnScaleUp:
+						actionType = SCALEUP_BUTTON_CLICK;
+						break;
+					case btnScaleDown:
+						actionType = SCALEDOWN_BUTTON_CLICK;
+						break;
+					case btnXScaleUp:
+						actionType = SCALEXUP_BUTTON_CLICK;
+						break;
+					case btnXScaleDown:
+						actionType = SCALEXDOWN_BUTTON_CLICK;
+						break;
+					case btnYScaleUp:
+						actionType = SCALEYUP_BUTTON_CLICK;
+						break;
+					case btnYScaleDown:
+						actionType = SCALEYDOWN_BUTTON_CLICK;
+						break;
+					case btnOffsetUp:
+						actionType = OFFSETUP_BUTTON_CLICK;
+						break;
+					case btnOffsetDown:
+						actionType = OFFSETDOWN_BUTTON_CLICK;
+				}
+				return actionType;
+			}
+
+			private function btn_mouseDown(e:MouseEvent) : void
+			{
+				actionType = getTypeByEventTarget(e.currentTarget);
+				startTimer();
+			}
+
+			private function dpad_mouseDown(e:PositionInspectorEvent) : void
+			{
+				actionType = e.dpad_action;
+				startTimer();
+			}
+
+			private function mouseUp(e:Event) : void
+			{
+				if (timer != null && timer.running) {
+					timer.stop();
+					timer.removeEventListener(TimerEvent.TIMER, doTimer);
+					dispatchLocationUpdateEvent();
+				}
+			}
+		]]>
+	</fx:Script>
+
+	<s:states>
+		<s:State name="simple"/>
+		<s:State name="advanced"/>
+	</s:states>
+
+	<s:Group id="yPad">
+		<s:HGroup
+			width="100%"
+			horizontalCenter="0"
+			verticalCenter="0"
+			top="15"
+			bottom="15"
+			left="15"
+			right="15"
+			gap="8"
+			horizontalAlign="center">
+			<s:VGroup gap="8">
+				<components:IconButton
+					id="btnScaleUp"
+					buttonMode="true"
+					enabled="true"
+					icon="@Embed('../images/positionInspector/scaleUpIcon.png')"
+					iconOver="@Embed('../images/positionInspector/scaleUpIcon_hover.png')"
+					mouseDown="btn_mouseDown(event)"
+					mouseOut="mouseUp(event)"
+					mouseUp="mouseUp(event)"/>
+				<components:IconButton
+					id="btnScaleDown"
+					buttonMode="true"
+					enabled="true"
+					icon="@Embed('../images/positionInspector/scaleDownIcon.png')"
+					iconOver="@Embed('../images/positionInspector/scaleDownIcon_hover.png')"
+					mouseDown="btn_mouseDown(event)"
+					mouseOut="mouseUp(event)"
+					mouseUp="mouseUp(event)"/>
+			</s:VGroup>
+			<s:VGroup gap="8">
+				<components:IconButton
+					id="btnXScaleUp"
+					buttonMode="true"
+					enabled="true"
+					icon="@Embed('../images/positionInspector/scaleXUpIcon.png')"
+					iconOver="@Embed('../images/positionInspector/scaleXUpIcon_hover.png')"
+					mouseDown="btn_mouseDown(event)"
+					mouseOut="mouseUp(event)"
+					mouseUp="mouseUp(event)"/>
+				<components:IconButton
+					id="btnXScaleDown"
+					buttonMode="true"
+					enabled="true"
+					icon="@Embed('../images/positionInspector/scaleXDownIcon.png')"
+					iconOver="@Embed('../images/positionInspector/scaleXDownIcon_hover.png')"
+					mouseDown="btn_mouseDown(event)"
+					mouseOut="mouseUp(event)"
+					mouseUp="mouseUp(event)"/>
+			</s:VGroup>
+			<s:VGroup gap="8">
+				<components:IconButton
+					id="btnYScaleUp"
+					buttonMode="true"
+					enabled="true"
+					icon="@Embed('../images/positionInspector/scaleYUpIcon.png')"
+					iconOver="@Embed('../images/positionInspector/scaleYUpIcon_hover.png')"
+					mouseDown="btn_mouseDown(event)"
+					mouseOut="mouseUp(event)"
+					mouseUp="mouseUp(event)"/>
+				<components:IconButton
+					id="btnYScaleDown"
+					buttonMode="true"
+					enabled="true"
+					icon="@Embed('../images/positionInspector/scaleYDownIcon.png')"
+					iconOver="@Embed('../images/positionInspector/scaleYDownIcon_hover.png')"
+					mouseDown="btn_mouseDown(event)"
+					mouseOut="mouseUp(event)"
+					mouseUp="mouseUp(event)"/>
+			</s:VGroup>
+			<s:VGroup gap="8">
+				<components:IconButton
+					id="btnRotateUp"
+					buttonMode="true"
+					enabled="true"
+					icon="@Embed('../images/positionInspector/rotateLeftIcon.png')"
+					iconOver="@Embed('../images/positionInspector/rotateLeftIcon_hover.png')"
+					mouseDown="btn_mouseDown(event)"
+					mouseOut="mouseUp(event)"
+					mouseUp="mouseUp(event)"/>
+				<components:IconButton
+					id="btnRotateDown"
+					buttonMode="true"
+					enabled="true"
+					icon="@Embed('../images/positionInspector/rotateRightIcon.png')"
+					iconOver="@Embed('../images/positionInspector/rotateRightIcon_hover.png')"
+					mouseDown="btn_mouseDown(event)"
+					mouseOut="mouseUp(event)"
+					mouseUp="mouseUp(event)"/>
+			</s:VGroup>
+			<s:VGroup gap="8">
+				<components:IconButton
+					id="btnOffsetUp"
+					buttonMode="true"
+					enabled="true"
+					icon="@Embed('../images/positionInspector/eyesFurtherIcon.png')"
+					iconOver="@Embed('../images/positionInspector/eyesFurtherIcon_hover.png')"
+					mouseDown="btn_mouseDown(event)"
+					mouseOut="mouseUp(event)"
+					mouseUp="mouseUp(event)"/>
+				<components:IconButton
+					id="btnOffsetDown"
+					buttonMode="true"
+					enabled="true"
+					icon="@Embed('../images/positionInspector/eyesCloserIcon.png')"
+					iconOver="@Embed('../images/positionInspector/eyesCloserIcon_hover.png')"
+					mouseDown="btn_mouseDown(event)"
+					mouseOut="mouseUp(event)"
+					mouseUp="mouseUp(event)"/>
+			</s:VGroup>
+			<components:DirectionControlSpark id="dpad" verticalCenter="0" right="0"/>
+		</s:HGroup>
+	</s:Group>
+
+</s:Group>

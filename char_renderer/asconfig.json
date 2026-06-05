@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"output": "../output/char_renderer.swf",
+		"accessible": true,
+		"source-path": [
+			"src"
+		],
+		"library-path": [
+			"../anifire/bin/anifire.swc"
+		]
+	},
+	"files": [
+		"src/CharRenderer.as"
+	],
+	"copySourcePathAssets": true,
+	"additionalOptions": "-locale en_US -managers=flash.fonts.CFFFontManager"
+}

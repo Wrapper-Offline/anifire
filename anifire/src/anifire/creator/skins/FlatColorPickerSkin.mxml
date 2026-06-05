@@ -17,15 +17,20 @@
 
 	<s:states>
 		<s:State name="normal"/>
-		<s:State name="open"/>
+		<s:State name="open" />
 		<s:State name="disabled"/>
 	</s:states>
 
 	<s:PopUpAnchor
-		id="popUp" includeIn="open"
-		right="40" height="100%" popUpPosition="above"
-		popUpWidthMatchesAnchorWidth="true"
-		displayPopUp.normal="false" displayPopUp.open="true">
+		id="popUp"
+		includeIn="open"
+		itemDestructionPolicy="auto"
+		right="40"
+		height="100%"
+		popUpPosition="above"
+		popUpWidthMatchesAnchorWidth="false"
+		displayPopUp.normal="false"
+		displayPopUp.open="true">
 		<s:Group id="dropDown">
 			<components:ArrowTipContainer
 				left="0" right="0" top="0" bottom="0"

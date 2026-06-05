@@ -2,15 +2,29 @@
 <s:SparkSkin
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
-	xmlns:mx="library://ns.adobe.com/flex/mx">
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	minWidth="11"
+	alpha.disabled=".5">
 
 	<fx:Metadata>
 		[HostComponent("spark.components.VSlider")]
 	</fx:Metadata>
 
+	<fx:Script>
+		<![CDATA[
+			override protected function measure() : void
+			{
+				var _loc1_:Number = Number(this.thumb.getLayoutBoundsY());
+				this.thumb.setLayoutBoundsPosition(this.thumb.getLayoutBoundsX(),0);
+				super.measure();
+				this.thumb.setLayoutBoundsPosition(this.thumb.getLayoutBoundsX(),_loc1_);
+			}
+		]]>
+	</fx:Script>
+
 	<s:states>
-		<s:State name="disabled"/>
 		<s:State name="normal"/>
+		<s:State name="disabled"/>
 	</s:states>
 	
 	<s:Button

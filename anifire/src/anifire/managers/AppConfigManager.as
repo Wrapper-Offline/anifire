@@ -32,8 +32,10 @@ package anifire.managers
 
 		public function processAppParams() : void
 		{
-			var getGetTheApplicationObjectHandler:Object = FlexGlobals.topLevelApplication;
-			this.setParamters(getGetTheApplicationObjectHandler.parameters);
+			try {
+				var getGetTheApplicationObjectHandler:Object = FlexGlobals.topLevelApplication;
+				this.setParamters(getGetTheApplicationObjectHandler.parameters);
+			} catch (e) {}
 		}
 
 		public function setParamters(param1:Object) : void

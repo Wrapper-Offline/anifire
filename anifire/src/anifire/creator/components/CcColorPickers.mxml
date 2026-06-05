@@ -6,125 +6,73 @@
 
 	<fx:Script>
 		<![CDATA[
-			import anifire.creator.events.CcColorPickerEvent;
-			import anifire.models.creator.CCBodyComponentModel;
-			import anifire.models.creator.CCThemeModel;
 			import anifire.models.creator.CCBodyModel;
+			import anifire.models.creator.CCThemeModel;
 			import anifire.models.creator.CCColor;
+			import anifire.constant.CcLibConstant;
+			import spark.components.VGroup;
 
-			private var colorThumb:CCColor;
-			private var _biggerElementWidth:Number;
-			private var _smallerElementWidth:Number;
-			private const DELAY_BETWEEN_LOADING_EACH_THUMB:Number = 200;
-
-			public function set biggerElementWidth(param1:Number) : void
+			public function get pickers() : VGroup
 			{
-				this._biggerElementWidth = param1;
-			}
-			
-			public function set smallerElementWidth(param1:Number) : void
-			{
-				this._smallerElementWidth = param1;
-			}
-
-			public function addLibraryType(type:String, theme:CCThemeModel, ccChar:CCBodyModel) : void
-			{
-				var color:CCColor;
-				var colors:Vector.<CCColor> = new Vector.<CCColor>();
-				for (var colorType:String in theme.colors)
-				{
-					color = theme.colors[colorType];
-					if (color.targetComponent == type)
-					{
-						colors.push(color);
-					}
-				}
-				if (colors.length > 0)
-				{
-					for (var index2:int = 0; index2 < colors.length; index2++)
-					{
-						color = colors[index2] as CCColor;
-						this.addColorPicker(color, theme, ccChar);	
-					}
-				}
+				return this._pickers;
 			}
 
 			/**
-			 * Adds a component to the list of color pickers
-			 * using its type.
+			 * initialize the color pickers
+			 * @param theme cc theme
+			 * @param char char body
+			 * @param type component type
+			 * @param selected selected component or library
 			 */
-			public function addComponentType(type:String, theme:CCThemeModel, ccChar:CCBodyModel) : void
+			public function init(theme:CCThemeModel, char:CCBodyModel, type:String, selected:*) : void
 			{
-				var color:CCColor;
-				var colors:Vector.<CCColor> = new Vector.<CCColor>();
-				for (var colorType:String in theme.colors)
-				{
-					color = theme.colors[colorType];
-					if (color.targetComponent == type)
-					{
-						colors.push(color);
+				// there's only like 2 per every component
+				var prevKey:String;
+				for (var key:String in theme.colors) {
+					var color:CCColor = theme.colors[key];
+					if (color.targetComponent != type) {
+						continue;
+					}
+					var charColorI:String = color.type;
+					if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) > -1) {
+						charColorI += selected.id;
+					}
+					var charColor:CCColor = char.colors[charColorI];
+					var prepend:Boolean = prevKey && 
+						theme.componentOrder.indexOf(key) < theme.componentOrder.indexOf(prevKey);
+					this.addColor(color, charColor ? charColor.dest : 0, prepend);
+					if (prevKey) {
+						break;
+					} else {
+						prevKey = key;
 					}
 				}
-				if (colors.length > 0)
-				{
-					for (var index2:int = 0; index2 < colors.length; index2++)
-					{
-						color = colors[index2] as CCColor;
-						this.addColorPicker(color, theme, ccChar);	
-					}
-				}
 			}
-			
-			private function addColorPicker(color:CCColor, theme:CCThemeModel, ccChar:CCBodyModel) : void
+
+			public function setColor(type:String, value:uint) : void
 			{
-				var picker:CcColorPickerElementSpark = new CcColorPickerElementSpark();
-				if (color.choices.length > 4)
-				{
-					picker.width = this._biggerElementWidth;
+				var picker:ColorPickerElementSpark = this._pickers.getChildByName(type) as ColorPickerElementSpark;
+				if (!picker) {
+					return;
 				}
-				else
-				{
-					picker.width = this._smallerElementWidth;
-				}
-				picker.height = 30;
-				picker.addEventListener(CcColorPickerEvent.COLOR_CHOSEN, this.onUserChooseColor);
-				picker.callLater(picker.initByCcColor, [color]);
-				this._pickers.addElement(picker);
+				picker.setColor(value);
 			}
-			
-			private function onUserChooseColor(event:CcColorPickerEvent) : void
+
+			public function reset() : void
 			{
-				this.tellEveryBodyColorChosen(event.color, event.colorValue, event.undoable);
-			}
-			
-			private function tellEveryBodyColorChosen(color:CCColor, colorValue:uint, undoable:Boolean = true) : void
-			{
-				var event:CcColorPickerEvent = new CcColorPickerEvent(CcColorPickerEvent.COLOR_CHOSEN, this);
-				event.color = color;
-				event.colorValue = colorValue;
-				event.undoable = undoable;
-				this.dispatchEvent(event);
-			}
-			
-			public function destroy() : void
-			{
-				var _loc1_:int = 0;
-				var _loc2_:CcColorPickerElementSpark = null;
-				while(_loc1_ < this._pickers.numChildren)
-				{
-					_loc2_ = this._pickers.getChildAt(_loc1_) as CcColorPickerElementSpark;
-					_loc2_.removeEventListener(CcColorPickerEvent.COLOR_CHOSEN, this.onUserChooseColor);
-					_loc1_++;
-				}
 				this._pickers.removeAllElements();
 			}
 
-			/**
-			 * Deprecated. Please use the `addComponentType` method
-			 * instead.
-			 */
-			public function addComponentThumb(bodyCmpnt:CCBodyComponentModel, cmpntThumb:*, theme:CCThemeModel, ccChar:CCBodyModel) : void
-			{}
+			private function addColor(color:CCColor, value:uint, prepend:Boolean) {
+				var picker:ColorPickerElementSpark = new ColorPickerElementSpark();
+				picker.init(color, value);
+				picker.name = color.type;
+				if (prepend) {
+					this._pickers.addElementAt(picker, 0);
+				} else {
+					this._pickers.addElement(picker);
+				}
+			}
 		]]>
 	</fx:Script>
 

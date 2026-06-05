@@ -7,171 +7,193 @@
 	autoDrawBackground="false"
 	width="105"
 	height="105"
-	useHandCursor="true"
-	buttonMode="true">
+	buttonMode="true"
+	buttonMode.selectedAndShowsCaret="false">
 
 	<fx:Script>
 		<![CDATA[
-			import anifire.constant.LicenseConstants;
-			import anifire.util.UtilUser;
 			import anifire.component.CcComponentLoader;
 			import anifire.component.CcActionLoader;
 			import anifire.models.creator.CCComponentModel;
 			import anifire.models.creator.CCLibraryModel;
+			import flash.display.LoaderInfo;
+			import anifire.util.UtilColor;
+			import flash.display.DisplayObject;
+			import flash.geom.ColorTransform;
 
-			private var cid:String;
-			private var themeId:String;
-			private var thumb:*;
+			private static var BITMAP_DISPLAY_SIDE:Number = 105;
 			[Bindable]
-			public var isNull:Boolean = false;
-			protected var _loader:Loader = new Loader();
-			protected var _bitmapData:BitmapData;
-			protected var _displayWidth:Number = 105;
-			protected var _displayHeight:Number = 105;
-			protected var _displayMatrix:Matrix = new Matrix();
+			private var isNull:Boolean = false;
+			private var loader:Loader = new Loader();
+			private var bitmapData:BitmapData;
 
-			override public function set data(param1:Object) : void
+			override public function set data(value:Object) : void
 			{
-				if(!param1)
-				{
-					super.data = param1;
-					return;
-				}
-				this.cid = param1.key;
-				this.thumb = param1.data;
-				this.themeId = param1.themeId;
-				super.data = this.thumb;
-				if(!this.thumb)
-				{
+				super.data = value;
+				if (value == null) {
 					this.isNull = true;
 					this.nullIcon.visible = true;
-				}
-				else
-				{
-					this.isNull = false;
-					this.nullIcon.visible = false;
-				}
-				if(this.thumb)
-				{
-					if (!(this.thumb is CCComponentModel) && !(this.thumb is CCLibraryModel))
-					{
+					this.imageDisplay.source = null;
+				} else {
+					if (!(this.data is CCComponentModel) && !(this.data is CCLibraryModel)) {
 						return;
 					}
+					this.isNull = false;
+					this.nullIcon.visible = false;
 					this.imageDisplay.source = null;
 					this.updateThumbData();
 				}
-				else
-				{
-					this.imageDisplay.source = null;
+			}
+
+			override public function set label(value:String) : void
+			{
+				super.toolTip = value;
+			}
+
+			public function refreshColor() : void
+			{
+				if (this.data == null) {
+					return;
 				}
-				if (UtilUser.hasAdminFeatures || LicenseConstants.isThumbnailTestHost())
-				{
-					this.toolTip = this.cid;
+				if (this.loader.content is DisplayObject) {
+					UtilColor.setAssetPartColor(this.loader.content, "ccSkinColor", (owner as ThumbList).char.colors["ccSkinColor"].dest);
+					this.createBitmap(this.loader.content);
 				}
 			}
-			
+
+			/**
+			 * retrieves the component from the asset store
+			 */
 			private function updateThumbData() : void
 			{
-				var storeUrl:String = CcActionLoader.getStoreUrl(this.themeId + "/" + this.thumb.type + "/" + this.thumb.basePath);
-				if (this.thumb is CCComponentModel)
-				{
+				var storeUrl:String = CcActionLoader.getStoreUrl((owner as ThumbList).char.themeId + "/" + this.data.type + "/" + this.data.basePath);
+				if (this.data is CCComponentModel) {
 					storeUrl += "/" + "thumbnail.swf";
-				}
-				else
-				{
+				} else {
 					storeUrl += "_thumbnail.swf";
 				}
-				var compLoader:CcComponentLoader = CcComponentLoader.getComponentLoader(this.thumb.basePath, storeUrl);
+				var compLoader:CcComponentLoader = new CcComponentLoader(this.data.basePath, storeUrl);
 				compLoader.addEventListener(Event.COMPLETE, this.onLoadThumbImage);
 				compLoader.addEventListener(IOErrorEvent.IO_ERROR, this.onFailThumbImage);
 				compLoader.startProcess();
-				this._loading.visible = true;
-			}
-			
-			private function onLoadThumbImage(e:Event) : void
-			{
-				var loader:CcComponentLoader = CcComponentLoader(e.target);
-				if (loader)
-				{
-					if (Boolean(this.thumb) && loader.swfBytes is ByteArray)
-					{
-						this._loader.contentLoaderInfo.addEventListener(Event.INIT, this.onImageLoaderInit);
-						this._loader.loadBytes(loader.swfBytes);
-					}
-					else
-					{
-						this.imageDisplay.source = null;
-					}
-				}				
+				this.spinner.visible = true;
 			}
 
-			private function onFailThumbImage(e:Event) : void
+			/**
+			 * called when asset is loaded
+			 */
+			private function onLoadThumbImage(event:Event) : void
 			{
-				//you.. have FAILED
+				var compLoader:CcComponentLoader = CcComponentLoader(event.target);
+				compLoader.removeEventListener(Event.COMPLETE, this.onLoadThumbImage);
+				compLoader.removeEventListener(IOErrorEvent.IO_ERROR, this.onFailThumbImage);
+
+				if (Boolean(this.data) && compLoader.swfBytes is ByteArray) {
+					this.loader.contentLoaderInfo.addEventListener(Event.INIT, this.onImageLoaderInit);
+					this.loader.loadBytes(compLoader.swfBytes);
+					compLoader.unload();
+				} else {
+					this.imageDisplay.source = null;
+				}	
 			}
-			
-			protected function onImageLoaderInit(param1:Event = null) : void
+
+			/**
+			 * you.. have FAILED
+			 */
+			private function onFailThumbImage(event:Event) : void
 			{
-				if(this._loader.content is DisplayObject)
-				{
-					this.createBitmap(this._loader.content);
-				}
-				else
-				{
-					this.imageDisplay.source = this._loader.content;
-				}
-				this._loading.visible = false;
+				var compLoader:CcComponentLoader = CcComponentLoader(event.target);
+				compLoader.removeEventListener(Event.COMPLETE, this.onLoadThumbImage);
+				compLoader.removeEventListener(IOErrorEvent.IO_ERROR, this.onFailThumbImage);
+				this.spinner.visible = false;
 			}
-			
-			protected function createBitmap(param1:DisplayObject) : void
+
+			/**
+			 * called when data is loaded, adds bitmapdata to imageDisplay
+			 */
+			protected function onImageLoaderInit(event:Event) : void
 			{
-				this._bitmapData = new BitmapData(this._displayWidth,this._displayHeight,true,16711680);
-				this._displayMatrix.a = this._displayWidth / 60;
-				this._displayMatrix.d = this._displayHeight / 60;
-				this._bitmapData.draw(param1,this._displayMatrix,new ColorTransform(),null,null,true);
-				this.imageDisplay.source = this._bitmapData;
+				var info:LoaderInfo = LoaderInfo(event.target);
+				info.removeEventListener(Event.INIT, this.onImageLoaderInit);
+
+				if (this.loader.content is DisplayObject) {
+					this.refreshColor();
+					this.loader.stopAllMovieClips();
+				} else {
+					this.imageDisplay.source = this.loader.content;
+				}
+				this.spinner.visible = false;
+			}
+
+			/**
+			 * draws a bitmap and unloads the original
+			 */
+			protected function createBitmap(obj:DisplayObject) : void
+			{
+				this.bitmapData = new BitmapData(BITMAP_DISPLAY_SIDE, BITMAP_DISPLAY_SIDE, true, 0);
+				var displayMatrix:Matrix = new Matrix();
+				displayMatrix.a = BITMAP_DISPLAY_SIDE / 60;
+				displayMatrix.d = BITMAP_DISPLAY_SIDE / 60;
+				this.bitmapData.draw(obj, displayMatrix, new ColorTransform(), null, null, true);
+				this.imageDisplay.source = this.bitmapData;
 			}
 		]]>
 	</fx:Script>
 
-	<s:states>
-		<s:State name="normal"/>
-		<s:State name="hovered"/>
-		<s:State name="selected"/>
-		<s:State name="normalAndShowsCaret"/>
-		<s:State name="hoveredAndShowsCaret"/>
-		<s:State name="selectedAndShowsCaret"/>
-	</s:states>
+	<fx:Declarations>
+		<s:Power id="power" easeInFraction="1" exponent="4"/>
+	</fx:Declarations>
 
 	<s:transitions>
-		<s:Transition>
-			<s:AnimateColor target="{fill}" duration="0.15"/>
+		<s:Transition fromState="*" toState="*">
+			<s:Parallel id="ok" targets="{[rect, imageDisplay]}">
+				<s:Resize duration="50" easer="{power}"/>
+			</s:Parallel>
 		</s:Transition>
-		<s:Transition>
-			<s:AnimateColor target="{stroke}" duration="0.15"/>
-		</s:Transition>
-	</s:transitions>	
+	</s:transitions>
 
-	<s:Rect top="0" right="0" bottom="0" left="0" radiusX="3" radiusY="3">
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="down"/>
+		<s:State name="hovered" stateGroups="buttonStates"/>
+		<s:State name="selected" stateGroups="buttonStates"/>
+		<s:State name="normalAndShowsCaret"/>
+		<s:State name="hoveredAndShowsCaret" stateGroups="buttonStates"/>
+		<s:State name="selectedAndShowsCaret" stateGroups="buttonStates"/>
+	</s:states>
+
+	<s:Rect
+		id="rect" 
+		radiusX="3"
+		radiusY="3"
+		width="102"
+		height="102"
+		width.down="99"
+		height.down="99"
+		width.buttonStates="105"
+		height.buttonStates="105"
+		verticalCenter="0"
+		horizontalCenter="0">
 		<s:fill>
 			<s:SolidColor id="fill" color="{getStyle('backgroundColor')}"/>
 		</s:fill>
-		<s:stroke>
-			<s:SolidColorStroke id="stroke" color="{getStyle('borderColor')}" weight="1" alpha="1"/>
-		</s:stroke>
 	</s:Rect>
 	<s:Group id="nullIcon" visible="false" horizontalCenter="0" verticalCenter="0">
 		<s:Image source="@Embed('../images/componentIcons/nullIcon.png')" visible="true" visible.hovered="false"/>
 		<s:Image source="@Embed('../images/componentIcons/nullIcon_hover.png')" visible="false" visible.hovered="true"/>
 	</s:Group>
-	<components:BusyIndicator id="_loading" horizontalCenter="0" verticalCenter="0" visible="false" symbolColor="0"/>
+	<components:BusyIndicator id="spinner" horizontalCenter="0" verticalCenter="0" visible="false" symbolColor="0"/>
 	<s:BitmapImage
 		id="imageDisplay"
-		width="95"
-		height="95"
-		scaleX="-1"
-		horizontalCenter="0"
+		width="92"
+		height="92"
+		width.down="89"
+		height.down="89"
+		width.buttonStates="95"
+		height.buttonStates="95"
 		verticalCenter="0"
+		horizontalCenter="0"
+		scaleX="-1"
 		smoothingQuality="high"
 		smooth="true"/>
 

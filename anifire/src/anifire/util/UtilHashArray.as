@@ -2,255 +2,232 @@ package anifire.util
 {
 	public class UtilHashArray
 	{
-		
-		
-		private var keyToIndexMap:anifire.util.UtilHashMap;
-		
+		private var keyToIndexMap:UtilHashMap;
 		private var indexToKeyMap:Array;
-		
 		private var data:Array;
 		
 		public function UtilHashArray()
 		{
 			super();
-			this.keyToIndexMap = new anifire.util.UtilHashMap();
+			this.keyToIndexMap = new UtilHashMap();
 			this.indexToKeyMap = new Array();
 			this.data = new Array();
 		}
-		
-		public function push(param1:String, param2:*, param3:Boolean = true) : int
+
+		/**
+		 * pushes a value to the array with a key
+		 * @param key key to use
+		 * @param value value to push
+		 * @param replace replace if key exists
+		 */
+		public function push(key:String, value:*, replace:Boolean = true) : int
 		{
-			var _loc4_:int = 0;
-			if(this.keyToIndexMap.containsKey(param1))
-			{
-				if(param3)
-				{
-					_loc4_ = this.keyToIndexMap.getValue(param1) as int;
-					this.data[_loc4_] = param2;
+			var i:int = 0;
+			if (this.keyToIndexMap.containsKey(key)) {
+				if (replace) {
+					i = this.keyToIndexMap.getValue(key) as int;
+					this.data[i] = value;
 				}
+			} else {
+				i = int(this.data.length);
+				this.data.push(value);
+				this.indexToKeyMap.push(key);
+				this.keyToIndexMap.put(key, i);
 			}
-			else
-			{
-				_loc4_ = int(this.data.length);
-				this.data.push(param2);
-				this.indexToKeyMap.push(param1);
-				this.keyToIndexMap.put(param1,_loc4_);
-			}
-			return _loc4_;
+			return i;
 		}
-		
-		public function remove(param1:int, param2:int) : void
+
+		/**
+		 * removes n elements from an index
+		 * @param start starting index
+		 * @param deleteCount number of elements to delete
+		 */
+		public function remove(start:int, deleteCount:int) : void
 		{
-			var _loc3_:int = 0;
-			if(param1 >= this.length || param1 + param2 - 1 >= this.length)
-			{
-				throw new Error("UtilHashArray index out of bound error. Index --> " + param1);
+			if (start >= this.length || start + deleteCount - 1 >= this.length) {
+				throw new Error("UtilHashArray index out of bound error. Index --> " + start);
 			}
-			_loc3_ = 0;
-			while(_loc3_ < param2)
-			{
-				this.keyToIndexMap.remove(this.indexToKeyMap[param1 + _loc3_]);
-				_loc3_++;
+			var i:int = 0;
+			for (i = 0; i < deleteCount; i++) {
+				this.keyToIndexMap.remove(this.indexToKeyMap[start + i]);
 			}
-			this.data.splice(param1,param2);
-			this.indexToKeyMap.splice(param1,param2);
-			_loc3_ = param1;
-			while(_loc3_ < this.length)
-			{
-				this.keyToIndexMap.remove(this.indexToKeyMap[_loc3_]);
-				this.keyToIndexMap.put(this.indexToKeyMap[_loc3_],_loc3_);
-				_loc3_++;
+			this.data.splice(start, deleteCount);
+			this.indexToKeyMap.splice(start, deleteCount);
+			for (i = start; i < this.length; i++) {
+				this.keyToIndexMap.remove(this.indexToKeyMap[i]);
+				this.keyToIndexMap.put(this.indexToKeyMap[i], i);
 			}
 		}
-		
-		public function removeByKey(param1:String) : void
+
+		/**
+		 * removes an element by its key
+		 */
+		public function removeByKey(key:String) : void
 		{
-			var _loc2_:int = this.getIndex(param1);
-			if(_loc2_ != -1)
-			{
-				this.remove(_loc2_,1);
+			var i:int = this.getIndex(key);
+			if (i != -1) {
+				this.remove(i, 1);
 			}
 		}
-		
-		public function insert(param1:int, param2:UtilHashArray, param3:Boolean = true) : void
+
+		/**
+		 * inserts an array of elements at a starting index
+		 * @param start starting index
+		 * @param insertArray elements to be inserted
+		 * @param replace should existing elements be replaced
+		 * it should've been me
+		 */
+		public function insert(start:int, insertArray:UtilHashArray, replace:Boolean = true) : void
 		{
-			var _loc4_:int = 0;
-			var _loc6_:Function = null;
-			var _loc7_:Array = null;
-			var _loc8_:String = null;
-			var _loc5_:UtilHashArray = param2.clone();
-			if(param3)
-			{
-				_loc4_ = _loc5_.length - 1;
-				while(_loc4_ >= 0)
-				{
-					_loc8_ = _loc5_.getKey(_loc4_);
-					if(this.containsKey(_loc8_))
-					{
-						this.replaceValueByKey(_loc8_,_loc5_.getValueByIndex(_loc4_));
-						_loc5_.remove(_loc4_,1);
+			var i:int = 0;
+			var insert:UtilHashArray = insertArray.clone();
+			if (replace) {
+				for (i = insert.length - 1; i >= 0; i--) {
+					var key:String = insert.getKey(i);
+					if (this.containsKey(key)) {
+						this.replaceValueByKey(key, insert.getValueByIndex(i));
+						insert.remove(i, 1);
 					}
-					_loc4_--;
 				}
-			}
-			else
-			{
-				_loc4_ = 0;
-				while(_loc4_ < _loc5_.length)
-				{
-					if(this.containsKey(_loc5_.getKey(_loc4_)))
-					{
+			} else {
+				for (i = 0; i < insert.length; i++) {
+					if (this.containsKey(insert.getKey(i))) {
 						throw new Error("The key already exist in the HashArray");
 					}
-					_loc4_++;
 				}
 			}
-			_loc6_ = this.indexToKeyMap.splice;
-			(_loc7_ = _loc5_.indexToKeyMap.concat()).unshift(0);
-			_loc7_.unshift(param1);
-			_loc6_.apply(this.indexToKeyMap,_loc7_);
-			_loc6_ = this.data.splice;
-			(_loc7_ = _loc5_.data.concat()).unshift(0);
-			_loc7_.unshift(param1);
-			_loc6_.apply(this.data,_loc7_);
-			_loc5_.removeAll();
-			_loc5_ = null;
-			_loc4_ = param1;
-			while(_loc4_ < this.length)
-			{
-				this.keyToIndexMap.put(this.indexToKeyMap[_loc4_],_loc4_);
-				_loc4_++;
+			var spliceFunc:Function = this.indexToKeyMap.splice;
+			var clone:Array = insert.indexToKeyMap.concat();
+			clone.unshift(0);
+			clone.unshift(start);
+			spliceFunc.apply(this.indexToKeyMap, clone);
+			spliceFunc = this.data.splice;
+			clone = insert.data.concat();
+			clone.unshift(0);
+			clone.unshift(start);
+			spliceFunc.apply(this.data, clone);
+			insert.removeAll();
+			insert = null;
+			for (i = start; i < this.length; i++) {
+				this.keyToIndexMap.put(this.indexToKeyMap[i], i);
 			}
 		}
-		
-		public function containsKey(param1:String) : Boolean
+
+		public function containsKey(key:String) : Boolean
 		{
-			return this.keyToIndexMap.containsKey(param1);
+			return this.keyToIndexMap.containsKey(key);
 		}
-		
-		public function containsValue(param1:*) : Boolean
+
+		public function containsValue(value:*) : Boolean
 		{
-			var _loc2_:int = 0;
-			while(_loc2_ < this.data.length)
-			{
-				if(this.data[_loc2_] == param1)
-				{
+			for (var i:int = 0; i < this.data.length; i++) {
+				if (this.data[i] == value) {
 					return true;
 				}
-				_loc2_++;
 			}
 			return false;
 		}
-		
-		public function getKey(param1:int) : String
+
+		public function getKey(index:int) : String
 		{
-			return this.indexToKeyMap[param1];
+			return this.indexToKeyMap[index];
 		}
-		
+
 		public function getKeys() : Array
 		{
 			return this.indexToKeyMap;
 		}
-		
-		public function getIndex(param1:String) : int
+
+		public function getIndex(key:String) : int
 		{
-			var _loc2_:* = this.keyToIndexMap.getValue(param1);
-			if(_loc2_ != null)
-			{
-				return int(_loc2_);
+			var i:* = this.keyToIndexMap.getValue(key);
+			if (i != null) {
+				return int(i);
 			}
 			return -1;
 		}
-		
-		public function getValueByKey(param1:String) : *
+
+		public function getValueByKey(key:String) : *
 		{
-			var _loc2_:* = this.keyToIndexMap.getValue(param1);
-			if(_loc2_ != null)
-			{
-				return this.data[int(_loc2_)];
+			var i:* = this.keyToIndexMap.getValue(key);
+			if (i != null) {
+				return this.data[int(i)];
 			}
 			return null;
 		}
-		
-		public function getValueByIndex(param1:int) : *
+
+		public function getValueByIndex(index:int) : *
 		{
-			return this.data[param1];
+			return this.data[index];
 		}
-		
-		public function replaceValueByIndex(param1:int, param2:*) : void
+
+		public function replaceValueByIndex(index:int, value:*) : void
 		{
-			if(param1 >= this.length || param1 < 0)
-			{
+			if (index >= this.length || index < 0) {
 				throw new Error("index out of bound");
 			}
-			this.data[param1] = param2;
+			this.data[index] = value;
 		}
-		
-		public function replaceValueByKey(param1:String, param2:*) : void
+
+		public function replaceValueByKey(key:String, value:*) : void
 		{
-			var _loc3_:* = this.keyToIndexMap.getValue(param1);
-			if(_loc3_ == null)
-			{
+			var i:* = this.keyToIndexMap.getValue(key);
+			if (i == null) {
 				throw new Error("key not exist!");
 			}
-			this.data[_loc3_ as int] = param2;
+			this.data[i as int] = value;
 		}
-		
+
 		public function get length() : int
 		{
 			return this.data.length;
 		}
-		
+
 		public function removeAll() : void
 		{
 			this.keyToIndexMap.clear();
-			this.keyToIndexMap = new anifire.util.UtilHashMap();
-			this.indexToKeyMap.splice(0,this.indexToKeyMap.length);
+			this.keyToIndexMap = new UtilHashMap();
+			this.indexToKeyMap.splice(0, this.indexToKeyMap.length);
 			this.indexToKeyMap = new Array();
-			this.data.splice(0,this.data.length);
+			this.data.splice(0, this.data.length);
 			this.data = new Array();
 		}
-		
+
 		public function getArray() : Array
 		{
 			return this.data;
 		}
-		
-		public function unShift(param1:String, param2:Object) : uint
+
+		public function unShift(key:String, value:Object) : uint
 		{
-			if(this.keyToIndexMap.containsKey(param1))
-			{
-				this.remove(this.getIndex(param1),1);
+			if (this.keyToIndexMap.containsKey(key)) {
+				this.remove(this.getIndex(key), 1);
 			}
-			this.data.unshift(param2);
-			this.indexToKeyMap.unshift(param1);
-			var _loc3_:int = 0;
-			while(_loc3_ < this.indexToKeyMap.length)
-			{
-				this.keyToIndexMap.put(this.indexToKeyMap[_loc3_],_loc3_);
-				_loc3_++;
+			this.data.unshift(value);
+			this.indexToKeyMap.unshift(key);
+			for (var i:int = 0; i < this.indexToKeyMap.length; i++) {
+				this.keyToIndexMap.put(this.indexToKeyMap[i], i);
 			}
 			return this.length;
 		}
-		
+
 		public function clone() : UtilHashArray
 		{
-			var _loc1_:UtilHashArray = new UtilHashArray();
-			_loc1_.data = this.data.concat();
-			_loc1_.indexToKeyMap = this.indexToKeyMap.concat();
-			var _loc2_:int = 0;
-			while(_loc2_ < _loc1_.indexToKeyMap.length)
-			{
-				_loc1_.keyToIndexMap.put(_loc1_.indexToKeyMap[_loc2_],_loc2_);
-				_loc2_++;
+			var clone:UtilHashArray = new UtilHashArray();
+			clone.data = this.data.concat();
+			clone.indexToKeyMap = this.indexToKeyMap.concat();
+			for (var i:int = 0; i < clone.indexToKeyMap.length; i++) {
+				clone.keyToIndexMap.put(clone.indexToKeyMap[i], i);
 			}
-			return _loc1_;
+			return clone;
 		}
-		
-		public function isIdentical(param1:UtilHashArray) : Boolean
+
+		public function isIdentical(compare:UtilHashArray) : Boolean
 		{
-			if(this.data.toString() == param1.data.toString() && this.indexToKeyMap.toString() == param1.indexToKeyMap.toString())
-			{
+			if (
+				this.data.toString() == compare.data.toString() && 
+				this.indexToKeyMap.toString() == compare.indexToKeyMap.toString()
+			) {
 				return true;
 			}
 			return false;

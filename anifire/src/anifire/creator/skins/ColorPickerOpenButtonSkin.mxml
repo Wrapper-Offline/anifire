@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:SparkSkin
+<s:SparkButtonSkin
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
-	minWidth="20"
-	minHeight="20"
+	minWidth="60"
+	minHeight="32"
 	alpha.disabled="0.5">
 
 	<s:states>
@@ -14,20 +14,45 @@
 		<s:State name="disabled"/>
 	</s:states>
 
-	<s:Ellipse height="25" width="25">
+	<!-- <s:Ellipse height="25" width="25">
 		<s:stroke>
 			<s:SolidColorStroke color="0xBBBBBB"/>
 		</s:stroke>
 		<s:fill>
 			<s:SolidColor color="0xBBBBBB"/>
 		</s:fill>
-	</s:Ellipse>
-	<s:Rect height="25" width="22" x="13" radiusX="4" radiusY="4">
+	</s:Ellipse> -->
+	<s:Rect
+		width="60"
+		height="32"
+		topLeftRadiusX="15"
+		topLeftRadiusY="15"
+		topRightRadiusX="0"
+		topRightRadiusY="0"
+		bottomLeftRadiusX="15"
+		bottomLeftRadiusY="15"
+		bottomRightRadiusX="0"
+		bottomRightRadiusY="0">
 		<s:fill>
-			<s:SolidColor color="0xBBBBBB"/>
+			<s:SolidColor color="0xFFFFFF"/>
 		</s:fill>
 	</s:Rect>
-	<s:Rect id="frameDisplay" left="0" right="0" top="0" bottom="0" radiusX="4" radiusY="4"/>
-	<s:Rect id="shadow" left="1" top="1" right="1" bottom="1" radiusX="3"/>
+	<s:Rect
+		width="58"
+		height="28"
+		top="2"
+		left="2"
+		topLeftRadiusX="15"
+		topLeftRadiusY="15"
+		topRightRadiusX="3"
+		topRightRadiusY="3"
+		bottomLeftRadiusX="15"
+		bottomLeftRadiusY="15"
+		bottomRightRadiusX="3"
+		bottomRightRadiusY="3">
+		<s:fill>
+			<s:SolidColor color="0xDDDDDD" color.overAndDownStates="0xFC4F7D"/>
+		</s:fill>
+	</s:Rect>
 
-</s:SparkSkin>
+</s:SparkButtonSkin>

@@ -12,7 +12,7 @@
 		<s:State name="normal" />
 	</s:states>
 
-	<s:Rect id="backgroundRect" radiusX="4" radiusY="4" left="0" right="0" height="100%" top="0">
+	<s:Rect id="backgroundRect" radiusX="4" radiusY="4" left="0" right="0" top="0" height="100%">
 		<s:fill>
 			<s:SolidColor color="{getStyle('backgroundColor')}"/>
 		</s:fill>

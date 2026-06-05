@@ -10,31 +10,20 @@
 			import anifire.event.EyeDropperEvent;
 			import mx.core.FlexGlobals;
 			import mx.events.ResizeEvent;
+			import flash.events.MouseEvent;
 
 			protected static const CURSOR_REFRESH_INTERVAL:int = 50;
-			
 			public static const MAGNIFICATION_RATE:Number = 10;
-			
 			public static const MAGNIFIED_SIZE:Number = 90;
-			
 			public static const MAGNIFIED_OFFSET:Number = MAGNIFIED_SIZE * 0.5;
-			
 			public static const DRAW_AREA_OFFSET:Number = 4;
-			
 			public static var instance:EyeDropperScreenOverlay;
-			
 			protected var _requiresUpdate:Boolean;
-			
 			protected var _screenBitmapData:BitmapData;
-			
 			protected var _magnifiedBitmapData:BitmapData;
-			
 			protected var _magnifiedMatrix:Matrix;
-			
-			public var isPickingColor:Boolean = false;
-			
 			protected var _timer:uint;
-			
+			public var isPickingColor:Boolean = false;
 			private var _excludedDisplayObject:DisplayObject;
 
 			protected function init() : void
@@ -42,15 +31,14 @@
 				instance = this;
 				visible = false;
 				this._requiresUpdate = true;
-				this._magnifiedBitmapData = new BitmapData(MAGNIFIED_SIZE,MAGNIFIED_SIZE);
+				this._magnifiedBitmapData = new BitmapData(MAGNIFIED_SIZE, MAGNIFIED_SIZE);
 				this._magnifiedMatrix = new Matrix();
 				this.magnifiedImage.source = this._magnifiedBitmapData;
 			}
 			
 			protected function clearScreenImage() : void
 			{
-				if(this._screenBitmapData)
-				{
+				if (this._screenBitmapData) {
 					this._screenBitmapData.dispose();
 					this._screenBitmapData = null;
 				}
@@ -59,15 +47,14 @@
 			protected function createScreenImage() : void
 			{
 				this.clearScreenImage();
-				this._screenBitmapData = new BitmapData(getLayoutBoundsWidth(),getLayoutBoundsHeight(),false);
+				this._screenBitmapData = new BitmapData(getLayoutBoundsWidth(), getLayoutBoundsHeight(), false);
 				this._screenBitmapData.draw(FlexGlobals.topLevelApplication as DisplayObject);
 				this._requiresUpdate = false;
 			}
 			
 			public function createScreenshotOverlay() : void
 			{
-				if(this._excludedDisplayObject)
-				{
+				if (this._excludedDisplayObject) {
 					this._excludedDisplayObject.visible = false;
 				}
 				this.createScreenImage();
@@ -79,57 +66,54 @@
 				this._timer = setInterval(this.updateCursor,CURSOR_REFRESH_INTERVAL);
 			}
 			
-			protected function mouseUpHandler(param1:MouseEvent) : void
+			protected function mouseUpHandler(event:MouseEvent) : void
 			{
-				var _loc2_:EyeDropperEvent = null;
-				param1.stopImmediatePropagation();
-				if(this.isPickingColor)
-				{
-					_loc2_ = new EyeDropperEvent(EyeDropperEvent.EYE_DROPPER_COMPLETE);
-					_loc2_.color = this.getCurrentColor();
-					this.closeScreenshotOverlay();
-					dispatchEvent(_loc2_);
+				event.stopImmediatePropagation();
+				if (!this.isPickingColor) {
+					return;
 				}
+				var eyeEvent:EyeDropperEvent = new EyeDropperEvent(EyeDropperEvent.EYE_DROPPER_COMPLETE);
+				eyeEvent.color = this.getCurrentColor();
+				this.closeScreenshotOverlay();
+				dispatchEvent(eyeEvent);
 			}
 			
-			protected function mouseDownHandler(param1:MouseEvent) : void
+			protected function mouseDownHandler(event:MouseEvent) : void
 			{
-				param1.stopImmediatePropagation();
+				event.stopImmediatePropagation();
 			}
 			
 			protected function updateCursor() : void
 			{
-				if(this.isPickingColor)
-				{
-					this.eyeDropperCursor.x = mouseX;
-					this.eyeDropperCursor.y = mouseY;
-					this._magnifiedMatrix.identity();
-					this._magnifiedMatrix.translate(DRAW_AREA_OFFSET - int(mouseX),DRAW_AREA_OFFSET - int(mouseY));
-					this._magnifiedMatrix.scale(MAGNIFICATION_RATE,MAGNIFICATION_RATE);
-					this._magnifiedBitmapData.draw(this._screenBitmapData,this._magnifiedMatrix);
-					this.currentColorDisplay.color = this.getCurrentColor();
+				if (!this.isPickingColor) {
+					return;
 				}
+				this.eyeDropperCursor.x = mouseX;
+				this.eyeDropperCursor.y = mouseY;
+				this._magnifiedMatrix.identity();
+				this._magnifiedMatrix.translate(DRAW_AREA_OFFSET - int(mouseX), DRAW_AREA_OFFSET - int(mouseY));
+				this._magnifiedMatrix.scale(MAGNIFICATION_RATE, MAGNIFICATION_RATE);
+				this._magnifiedBitmapData.draw(this._screenBitmapData, this._magnifiedMatrix);
+				this.currentColorDisplay.color = this.getCurrentColor();
 			}
 			
 			protected function getCurrentColor() : uint
 			{
-				if(this._requiresUpdate)
-				{
+				if (this._requiresUpdate) {
 					this.createScreenImage();
 				}
 				return this._screenBitmapData.getPixel(mouseX,mouseY);
 			}
 			
-			protected function stage_keyDownHandler(param1:KeyboardEvent) : void
+			protected function stage_keyDownHandler(event:KeyboardEvent) : void
 			{
-				var _loc2_:EyeDropperEvent = null;
-				if(param1.keyCode == Keyboard.ESCAPE)
-				{
-					stage.removeEventListener(KeyboardEvent.KEY_DOWN,this.stage_keyDownHandler);
-					_loc2_ = new EyeDropperEvent(EyeDropperEvent.EYE_DROPPER_CANCEL);
-					this.dispatchEvent(_loc2_);
-					this.closeScreenshotOverlay();
+				if (event.keyCode !== Keyboard.ESCAPE) {
+					return;
 				}
+				stage.removeEventListener(KeyboardEvent.KEY_DOWN, this.stage_keyDownHandler);
+				var eyeEvent:EyeDropperEvent = new EyeDropperEvent(EyeDropperEvent.EYE_DROPPER_CANCEL);
+				this.dispatchEvent(eyeEvent);
+				this.closeScreenshotOverlay();
 			}
 			
 			protected function closeScreenshotOverlay() : void
@@ -140,18 +124,17 @@
 				visible = false;
 				clearInterval(this._timer);
 				Mouse.show();
-				if(this._excludedDisplayObject)
-				{
+				if (this._excludedDisplayObject) {
 					this._excludedDisplayObject.visible = true;
 				}
 			}
 			
-			public function excludedFromCapture(param1:DisplayObject) : void
+			public function excludedFromCapture(obj:DisplayObject) : void
 			{
-				this._excludedDisplayObject = param1;
+				this._excludedDisplayObject = obj;
 			}
 			
-			protected function resizeHandler(param1:ResizeEvent) : void
+			protected function resizeHandler(event:ResizeEvent) : void
 			{
 				this._requiresUpdate = true;
 			}

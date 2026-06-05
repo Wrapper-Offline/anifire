@@ -8,9 +8,6 @@ package anifire.constant
 	
 	public class CcLibConstant
 	{
-		
-		public static const COMPONENT_GROUP_UPPER_LOWER:String = "componentGroupClothes";
-		
 		public static const COMPONENT_TYPE_FACIAL_DECORATION:String = "facedecoration";
 		
 		public static const COMPONENT_TYPE_EYE:String = "eye";
@@ -363,13 +360,6 @@ package anifire.constant
 			return __headRelatedLibrary;
 		}
 		
-		public static function get COMPONENT_TYPE_CHOOSER_COMPONENT_GROUP() : Array
-		{
-			var _loc1_:Array = new Array();
-			_loc1_.push(COMPONENT_GROUP_UPPER_LOWER);
-			return _loc1_;
-		}
-		
 		public static function get BODYSHAPE_CHOOSABLE() : Boolean
 		{
 			if(themeId == ThemeConstants.ANIME_THEME_ID || themeId == ThemeConstants.NINJAANIME_THEME_ID)
@@ -428,15 +418,8 @@ package anifire.constant
 		public static function get COMPONENT_TYPE_CHOOSER_ORDERING_VER1() : Array
 		{
 			var _loc1_:Array = new Array();
-			if(UtilLicense.getCurrentLicenseId() == "8")
-			{
-				_loc1_.push(COMPONENT_GROUP_UPPER_LOWER);
-			}
-			else
-			{
-				_loc1_.push(COMPONENT_TYPE_UPPER_BODY);
-				_loc1_.push(COMPONENT_TYPE_LOWER_BODY);
-			}
+			_loc1_.push(COMPONENT_TYPE_UPPER_BODY);
+			_loc1_.push(COMPONENT_TYPE_LOWER_BODY);
 			_loc1_.push(COMPONENT_TYPE_FACESHAPE);
 			_loc1_.push(COMPONENT_TYPE_HAIR);
 			_loc1_.push(COMPONENT_TYPE_EYE);

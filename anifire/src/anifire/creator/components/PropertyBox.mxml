@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:components="anifire.creator.components.*"
+	width="280"
+	height="100"
+	visible.disabled="false">
+
+	<fx:Script>
+		<![CDATA[
+			import anifire.models.creator.CCThemeModel;
+			import anifire.models.creator.CCBodyModel;
+			import anifire.constant.CcLibConstant;
+			import anifire.models.creator.CCBodyComponentModel;
+			
+			[Bindable]
+			private var supportsTabs:Boolean = true;
+			private var _isReady:Boolean = false;
+
+			public function get isReady() : Boolean
+			{
+				return _isReady;
+			}
+
+			/**
+			 * initializes the ColorPickers and PositionInspector
+			 * @param theme cc theme
+			 * @param char char body
+			 * @param type component type
+			 * @param selected selected component or library
+			 */
+			public function init(theme:CCThemeModel, char:CCBodyModel, type:String, selected:*) : void
+			{
+				if (type == CcLibConstant.COMPONENT_TYPE_FACESHAPE) {
+					this.colorPickers.init(theme, char, CcLibConstant.COMPONENT_TYPE_BODYSHAPE, selected);
+				} else {
+					this.colorPickers.init(theme, char, type, selected);
+				}
+				var supportsDetailControl:Boolean = selected is CCBodyComponentModel ?
+					this.positionInspector.init(selected, true) : false;
+				supportsTabs = true;
+				if (this.colorPickers.pickers.numElements == 0) {
+					if (supportsDetailControl) {
+						setCurrentState("position");
+						supportsTabs = false;
+					} else {
+						setCurrentState("disabled");
+					}
+				} else {
+					setCurrentState("color");
+					if (!supportsDetailControl) {
+						supportsTabs = false;
+					}
+				}
+				_isReady = true;
+			}
+
+			public function reset() : void
+			{
+				setCurrentState("disabled");
+				this.colorPickers.reset();
+			}
+
+			public function setColor(type:String, value:uint) : void
+			{
+				this,colorPickers.setColor(type, value);
+			}
+
+			private function switchTab() : void
+			{
+				switch (this.currentState) {
+					case "color":
+						this.setCurrentState("position");
+						break;
+					case "position":
+					default:
+						this.setCurrentState("color");
+						break;
+				}
+			}
+		]]>
+	</fx:Script>
+
+	<s:states>
+		<s:State name="color"/>
+		<s:State name="position"/>
+		<s:State name="disabled"/>
+	</s:states>
+
+	<!-- Switcher icon
+		Switches tab between Color and PositionInspector -->
+	<components:IconButton
+		id="tabBtn"
+		buttonMode="true"
+		enabled="{supportsTabs}"
+		verticalCenter="0"
+		icon="@Embed('../images/positionInspector/anchorIcon.png')"
+		iconOver="@Embed('../images/positionInspector/anchorIcon_hover.png')"
+		iconDisabled="@Embed('../images/positionInspector/anchorIcon_disabled.png')"
+		click="switchTab()"
+		label="Switch tab utildict"/>
+	
+	<s:Group>
+		<s:Rect id="backgroundRect" radiusX="4" radiusY="4" left="0" right="0" top="0" height="100%">
+			<s:fill>
+				<s:SolidColor color="{getStyle('backgroundColor')}"/>
+			</s:fill>
+			<s:stroke>
+				<s:SolidColorStroke color="{getStyle('borderColor')}"/>
+			</s:stroke>
+		</s:Rect>
+		<components:CcColorPickers
+			id="colorPickers"
+			width="248"
+			height="62"
+			visible="false"
+			visible.color="true"/>
+		<components:PositionInspector
+			id="positionInspector"
+			visible="false"
+			visible.position="true"/>
+	</s:Group>
+
+	<!-- Advanced icon
+		Color: Enables separate left & right colors
+		PositionInspector: Enables text inputs -->
+	<components:IconButton
+		id="advancedBtn"
+		buttonMode="true"
+		enabled="true"
+		verticalCenter="0"
+		icon="@Embed('../images/positionInspector/anchorIcon.png')"
+		iconOver="@Embed('../images/positionInspector/anchorIcon_hover.png')"
+		iconDisabled="@Embed('../images/positionInspector/anchorIcon_disabled.png')"
+		click="'hi this shuold toggle advanced mode kthx bye'"
+		label="Advanced most utleildaict util dialecrt"/>
+
+</s:HGroup>

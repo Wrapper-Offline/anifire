@@ -26,9 +26,15 @@
 		</fx:Component>
 	</fx:Declarations>
 
-	<s:DataGroup id="dataGroup" width="100%" height="100%">
+	<s:Rect topLeftRadiusX="4" topLeftRadiusY="4" topRightRadiusX="4" topRightRadiusY="4" top="0" width="100%" height="56">
+		<s:fill>
+			<s:SolidColor color="{getStyle('backgroundColor')}"/>
+		</s:fill>
+	</s:Rect>
+
+	<s:DataGroup id="dataGroup" verticalCenter="0" width="100%" height="56">
 		<s:layout>
-			<s:HorizontalLayout gap="0" columnWidth="45" variableColumnWidth="false"/>
+			<s:HorizontalLayout horizontalAlign="center" gap="2" columnWidth="45" variableColumnWidth="false"/>
 		</s:layout>
 	</s:DataGroup>
 

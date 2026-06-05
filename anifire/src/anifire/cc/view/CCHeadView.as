@@ -67,24 +67,24 @@ package anifire.cc.view
 		{
 			if (this._myActionModel)
 			{
-				var _loc1_:Sprite = this._containers.getValueByKey("facedecorationMC");
-				if (_loc1_)
+				var fdContainer:Sprite = this._containers.getValueByKey("facedecorationMC");
+				if (fdContainer)
 				{
-					for (var _loc2_:String in this._myActionModel.components)
+					for (var type:String in this._myActionModel.components)
 					{
-						if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(_loc2_) > -1)
+						if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) > -1)
 						{
-							var _loc3_:Object = this._myActionModel.getComponentByType(_loc2_);
-							if (_loc3_)
+							var decorations:Object = this._myActionModel.getComponentByType(type);
+							if (decorations)
 							{
-								for (var _loc4_:String in _loc3_)
+								for (var i:String in decorations)
 								{
-									var _loc5_:CCBodyComponentModel = _loc3_[_loc4_] as CCBodyComponentModel;
-									if (_loc5_.id)
+									var component:CCBodyComponentModel = decorations[i] as CCBodyComponentModel;
+									if (component.id)
 									{
-										var _loc6_:Sprite = new Sprite();
-										_loc6_.name = _loc5_.id + CcLibConstant.MC_NAME_EXT;
-										_loc1_.addChild(_loc6_);
+										var sprite:Sprite = new Sprite();
+										sprite.name = component.id + CcLibConstant.MC_NAME_EXT;
+										fdContainer.addChild(sprite);
 									}
 								}
 							}
@@ -101,62 +101,43 @@ package anifire.cc.view
 			this._useImageLibrary = param3;
 		}
 		
-		private function createAllComponents(param1:Boolean = false) : void
+		private function createAllComponents(keep:Boolean = false) : void
 		{
-			if(this._myActionModel)
-			{
-				var _loc2_:CcComponent;
-				var _loc3_:String;
-				var _loc4_:ProcessRegulator;
-				var _loc5_:String;
-				var _loc6_:Object;
-				var _loc7_:String;
-				_loc4_ = new ProcessRegulator();
-				if(!param1)
-				{
+			if (this._myActionModel) {
+				var _loc4_:ProcessRegulator = new ProcessRegulator();
+				if (!keep) {
 					_componentList.removeAll();
 				}
-				for(_loc3_ in this._myActionModel.components)
-				{
-					_loc2_ = null;
-					_loc5_ = _loc3_;
-					if(CcLibConstant.ALL_HEAD_COMPONENT_TYPES.indexOf(_loc3_) >= 0)
-					{
-						if(CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(_loc3_) > -1)
-						{
-							_loc6_ = this._myActionModel.getComponentByType(_loc3_);
-							for(_loc7_ in _loc6_)
-							{
-								if(_loc3_ == CcLibConstant.COMPONENT_TYPE_FACIAL_DECORATION && _loc6_[_loc7_].id)
-								{
-									_loc5_ = _loc6_[_loc7_].id;
+				for (var type:String in this._myActionModel.components) {
+					var component:CcComponent = null;
+					var listIndex:String = type;
+					if (CcLibConstant.ALL_HEAD_COMPONENT_TYPES.indexOf(type) >= 0) {
+						if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) > -1) {
+							var components:Object = this._myActionModel.getComponentByType(type);
+							for (var i:String in components) {
+								if (type == CcLibConstant.COMPONENT_TYPE_FACIAL_DECORATION && components[i].id) {
+									listIndex = components[i].id;
 								}
-								_loc2_ = this.createComponentFromCam(_loc3_,_loc7_);
-								if(_loc2_)
-								{
-									_loc4_.addProcess(_loc2_ as IRegulatedProcess,Event.COMPLETE);
-									if(!param1)
-									{
-										_componentList.push(_loc5_,_loc2_);
+								component = this.createComponentFromCam(type, i);
+								if (component) {
+									_loc4_.addProcess(component as IRegulatedProcess, Event.COMPLETE);
+									if (!keep) {
+										_componentList.push(listIndex, component);
 									}
 								}
 							}
-						}
-						else
-						{
-							_loc2_ = this.createComponentFromCam(_loc3_);
-							if(_loc2_)
-							{
-								_loc4_.addProcess(_loc2_ as IRegulatedProcess,Event.COMPLETE);
-								if(!param1)
-								{
-									_componentList.push(_loc5_,_loc2_);
+						} else {
+							component = this.createComponentFromCam(type);
+							if (component) {
+								_loc4_.addProcess(component as IRegulatedProcess, Event.COMPLETE);
+								if (!keep) {
+									_componentList.push(listIndex, component);
 								}
 							}
 						}
 					}
 				}
-				_loc4_.addEventListener(Event.COMPLETE,this.onAllCcComponentCreated);
+				_loc4_.addEventListener(Event.COMPLETE, this.onAllCcComponentCreated);
 				_loc4_.startProcess();
 			}
 		}
@@ -194,26 +175,33 @@ package anifire.cc.view
 
 		public function setComponent(type:String, id:String, swfBytes:ByteArray) : Boolean
 		{
-			var component:CcComponent = this.createComponentFromCam(type, id);
-			if (component)
-			{
-				if(type == "facedecoration")
-				{
-					type = id;
-					var _loc5_:String = id + CcLibConstant.MC_NAME_EXT;
-					var _loc6_:DisplayObjectContainer = UtilPlain.getInstance(this,_loc5_);
-					if(!_loc6_)
-					{
-						var _loc7_:Sprite = this._containers.getValueByKey("facedecorationMC");
-						if(_loc7_)
-						{
-							var _loc8_:Sprite = new Sprite();
-							_loc8_.name = _loc5_;
-							_loc7_.addChild(_loc8_);
+			var index:String = "";
+			if (id) {
+				var components:Object = this._myActionModel.getComponentByType(type);
+				for (var i:String in components) {
+					if ((components[i] as CCCharActionComponentModel).id == id) {
+						index = i;
+					}
+				}	
+			}
+			var component:CcComponent = this.createComponentFromCam(type, index);
+			if (component) {
+				var listIndex:String = type;
+				if (type == "facedecoration") {
+					listIndex = id;
+					var spriteName:String = id + CcLibConstant.MC_NAME_EXT;
+					var _loc6_:DisplayObjectContainer = UtilPlain.getInstance(this, spriteName);
+					if (!_loc6_) {
+						// throw id;
+						var fdContainer:Sprite = this._containers.getValueByKey("facedecorationMC");
+						if (fdContainer) {
+							var sprite:Sprite = new Sprite();
+							sprite.name = spriteName;
+							fdContainer.addChild(sprite);
 						}
 					}
 				}
-				this._componentList.push(type, component);
+				this._componentList.push(listIndex, component);
 				component.addEventListener(Event.COMPLETE, this.onComponentLoaded);
 				component.loadFromBytes(swfBytes);
 				return true;
@@ -232,49 +220,37 @@ package anifire.cc.view
 			this.dispatchEvent(new Event(Event.COMPLETE));
 		}
 		
-		private function createComponentFromCam(type:String, id:String = "") : CcComponent
+		private function createComponentFromCam(type:String, index:String = "") : CcComponent
 		{
-			var _loc3_:CcComponent = CcComponentFactory.create(type);
-			if (this._useImageLibrary)
-			{
-				if (this._myActionModel)
-				{
-					var _loc4_:Object;
-					var _loc5_:String;
-					var _loc6_:Number;
-					if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) > -1)
-					{
-						_loc4_ = this._myActionModel.getComponentByType(type);
-						_loc5_ = _loc4_[id].path;
+			var component:CcComponent = CcComponentFactory.create(type);
+			var components:Object;
+			if (this._useImageLibrary) {
+				if (this._myActionModel) {
+					var path:String;
+					if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) > -1) {
+						components = this._myActionModel.getComponentByType(type);
+						path = components[index].path;
+					} else {
+						path = this._myActionModel.getComponentByType(type).path;
 					}
-					else
-					{
-						_loc5_ = this._myActionModel.getComponentByType(type).path;
-					}
-					_loc6_ = 0;
-					_loc6_ = CcImageLibrary.library.requestImage(_loc5_, this._sceneId, _loc3_);
-					if (_loc6_ > 0)
-					{
+					var _loc6_:Number = 0;
+					_loc6_ = CcImageLibrary.library.requestImage(path, this._sceneId, component);
+					if (_loc6_ > 0) {
 						return null;
 					}
 				}
 			}
-			if (_loc3_)
-			{
-				var _loc7_:CcComponentModel;
-				_loc7_ = CcComponentModel.createModelByType(type);
-				if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) > -1)
-				{
-					_loc4_ = this._myActionModel.getComponentByType(type);
-					_loc7_.initByCACam(_loc4_[id] as CCCharActionComponentModel);
-				}
-				else
-				{
+			if (component) {
+				var _loc7_:CcComponentModel = CcComponentModel.createModelByType(type);
+				if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) > -1) {
+					components = this._myActionModel.getComponentByType(type);
+					_loc7_.initByCACam(components[index] as CCCharActionComponentModel);
+				} else {
 					_loc7_.initByCam(this._myActionModel, type);
 				}
-				_loc3_.init(_loc7_);
+				component.init(_loc7_);
 			}
-			return _loc3_;
+			return component;
 		}
 		
 		override public function requestImage(sceneId:String) : void
@@ -425,9 +401,9 @@ package anifire.cc.view
 			{
 				for (var _loc1_:String in this._myActionModel.colorCodes)
 				{
-					var _loc2_:CCColor = this._myActionModel.getColor(_loc1_);
-					var _loc3_:SelectedColor = new SelectedColor(_loc2_.type, _loc2_.oc, _loc2_.dest);
-					changeColor(_loc3_, !!_loc2_.targetComponent?_loc2_.targetComponent:"");
+					var color:CCColor = this._myActionModel.getColor(_loc1_);
+					var selColor:SelectedColor = new SelectedColor(color.type, color.oc, color.dest);
+					changeColor(selColor, !!color.targetComponent ? color.targetComponent : "");
 				}
 			}
 		}

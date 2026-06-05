@@ -21,6 +21,8 @@ package anifire.util
 	import mx.events.ResourceEvent;
 	import mx.events.StyleEvent;
 	import mx.resources.ResourceManager;
+	import mx.resources.ResourceBundle;
+	import mx.resources.IResourceBundle;
 	
 	public class Util
 	{
@@ -187,25 +189,18 @@ package anifire.util
 			return _configManager.getValue(ServerConstants.FLASHVAR_IS_VIDEO_RECORD_MODE) == "1" && _configManager.getValue(ServerConstants.FLASHVAR_CUSTOM_PLAYER_HEIGHT) == "1080";
 		}
 		
-		public static function loadClientLocale(param1:String, param2:Function) : void
+		public static function loadClientLocale(app:String, callback:Function) : void
 		{
-			var langCode:String = null;
-			var themeCode:String = null;
-			var eventDispatcher:IEventDispatcher = null;
-			var app:String = param1;
-			var callback:Function = param2;
-			langCode = _configManager.getValue(ServerConstants.FLASHVAR_CLIENT_THEME_LANG_CODE);
-			themeCode = _configManager.getValue(ServerConstants.FLASHVAR_CLIENT_THEME_CODE);
-			if(themeCode == null || themeCode == "silver")
-			{
+			var langCode:String = _configManager.getValue(ServerConstants.FLASHVAR_CLIENT_THEME_LANG_CODE);
+			var themeCode:String = _configManager.getValue(ServerConstants.FLASHVAR_CLIENT_THEME_CODE);
+			if (themeCode == null || themeCode == "silver") {
 				themeCode = "go";
 			}
-			if(!langCode)
-			{
+			if (!langCode) {
 				langCode = "en_US";
 			}
-			var resourceModuleURL:String = UtilNetwork.getClientLocaleUrl(themeCode,langCode,"framework");
-			eventDispatcher = ResourceManager.getInstance().loadResourceModule(resourceModuleURL);
+			var resourceModuleURL:String = UtilNetwork.getClientLocaleUrl(themeCode, langCode, "framework");
+			var eventDispatcher:IEventDispatcher = ResourceManager.getInstance().loadResourceModule(resourceModuleURL);
 			(function():void
 			{
 				var counter:* = 2;
@@ -216,8 +211,8 @@ package anifire.util
 						callback(null);
 					}
 				};
-				UtilGettext.initAggregate(app,themeCode,langCode,_callback);
-				eventDispatcher.addEventListener(ResourceEvent.COMPLETE,_callback);
+				UtilGettext.initAggregate(app, themeCode, langCode, _callback);
+				eventDispatcher.addEventListener(ResourceEvent.COMPLETE, _callback);
 			})();
 			ResourceManager.getInstance().localeChain = [langCode];
 		}

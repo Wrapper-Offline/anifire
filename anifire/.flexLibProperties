@@ -75,11 +75,11 @@
     <classEntry path="anifire.creator.components.CCTemplateCharThumb"/>
     <classEntry path="anifire.creator.components.CcColorPickerElementSpark"/>
     <classEntry path="anifire.creator.components.CcColorPickers"/>
-    <classEntry path="anifire.creator.components.CcComponentPropertyInspectorSpark"/>
+    <classEntry path="anifire.creator.components.PositionInspector"/>
     <classEntry path="anifire.creator.components.CcComponentThumbDetailThumbnail"/>
     <classEntry path="anifire.creator.components.CcComponentThumbThumbnail"/>
     <classEntry path="anifire.creator.components.CharPreviewOption"/>
-    <classEntry path="anifire.creator.components.CharPreviewer"/>
+    <classEntry path="anifire.creator.components.CharPreview"/>
     <classEntry path="anifire.creator.components.ClothesChooser"/>
     <classEntry path="anifire.creator.components.ColorDisplayGroup"/>
     <classEntry path="anifire.creator.components.ColorPicker"/>

@@ -10,9 +10,15 @@ package anifire.creator.events
 		public var colorValue:uint;
 		public var undoable:Boolean = true;
 		
-		public function CcColorPickerEvent(param1:String, param2:Object, param3:Object = null, param4:Boolean = false, param5:Boolean = false)
+		public function CcColorPickerEvent(
+			type:String,
+			creator:Object,
+			data:Object = null,
+			bubbles:Boolean = false,
+			cancellable:Boolean = false
+		)
 		{
-			super(param1,param2,param3,param4,param5);
+			super(type, creator, data, bubbles, cancellable);
 		}
 	}
 }

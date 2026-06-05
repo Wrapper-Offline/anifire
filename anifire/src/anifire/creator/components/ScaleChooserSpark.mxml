@@ -34,7 +34,7 @@
 		<![CDATA[
 			import anifire.constant.CcLibConstant;
 			import anifire.creator.events.CcScaleChosenEvent;
-			import anifire.creator.events.CcThumbPropertyEvent;
+			import anifire.creator.events.PositionInspectorEvent;
 			import anifire.util.UtilDict;
 			import anifire.util.UtilUser;
 
@@ -87,10 +87,10 @@
 				{
 					setCurrentState("normal");
 				}
-				this.addEventListener(CcThumbPropertyEvent.CCPROP_DOWN_BUTTON_CLICK,this.updateHeadPos);
-				this.addEventListener(CcThumbPropertyEvent.CCPROP_UP_BUTTON_CLICK,this.updateHeadPos);
-				this.addEventListener(CcThumbPropertyEvent.CCPROP_LEFT_BUTTON_CLICK,this.updateHeadPos);
-				this.addEventListener(CcThumbPropertyEvent.CCPROP_RIGHT_BUTTON_CLICK,this.updateHeadPos);
+				this.addEventListener(PositionInspectorEvent.DOWN_BUTTON_CLICK,this.updateHeadPos);
+				this.addEventListener(PositionInspectorEvent.UP_BUTTON_CLICK,this.updateHeadPos);
+				this.addEventListener(PositionInspectorEvent.LEFT_BUTTON_CLICK,this.updateHeadPos);
+				this.addEventListener(PositionInspectorEvent.RIGHT_BUTTON_CLICK,this.updateHeadPos);
 				this.moveUp.play();
 			}
 			
@@ -127,16 +127,16 @@
 				var _loc3_:Number = 0;
 				switch(param1.type)
 				{
-					case CcThumbPropertyEvent.CCPROP_UP_BUTTON_CLICK:
+					case PositionInspectorEvent.UP_BUTTON_CLICK:
 						_loc3_ = -1;
 						break;
-					case CcThumbPropertyEvent.CCPROP_DOWN_BUTTON_CLICK:
+					case PositionInspectorEvent.DOWN_BUTTON_CLICK:
 						_loc3_ = 1;
 						break;
-					case CcThumbPropertyEvent.CCPROP_LEFT_BUTTON_CLICK:
+					case PositionInspectorEvent.LEFT_BUTTON_CLICK:
 						_loc2_ = 1;
 						break;
-					case CcThumbPropertyEvent.CCPROP_RIGHT_BUTTON_CLICK:
+					case PositionInspectorEvent.RIGHT_BUTTON_CLICK:
 						_loc2_ = -1;
 				}
 				var _loc4_:CcScaleChosenEvent;
@@ -185,8 +185,8 @@
 			enabled="true"
 			top="5"
 			right="5"
-			icon="@Embed('../images/propertyInspector/closeIcon.png')"
-			iconOver="@Embed('../images/propertyInspector/closeIcon_hover.png')"
+			icon="@Embed('../images/positionInspector/closeIcon.png')"
+			iconOver="@Embed('../images/positionInspector/closeIcon_hover.png')"
 			click="moveDown.play()"
 			label="{UtilDict.toDisplay('go','Close')}"/>
 		<s:HGroup
@@ -265,28 +265,28 @@
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/arrowLeftIcon.png')"
 						iconOver="@Embed('../images/bodyDetails/arrowLeftIcon_hover.png')"
-						click="dispatchEvent(new CcThumbPropertyEvent(CcThumbPropertyEvent.CCPROP_RIGHT_BUTTON_CLICK,this))"/>
+						click="dispatchEvent(new PositionInspectorEvent(PositionInspectorEvent.RIGHT_BUTTON_CLICK,this))"/>
 					<components:IconButton
 						id="btnArrowRight"
 						buttonMode="true"
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/arrowRightIcon.png')"
 						iconOver="@Embed('../images/bodyDetails/arrowRightIcon_hover.png')"
-						click="dispatchEvent(new CcThumbPropertyEvent(CcThumbPropertyEvent.CCPROP_RIGHT_BUTTON_CLICK,this))"/>
+						click="dispatchEvent(new PositionInspectorEvent(PositionInspectorEvent.RIGHT_BUTTON_CLICK,this))"/>
 					<components:IconButton
 						id="btnArrowUp"
 						buttonMode="true"
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/arrowUpIcon.png')"
 						iconOver="@Embed('../images/bodyDetails/arrowUpIcon_hover.png')"
-						click="dispatchEvent(new CcThumbPropertyEvent(CcThumbPropertyEvent.CCPROP_RIGHT_BUTTON_CLICK,this))"/>
+						click="dispatchEvent(new PositionInspectorEvent(PositionInspectorEvent.RIGHT_BUTTON_CLICK,this))"/>
 					<components:IconButton
 						id="btnArrowDown"
 						buttonMode="true"
 						enabled="true"
 						icon="@Embed('../images/bodyDetails/arrowDownIcon.png')"
 						iconOver="@Embed('../images/bodyDetails/arrowDownIcon_hover.png')"
-						click="dispatchEvent(new CcThumbPropertyEvent(CcThumbPropertyEvent.CCPROP_RIGHT_BUTTON_CLICK,this))"/>
+						click="dispatchEvent(new PositionInspectorEvent(PositionInspectorEvent.RIGHT_BUTTON_CLICK,this))"/>
 				</s:HGroup>
 			</s:VGroup>
 		</s:HGroup>

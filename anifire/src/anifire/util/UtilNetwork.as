@@ -475,15 +475,15 @@ package anifire.util
 			if(_loc4_ == "file")
 			{
 				_loc6_ = "locale";
-				return _loc6_ + "/" + param1 + "/" + param2 + "/" + param3 + "Resources_" + param2 + ".swf" + "?v=" + _loc5_;
+				return _loc6_ + "/" + param1 + "/" + param2 + "/" + param3 + "Resources4.16_" + param2 + ".swf" + "?v=" + _loc5_;
 			}
 			_loc7_ = _configManager.getValue(ServerConstants.FLASHVAR_CLIENT_THEME_PATH) as String;
 			if(_loc7_ == "" || _loc7_ == null)
 			{
-				return ServerConstants.CLIENT_THEME_PATH + "/" + param1 + "/" + param2 + "/" + param3 + "Resources_" + param2 + ".swf" + "?v=" + _loc5_;
+				return ServerConstants.CLIENT_THEME_PATH + "/" + param1 + "/" + param2 + "/" + param3 + "Resources4.16_" + param2 + ".swf" + "?v=" + _loc5_;
 			}
 			_loc8_ = new RegExp(ServerConstants.FLASHVAR_CLIENT_THEME_PLACEHOLDER,"g");
-			_loc9_ = "client_theme/" + param1 + "/" + param2 + "/" + param3 + "Resources_" + param2 + ".swf";
+			_loc9_ = "client_theme/" + param1 + "/" + param2 + "/" + param3 + "Resources4.16_" + param2 + ".swf";
 			_loc7_ = _loc7_.replace(_loc8_,_loc9_);
 			return _loc7_;
 		}

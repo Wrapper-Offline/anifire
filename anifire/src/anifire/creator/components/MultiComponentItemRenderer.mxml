@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer
+	xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	xmlns:components="anifire.creator.components.*"
+	autoDrawBackground="false"
+	width="70"
+	height="70"
+	buttonMode="true">
+	
+	<fx:Script>
+		<![CDATA[
+			import anifire.util.UtilDict;
+			import anifire.models.creator.CCBodyComponentModel;
+			import anifire.component.CcActionLoader;
+			import anifire.component.CcComponentLoader;
+			import anifire.creator.events.MultiComponentChooserEvent;
+
+			private var bodyComponent:CCBodyComponentModel;
+			private var basePath:String;
+			protected var _loader:Loader = new Loader();
+			protected var _bitmapData:BitmapData;
+			protected var _displayWidth:Number = 60;
+			protected var _displayHeight:Number = 60;
+			protected var _displayMatrix:Matrix = new Matrix();
+
+			override public function set data(newValue:Object) : void
+			{
+				super.data = newValue;
+				if (!newValue) {
+					this.imageDisplay.source = null;
+					return;
+				}
+				this.basePath = newValue.path as String;
+				this.bodyComponent = newValue.bodyComponent as CCBodyComponentModel;
+				this.imageDisplay.source = null;
+				this.updateThumbData();
+			}
+			
+			private function updateThumbData() : void
+			{
+				var storeUrl:String = CcActionLoader.getStoreUrl(this.bodyComponent.theme_id + "/" + this.bodyComponent.type + "/" + this.basePath);
+				storeUrl += "/" + "thumbnail.swf";
+				var compLoader:CcComponentLoader = new CcComponentLoader(this.basePath, storeUrl);
+				compLoader.addEventListener(Event.COMPLETE, this.onLoadThumbImage);
+				compLoader.addEventListener(IOErrorEvent.IO_ERROR, this.onFailThumbImage);
+				compLoader.startProcess();
+				this.spinner.visible = true;
+			}
+			
+			/**
+			 * called when asset is loaded
+			 */
+			private function onLoadThumbImage(event:Event) : void
+			{
+				var compLoader:CcComponentLoader = CcComponentLoader(event.target);
+				compLoader.removeEventListener(Event.COMPLETE, this.onLoadThumbImage);
+				compLoader.removeEventListener(IOErrorEvent.IO_ERROR, this.onFailThumbImage);
+
+				if (compLoader.swfBytes is ByteArray) {
+					this._loader.contentLoaderInfo.addEventListener(Event.INIT, this.onImageLoaderInit);
+					this._loader.loadBytes(compLoader.swfBytes);
+					compLoader.unload();
+				} else {
+					this.imageDisplay.source = null;
+				}	
+			}
+
+			/**
+			 * you.. have FAILED
+			 */
+			private function onFailThumbImage(event:Event) : void
+			{
+				var compLoader:CcComponentLoader = CcComponentLoader(event.target);
+				compLoader.removeEventListener(Event.COMPLETE, this.onLoadThumbImage);
+				compLoader.removeEventListener(IOErrorEvent.IO_ERROR, this.onFailThumbImage);
+
+				this.spinner.visible = false;
+			}
+			
+			/**
+			 * called when data is loaded, adds bitmapdata to imageDisplay
+			 */
+			protected function onImageLoaderInit(event:Event) : void
+			{
+				var info:LoaderInfo = LoaderInfo(event.target);
+				info.removeEventListener(Event.INIT, this.onImageLoaderInit);
+
+				if (this._loader.content is DisplayObject) {
+					this.createBitmap(this._loader.content);
+					this._loader.unloadAndStop();
+				} else {
+					this.imageDisplay.source = this._loader.content;
+				}
+				this.spinner.visible = false;
+			}
+
+			/**
+			 * draws a bitmap and unloads the original
+			 */
+			protected function createBitmap(obj:DisplayObject) : void
+			{
+				this._bitmapData = new BitmapData(this._displayWidth, this._displayHeight, true, 0);
+				this._displayMatrix.a = this._displayWidth / 60;
+				this._displayMatrix.d = this._displayHeight / 60;
+				this._bitmapData.draw(obj, this._displayMatrix, new ColorTransform(), null, null, true);
+				this.imageDisplay.source = this._bitmapData;
+			}
+			
+			private function onDeleteClick(event:Event) : void
+			{
+				var newEvent:MultiComponentChooserEvent = new MultiComponentChooserEvent(MultiComponentChooserEvent.DELETE, this);
+				newEvent.bodyComponent = this.bodyComponent;
+				owner.dispatchEvent(newEvent);
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<s:Power id="power" easeInFraction="1" exponent="4"/>
+	</fx:Declarations>
+
+	<s:transitions>
+		<s:Transition fromState="*" toState="*">
+			<s:Parallel id="ok" targets="{[rect, imageDisplay]}">
+				<s:Resize duration="50" easer="{power}"/>
+			</s:Parallel>
+		</s:Transition>
+	</s:transitions>
+
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="hovered" stateGroups="buttonStates"/>
+		<s:State name="selected" stateGroups="buttonStates"/>
+		<s:State name="normalAndShowsCaret"/>
+		<s:State name="hoveredAndShowsCaret" stateGroups="buttonStates"/>
+		<s:State name="selectedAndShowsCaret" stateGroups="buttonStates"/>
+	</s:states>
+
+	<s:Rect
+		id="rect"
+		radiusX="3"
+		radiusY="3"
+		width="67"
+		height="67"
+		width.buttonStates="70"
+		height.buttonStates="70"
+		verticalCenter="0"
+		horizontalCenter="0">
+		<s:fill>
+			<s:SolidColor color="{getStyle('backgroundColor')}"/>
+		</s:fill>
+	</s:Rect>
+	<components:BusyIndicator id="spinner" horizontalCenter="0" verticalCenter="0" visible="false" symbolColor="0"/>
+	<s:BitmapImage
+		id="imageDisplay"
+		width="67"
+		height="67"
+		width.buttonStates="70"
+		height.buttonStates="70"
+		verticalCenter="0"
+		horizontalCenter="0"
+		scaleX="-1"
+		smoothingQuality="high"
+		smooth="true"/>
+	<components:IconButton
+		id="btnDelete"
+		buttonMode="true"
+		visible="false"
+		visible.buttonStates="true"
+		enabled="true"
+		top="5"
+		left="6"
+		icon="@Embed('../images/componentChooser/deleteIcon.png')"
+		iconOver="@Embed('../images/componentChooser/deleteIcon_hover.png')"
+		click="this.onDeleteClick(event)"
+		label="{UtilDict.toDisplay('go', 'Delete')}"/>
+
+</s:ItemRenderer>

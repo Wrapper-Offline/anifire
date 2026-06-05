@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:components="anifire.creator.components.*">
+
+	<fx:Metadata>
+		[HostComponent("anifire.creator.components.ComponentPanel")]
+	</fx:Metadata>
+
+	<s:SkinnableContainer
+		id="slidingPanel"
+		skinClass="anifire.creator.skins.SlidingComponentPanelSkin"
+		width="660">
+		<s:layout>
+			<s:VerticalLayout paddingTop="1" gap="0"/>
+		</s:layout>
+
+		<components:TypeChooser
+			id="typeChooser"
+			width="658"
+			height="56"/>
+
+		<components:ThumbChooser
+			id="thumbChooser"
+			width="658"
+			biggerHeight="{this.height - 59}"
+			smallerHeight="{this.height - 59 - multiComponentChooser.height}"/>
+
+		<components:MultiComponentChooser
+			id="multiComponentChooser"
+			bottom="0"
+			left="0"
+			width="658"
+			height="105"/>
+	</s:SkinnableContainer>
+
+	<components:PropertyBox id="propertyBox"/>
+
+</s:Skin>

@@ -2,7 +2,8 @@
 <s:SparkButtonSkin
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
-	xmlns:mx="library://ns.adobe.com/flex/mx">
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	alpha.disabled=".5">
 
 	<s:states>
 		<s:State name="up"/>
@@ -15,7 +16,6 @@
 		verticalCenter="0"
 		horizontalCenter="0"
 		source="@Embed('../images/colorPicker/eyedropper.png')"
-		source.over="@Embed('../images/colorPicker/eyedropper_active.png')"
-		alpha.disabled="0.5"/>
+		source.over="@Embed('../images/colorPicker/eyedropper_active.png')"/>
 
 </s:SparkButtonSkin>

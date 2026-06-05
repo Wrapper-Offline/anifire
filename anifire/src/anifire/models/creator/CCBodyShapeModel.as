@@ -9,12 +9,13 @@ package anifire.models.creator
 		public var components:Object;
 		public var libraries:Object;
 		public var actions:Object;
-		public var runwayMode:Boolean;
-		public var defaultCharacterXML:Vector.<XML>;
 		public var defaultActionId:String;
 		public var defaultMotionId:String;
 		public var defaultFaceId:String;
+		public var runwayMode:Boolean;
+		public var defaultCharacterXML:Vector.<XML>;
 		public var actionCategories:Object;
+		public var componentOrder:Vector.<String>;
 		
 		public function CCBodyShapeModel(ccTheme:CCThemeModel)
 		{
@@ -23,9 +24,9 @@ package anifire.models.creator
 			this.components = {};
 			this.libraries = {};
 			this.actions = {};
-			if (ccTheme.runwayMode)
-			{
+			if (ccTheme.runwayMode) {
 				this.runwayMode = true;
+				this.componentOrder = new Vector.<String>();
 				this.defaultCharacterXML = new Vector.<XML>();
 				this.actionCategories = {};
 			}
@@ -156,10 +157,17 @@ package anifire.models.creator
 		public function getComponentsByType(type:String) : Vector.<CCComponentModel>
 		{
 			var components:Vector.<CCComponentModel> = new Vector.<CCComponentModel>();
-			for (var index:String in this.components)
-			{
+			for (var index:String in this.components) {
 				if (index.split(":")[0] == type)
 					components.push(this.components[index]);
+			}
+			if (this.runwayMode) {
+				var self:CCBodyShapeModel = this;
+				components.sort(function (component1, component2) {
+					var uid1:String = self.componentUniqueId(component1.type, component1.id);
+					var uid2:String = self.componentUniqueId(component2.type, component2.id);
+					return self.componentOrder.indexOf(uid1) - self.componentOrder.indexOf(uid2);
+				});
 			}
 			return components;
 		}
@@ -167,10 +175,17 @@ package anifire.models.creator
 		public function getLibrariesByType(type:String) : Vector.<CCLibraryModel>
 		{
 			var libraries:Vector.<CCLibraryModel> = new Vector.<CCLibraryModel>();
-			for (var index:String in this.libraries)
-			{
+			for (var index:String in this.libraries) {
 				if (index.split(":")[0] == type)
 					libraries.push(this.libraries[index]);
+			}
+			if (this.runwayMode) {
+				var self:CCBodyShapeModel = this;
+				libraries.sort(function (lib1, lib2) {
+					var uid1:String = self.componentUniqueId(lib1.type, lib1.id);
+					var uid2:String = self.componentUniqueId(lib2.type, lib2.id);
+					return self.componentOrder.indexOf(uid1) - self.componentOrder.indexOf(uid2);
+				});
 			}
 			return libraries;
 		}
@@ -184,10 +199,13 @@ package anifire.models.creator
 			return type + ":" + id;
 		}
 		
-		public function storeComponent(param1:CCComponentModel) : void
+		public function storeComponent(component:CCComponentModel) : void
 		{
-			var _loc2_:String = this.componentUniqueId(param1.type,param1.id);
-			this.components[_loc2_] = param1;
+			var uniqueId:String = this.componentUniqueId(component.type, component.id);
+			this.components[uniqueId] = component;
+			if (this.runwayMode) {
+				this.componentOrder.push(uniqueId);
+			}
 		}
 		
 		public function getComponent(type:String, id:String) : CCComponentModel
@@ -196,15 +214,18 @@ package anifire.models.creator
 			return this.components[uniqueId];
 		}
 		
-		public function storeLibrary(param1:CCLibraryModel) : void
+		public function storeLibrary(library:CCLibraryModel) : void
 		{
-			var _loc2_:String = this.componentUniqueId(param1.type,param1.id);
-			this.libraries[_loc2_] = param1;
+			var uniqueId:String = this.componentUniqueId(library.type, library.id);
+			this.libraries[uniqueId] = library;
+			if (this.runwayMode) {
+				this.componentOrder.push(uniqueId);
+			}
 		}
 		
-		public function getLibrary(param1:String, param2:String) : CCLibraryModel
+		public function getLibrary(type:String, id:String) : CCLibraryModel
 		{
-			var _loc3_:String = this.componentUniqueId(param1,param2);
+			var _loc3_:String = this.componentUniqueId(type, id);
 			return this.libraries[_loc3_];
 		}
 		

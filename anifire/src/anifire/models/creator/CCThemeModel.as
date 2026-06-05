@@ -8,12 +8,17 @@ package anifire.models.creator
 	
 	public class CCThemeModel extends EventDispatcher
 	{
-		/**
-		 * i have no idea what this does
-		 */
 		public var runwayMode:Boolean;
 		public var themeId:String;
 		public var defaultBodyShape:CCBodyShapeModel;
+
+		/**
+		 * ```
+		 * {
+		 * 	string: CCBodyShapeModel
+		 * }
+		 * ```
+		 */
 		public var bodyShapes:Object;
 		public var components:Object;
 		public var version:int;
@@ -21,6 +26,7 @@ package anifire.models.creator
 		public var faces:Object;
 		public var colors:Object;
 		public var completed:Boolean = false;
+		public var componentOrder:Vector.<String>;
 		/**
 		 * an object of objects of character actions indexed by
 		 * their id indexed by the character id
@@ -74,6 +80,7 @@ package anifire.models.creator
 			var totalNodes:int = nodes.length();
 			if (this.runwayMode)
 			{
+				this.componentOrder = new Vector.<String>();
 				this.colors = {};
 				if (ccThemeXml.@version)
 				{
@@ -98,6 +105,7 @@ package anifire.models.creator
 							if (node.@component_type)
 								color.targetComponent = node.@component_type;
 							this.colors[color.type] = color;
+							this.componentOrder.push(color.type);
 						}
 						break;
 					case "facial":
@@ -153,6 +161,9 @@ package anifire.models.creator
 		{
 			var uniqueId:String = this.componentUniqueId(component.type, component.id);
 			this.components[uniqueId] = component;
+			if (this.runwayMode) {
+				this.componentOrder.push(uniqueId);
+			}
 		}
 
 		/**
@@ -168,7 +179,7 @@ package anifire.models.creator
 		 * returns a specified component from a bodyshape. if it fails,
 		 * it returns a shared component from the theme (if it exists)
 		 */
-		protected function getComponent(bodyShape:CCBodyShapeModel, type:String, id:String) : CCComponentModel
+		public function getComponent(bodyShape:CCBodyShapeModel, type:String, id:String) : CCComponentModel
 		{
 			var component:CCComponentModel = bodyShape.getComponent(type, id);
 			if (!component)
@@ -188,6 +199,14 @@ package anifire.models.creator
 			{
 				if (index.split(":")[0] == type)
 					components.push(this.components[index]);
+			}
+			if (this.runwayMode) {
+				var self:CCThemeModel = this;
+				components.sort(function (component1, component2) {
+					var uid1:String = self.componentUniqueId(component1.type, component1.id);
+					var uid2:String = self.componentUniqueId(component2.type, component2.id);
+					return self.componentOrder.indexOf(uid1) - self.componentOrder.indexOf(uid2);
+				});
 			}
 			return components;
 		}

@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	xmlns:cComponents="anifire.creator.components.*"
+	width="100%"
+	height="32">
+
+	<fx:Script>
+		<![CDATA[
+			import anifire.creator.events.CcColorPickerEvent;
+			import anifire.creator.events.ColorPickerDropDownListEvent;
+			import anifire.models.creator.CCColor;
+			import mx.containers.Canvas;
+			import mx.events.FlexEvent;
+			import spark.components.Image;
+			import flash.events.IEventDispatcher;
+	
+			private var color:CCColor;
+			private var page:int = 0;
+
+			/**
+			 * initializes the color picker with a color
+			 */
+			public function init(color:CCColor, value:uint, page:int = 0) : void
+			{
+				this.destroy();
+				this.color = color;
+				this.page = page;
+				this.addIcon();
+				this.refreshButtons();
+				var choices:Vector.<String> = this.color.choices;
+				var startI:int = page * 5;
+				var maxI:int = Math.min(choices.length, startI + 5);
+				for (var index:int = page * 5; index < maxI; index++) {
+					this.insertColor(uint(choices[index]), index == maxI - 1 && !this.nextBtn.visible);
+				}
+				var self:ColorPickerElementSpark = this;
+				this.colorPicker.addEventListener(
+					FlexEvent.CREATION_COMPLETE,
+					function colorPicker_creationComplete(event:FlexEvent) {
+						(event.target as IEventDispatcher).removeEventListener(event.type, colorPicker_creationComplete);
+						self.setColor(value);
+					}
+				);
+			}
+
+			public function setColor(value:uint) : void
+			{
+				this.colorPicker.colorDisplay.color = value;
+			}
+
+			private function addIcon() : void
+			{
+				for (var typeObjI:String in this.iconList.source) {
+					var type:String = this.iconList.source[typeObjI].type;
+					if (type != this.color.type) {
+						continue;
+					}
+					var image:Image = new Image();
+					image.source = this.iconList.source[typeObjI].icon;
+					this.ico.addElement(image);
+				}
+			}
+			
+			private function insertColor(value:uint, isEnd:Boolean = false) : void
+			{
+				var swatch:Canvas = new Canvas();
+				swatch.width = 30;
+				swatch.height = 32;
+				swatch.data = value;
+				this.renderColor(swatch, false, isEnd);
+				swatch.buttonMode = true;
+				swatch.name = "button" + value.toString();
+				swatch.addEventListener(MouseEvent.MOUSE_OVER, this.swatch_mouseOver);
+				swatch.addEventListener(MouseEvent.MOUSE_OUT, this.swatch_mouseOut);
+				swatch.addEventListener(MouseEvent.CLICK, this.swatch_click);
+				this.tileColor.addElement(swatch);
+			}
+
+			/**
+			 * removes all color options if they exist
+			 */
+			private function destroy() : void
+			{
+				this.tileColor.removeAllElements();
+			}
+
+			private function renderColor(swatch:Canvas, hovered:Boolean, isEnd:Boolean = false) : void
+			{
+				var rightRadius:int = isEnd ? 15 : 3;
+				swatch.graphics.clear();
+				swatch.graphics.beginFill(0xFFFFFF);
+				if (isEnd) {
+					swatch.graphics.drawRoundRectComplex(0, 0, swatch.width + 3, swatch.height, 0, rightRadius, 0, rightRadius);
+				} else {
+					swatch.graphics.drawRect(0, 0, swatch.width, swatch.height);
+				}
+				swatch.graphics.endFill();
+				swatch.graphics.beginFill(hovered ? 0xFC4F7D : 0xDDDDDD);
+				swatch.graphics.drawRoundRectComplex(4, 2, swatch.width - 4, swatch.height - 4, 3, rightRadius, 3, rightRadius);
+				swatch.graphics.endFill();
+				swatch.graphics.beginFill(uint(swatch.data));
+				swatch.graphics.drawRoundRectComplex(5, 3, swatch.width - 6, swatch.height - 6, 3, rightRadius, 3, rightRadius);
+				swatch.graphics.endFill();
+			}
+
+			private function refreshButtons() : void
+			{
+				var showPrev:Boolean = true;
+				var showNext:Boolean = true;
+				if (this.page == 0) {
+					showPrev = false;
+				}
+				if (this.color.choices.length <= (this.page + 1) * 5) {
+					showNext = false;
+				}
+				this.prevBtn.includeInLayout = this.prevBtn.visible = showPrev;
+				this.nextBtn.includeInLayout = this.nextBtn.visible = showNext;
+			}
+
+			/**
+			 * dispatches a color chosen event
+			 */
+			private function dispatchColorChosenEvent(colorValue:uint, undoable:Boolean = true) : void
+			{
+				var event:CcColorPickerEvent = new CcColorPickerEvent(CcColorPickerEvent.COLOR_CHOSEN, this, null, true);
+				event.color = this.color;
+				event.colorValue = colorValue;
+				event.undoable = undoable;
+				this.dispatchEvent(event);
+			}
+
+			/**
+			 * dispatched when the color in the dropdown has changed, but
+			 * the user has yet to actually finish selecting it.
+			 */
+			private function colorPicker_colorChangeHandler(event:ColorPickerDropDownListEvent) : void
+			{
+				this.dispatchColorChosenEvent(event.color, false);
+			}
+
+			/**
+			 * dispatched when the user has finished selecting a color
+			 * in the dropdown.
+			 */
+			private function colorPicker_colorCommitHandler(event:ColorPickerDropDownListEvent) : void
+			{
+				this.dispatchColorChosenEvent(event.color);
+			}
+
+			private function swatch_mouseOver(event:Event) : void
+			{
+				var swatch:Canvas = event.currentTarget as Canvas;
+				this.renderColor(swatch, true, this.tileColor.getElementIndex(swatch) == this.tileColor.numElements - 1 && !this.nextBtn.visible);
+			}
+			
+			private function swatch_mouseOut(event:Event) : void
+			{
+				var swatch:Canvas = event.currentTarget as Canvas;
+				this.renderColor(swatch, false, this.tileColor.getElementIndex(swatch) == this.tileColor.numElements - 1 && !this.nextBtn.visible);
+			}
+
+			private function swatch_click(event:MouseEvent) : void
+			{
+				var value:uint = uint(Canvas(event.currentTarget).data);
+				this.setColor(value);
+				this.dispatchColorChosenEvent(value);
+			}
+
+			private function prevBtn_click() : void
+			{
+				this.page--;
+				this.init(this.color, this.colorPicker.colorDisplay.color, this.page);
+			}
+
+			private function nextBtn_click() : void
+			{
+				this.page++;
+				this.init(this.color, this.colorPicker.colorDisplay.color, this.page);
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<s:ArrayList id="iconList">
+			<fx:Object type="ccSkinColor" icon="@Embed('../images/colorPicker/faceColorIcon.png')"/>
+			<fx:Object type="ccFaceHairColor" icon="@Embed('../images/colorPicker/beardColorIcon.png')"/>
+			<fx:Object type="ccEyeLib" icon="@Embed('../images/colorPicker/eyeEyelidColorIcon.png')"/>
+			<fx:Object type="ccEyeIris" icon="@Embed('../images/colorPicker/eyeIrisColorIcon.png')"/>
+			<fx:Object type="ccGlassesFrame" icon="@Embed('../images/colorPicker/glassesFrameColorIcon.png')"/>
+			<fx:Object type="ccGlassesLens" icon="@Embed('../images/colorPicker/glassesLensColorIcon.png')"/>
+			<fx:Object type="ccMouthLip" icon="@Embed('../images/colorPicker/mouthColorIcon.png')"/>
+			<fx:Object type="ccMustache" icon="@Embed('../images/colorPicker/mustacheColorIcon.png')"/>
+			<fx:Object type="ccBeard" icon="@Embed('../images/colorPicker/beardColorIcon.png')"/>
+			<fx:Object type="ccEyebrow" icon="@Embed('../images/colorPicker/eyebrowColorIcon.png')"/>
+			<fx:Object type="ccHairMajor" icon="@Embed('../images/colorPicker/hairMajorColorIcon.png')"/>
+			<fx:Object type="ccHairMinor" icon="@Embed('../images/colorPicker/hairMinorColorIcon.png')"/>
+			<fx:Object type="ccUpperMain" icon="@Embed('../images/colorPicker/upperMajorColorIcon.png')"/>
+			<fx:Object type="ccUpperMinor" icon="@Embed('../images/colorPicker/upperMinorColorIcon.png')"/>
+			<fx:Object type="ccLowerMain" icon="@Embed('../images/colorPicker/lowerMajorColorIcon.png')"/>
+			<fx:Object type="ccLowerMainA" icon="@Embed('../images/colorPicker/lowerMajorColorIcon.png')"/>
+			<fx:Object type="ccLowerMinor" icon="@Embed('../images/colorPicker/lowerMinorColorIcon.png')"/>
+			<fx:Object type="ccBackMajor" icon="@Embed('../images/colorPicker/backMajorColorIcon.png')"/>
+			<fx:Object type="ccBackMinor" icon="@Embed('../images/colorPicker/backMinorColorIcon.png')"/>
+			<fx:Object type="ccDecMajor" icon="@Embed('../images/colorPicker/decMajorColorIcon.png')"/>
+			<fx:Object type="ccDecMinor" icon="@Embed('../images/colorPicker/decMinorColorIcon.png')"/>
+			<fx:Object type="ccFeetMain" icon="@Embed('../images/colorPicker/feetColorIcon.png')"/>
+			<fx:Object type="ccHandMain" icon="@Embed('../images/colorPicker/handColorIcon.png')"/>
+		</s:ArrayList>
+	</fx:Declarations>
+
+	<s:Group id="ico" height="30" width="30" verticalCenter="0"/>
+	<s:HGroup width="100%" height="32" gap="0">
+		<cComponents:ColorPickerDropDownList
+			id="colorPicker"
+			colorChange="colorPicker_colorChangeHandler(event)" 
+			colorCommit="colorPicker_colorCommitHandler(event)"/>
+		<s:Button id="prevBtn" width="20" label="&lt;" click="prevBtn_click()"/>
+		<s:HGroup id="tileColor" height="25" verticalCenter="0" gap="0"></s:HGroup>
+		<s:Button id="nextBtn" width="20" label="&gt;" click="nextBtn_click()"/>
+	</s:HGroup>
+
+</s:HGroup>

@@ -157,10 +157,6 @@
 		<s:State name="disabledWithPrompt" stateGroups="disabledStates"/>
 	</s:states>
 
-	<s:Label
-		id="promptDisplay" maxDisplayedLines="1" includeIn="normalWithPrompt, disabledWithPrompt"
-		mouseEnabled="false" mouseChildren="false" includeInLayout="false"
-		verticalAlign="middle"/>
 	<s:Rect id="border" left="0" right="0" top="0" bottom="0" radiusX="3">
 		<s:stroke>
 			<s:SolidColorStroke id="borderStroke" weight="1"/>
@@ -171,7 +167,7 @@
 			<s:SolidColor id="bgFill" color="0xFFFFFF"/>
 		</s:fill>
 	</s:Rect>
-	<s:Rect id="shadow" left="1" right="1" top="1" bottom="1" radiusX="2">
+	<s:Rect id="shadow" left="1" right="1" top="1" height="1" radiusX="2">
 		<s:fill>
 			<s:SolidColor color="0x000000" alpha="0.12"/>
 		</s:fill>
@@ -181,5 +177,13 @@
 		paddingLeft="3" paddingRight="3" paddingTop="4" paddingBottom="2">
 		<s:RichEditableText id="textDisplay" width="100%" widthInChars="10"/>
 	</s:HGroup>
+	<s:Label
+		id="promptDisplay"
+		maxDisplayedLines="1"
+		includeIn="normalWithPrompt, disabledWithPrompt"
+		mouseEnabled="false"
+		mouseChildren="false"
+		includeInLayout="false"
+		verticalAlign="middle"/>
 
 </s:SparkSkin>

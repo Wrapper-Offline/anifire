@@ -3,41 +3,84 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
-	width="20"
-	height="20">
+	width="56"
+	height="26">
 
 	<fx:Script>
 		<![CDATA[
+			import anifire.managers.ColorUtils;
+
 			public var _color:uint;
+			public var _light:Boolean;
 
 			public function set color(color:uint) : void
 			{
-				if(this._color != color)
-				{
-					this._color = color;
+				if (this._color == color) {
+					return;
 				}
+				this._color = color;
+				var rgb:Array = ColorUtils.colorToRgb(color);
+				for each (var c:Number in rgb) {
+					c = c / 255.0
+					if (c <= 0.04045) {
+						c = c / 12.92 
+					} else {
+						c = ((c + 0.055) / 1.055) ^ 2.4
+					}
+				}
+				var luminance:Number = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+				this.light = luminance > 179;
 			}
+
 			[Bindable]
 			public function get color() : uint
 			{
 				return this._color;
 			}
+
+			[Bindable]
+			public function get light() : Boolean
+			{
+				return this._light;
+			}
+
+			public function set light(value:Boolean) : void
+			{
+				if (this._light != value) {
+					this._light = value;	
+				}
+			}
 		]]>
 	</fx:Script>
 
-	<s:Ellipse width="100%" height="100%">
+	<s:Rect
+		id="currentColor"
+		width="56"
+		height="26"
+		topLeftRadiusX="15"
+		topLeftRadiusY="15"
+		topRightRadiusX="3"
+		topRightRadiusY="3"
+		bottomLeftRadiusX="15"
+		bottomLeftRadiusY="15"
+		bottomRightRadiusX="3"
+		bottomRightRadiusY="3">
 		<s:fill>
 			<s:SolidColor id="colorDisplay" color="{this.color}"/>
 		</s:fill>
-		<s:stroke>
-			<s:SolidColorStroke color="0xEEEEEE"/>
-		</s:stroke>
-	</s:Ellipse>
+	</s:Rect>
 	<s:BitmapImage
 		left="0"
 		right="0"
 		top="0"
 		bottom="0"
-		source="@Embed('../../images/colorPicker/nocolor.png')"/>
+		source="@Embed('../../images/colorPicker/nocolor.png')"
+		visible="{color == uint.MAX_VALUE}"/>
+	<s:Path id="triangle1" right="4" verticalCenter="0">
+		<s:data>m 0 0 l 6 0 l -3 3 Z</s:data>
+		<s:fill>
+			<s:SolidColor color="{light ? 0x000000 : 0xFFFFFF}"/>
+		</s:fill>
+	</s:Path>
 
 </s:Group>

@@ -208,19 +208,16 @@ package anifire.cc.view
 			this._customColor.push(_loc4_.areaName,_loc4_);
 		}
 		
-		private function changeColor(param1:SelectedColor, param2:String = "") : Number
+		private function changeColor(color:SelectedColor, targetComponentId:String = "") : Number
 		{
-			var _loc3_:DisplayObject = null;
-			if(param2 == "")
-			{
-				_loc3_ = this;
+			var obj:DisplayObject;
+			if (targetComponentId == "") {
+				obj = this;
+			} else {
+				obj = UtilPlain.getInstance(this, targetComponentId);
 			}
-			else
-			{
-				_loc3_ = UtilPlain.getInstance(this,param2);
-			}
-			var _loc4_:uint = UtilColor.setAssetPartColor(_loc3_,param1.areaName,param1.dstColor);
-			return _loc4_;
+			var colorValue:uint = UtilColor.setAssetPartColor(obj, color.areaName, color.dstColor);
+			return colorValue;
 		}
 		
 		private function changeColorForShader(param1:UtilHashArray) : Number

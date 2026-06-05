@@ -35,11 +35,11 @@ package anifire.component
 		
 		private var _key:String;
 		
-		public function CcComponentLoader(param1:String, param2:String)
+		public function CcComponentLoader(key:String, url:String)
 		{
 			super();
-			this._key = param1;
-			this._url = param2;
+			this._key = key;
+			this._url = url;
 			_configManager = AppConfigManager.instance;
 		}
 		
@@ -85,6 +85,12 @@ package anifire.component
 				this._numTry = 0;
 				this.reload();
 			}
+		}
+
+		public function unload() : void
+		{
+			this._swfBytes = null;
+			this._stream = null;
 		}
 		
 		private function reload() : void

@@ -32,11 +32,11 @@ package anifire.models.creator
 
 		public function serialize() : XML
 		{
-			var xml:XML = <color>{this.dest.toString()}</color>;
+			var xml:XML = <color>{this.dest.toString(16)}</color>;
 			xml.@r = this.type;
 			if(this.oc != uint.MAX_VALUE)
 			{
-				xml.@oc = this.oc.toString();
+				xml.@oc = this.oc.toString(16);
 			}
 			if(this.targetComponent)
 			{

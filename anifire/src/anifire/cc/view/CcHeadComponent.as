@@ -20,6 +20,7 @@ package anifire.cc.view
 	import flash.events.Event;
 	import flash.events.IEventDispatcher;
 	import flash.utils.ByteArray;
+	import flash.external.ExternalInterface;
 	
 	public class CcHeadComponent extends MovieClip
 	{
@@ -261,41 +262,34 @@ package anifire.cc.view
 			}
 		}
 		
-		private function addPairComponent(param1:CcPairComponent) : void
+		private function addPairComponent(component:CcPairComponent) : void
 		{
-			var _loc2_:String = null;
-			var _loc3_:DisplayObjectContainer = null;
-			var _loc4_:DisplayObjectContainer = null;
-			var _loc5_:String = null;
-			var _loc6_:String = null;
-			if(param1)
-			{
-				if(param1.name == CcLibConstant.COMPONENT_TYPE_GLASSES)
-				{
-					_loc3_ = param1.rightSide;
-					_loc5_ = "Right";
-					_loc4_ = param1.leftSide;
-					_loc6_ = "Left";
+			var clipName:String;
+			var domObj:DisplayObjectContainer;
+			var subObj:DisplayObjectContainer;
+			var domObjSide:String;
+			var subObjSide:String;
+			if (component) {
+				if (component.name == CcLibConstant.COMPONENT_TYPE_GLASSES) {
+					domObj = component.rightSide;
+					domObjSide = "Right";
+					subObj = component.leftSide;
+					subObjSide = "Left";
+				} else {
+					domObj = component.leftSide;
+					domObjSide = "Left";
+					subObj = component.rightSide;
+					subObjSide = "Right";
 				}
-				else
-				{
-					_loc3_ = param1.leftSide;
-					_loc5_ = "Left";
-					_loc4_ = param1.rightSide;
-					_loc6_ = "Right";
-				}
-				if(param1.model is ICcPairComponent && ICcPairComponent(param1.model).split)
-				{
-					if(_loc3_)
-					{
-						_loc2_ = param1.name + _loc5_ + CcLibConstant.MC_NAME_EXT;
-						this.addImage(_loc3_,_loc2_);
+				if (component.model is ICcPairComponent && ICcPairComponent(component.model).split) {
+					if (domObj) {
+						clipName = component.name + domObjSide + CcLibConstant.MC_NAME_EXT;
+						this.addImage(domObj, clipName);
 					}
 				}
-				if(_loc4_)
-				{
-					_loc2_ = param1.name + _loc6_ + CcLibConstant.MC_NAME_EXT;
-					this.addImage(_loc4_,_loc2_);
+				if (subObj) {
+					clipName = component.name + subObjSide + CcLibConstant.MC_NAME_EXT;
+					this.addImage(subObj, clipName);
 				}
 			}
 		}
@@ -557,18 +551,15 @@ package anifire.cc.view
 			}
 		}
 		
-		protected function changeColor(param1:SelectedColor, param2:String = "") : Number
+		protected function changeColor(selColor:SelectedColor, targetComponent:String = "") : Number
 		{
-			var _loc3_:DisplayObject = null;
-			if(param2 == "")
-			{
-				_loc3_ = this;
+			var obj:DisplayObject = null;
+			if (targetComponent == "") {
+				obj = this;
+			} else {
+				obj = UtilPlain.getInstance(this, targetComponent);
 			}
-			else
-			{
-				_loc3_ = UtilPlain.getInstance(this,param2);
-			}
-			var _loc4_:uint = UtilColor.setAssetPartColor(_loc3_,param1.areaName,param1.dstColor);
+			var _loc4_:uint = UtilColor.setAssetPartColor(obj, selColor.areaName, selColor.dstColor);
 			return _loc4_;
 		}
 	}

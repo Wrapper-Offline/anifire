@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	xmlns:components="anifire.creator.components.*">
+
+	<fx:Script>
+		<![CDATA[
+			import anifire.constant.CcLibConstant;
+			import anifire.creator.events.ThumbChooserEvent;
+			import mx.collections.ArrayCollection;
+			import spark.events.IndexChangeEvent;
+			import anifire.models.creator.CCBodyModel;
+			import anifire.models.creator.CCThemeModel;
+			import anifire.models.creator.CCBodyComponentModel;
+			import anifire.creator.core.CharacterCreator;
+			import anifire.models.creator.CCComponentModel;
+			import anifire.models.creator.CCLibraryModel;
+			import mx.events.FlexMouseEvent;
+
+			private static const EVENT_TAG_FILTER_CHANGED:String = "evt_tag_changed";
+			private var componentType:String;
+			private var _biggerHeight:Number;
+			private var _smallerHeight:Number;
+			private var _filter:Function = null;
+			private var direction:int;
+
+			/**
+			 * source array for the ThumbList
+			 */
+			[Bindable]
+			public var _thumbCollection:ArrayCollection;
+
+			public function set biggerHeight(height:Number) : void
+			{
+				this._biggerHeight = height;
+			}
+			
+			public function set smallerHeight(height:Number) : void
+			{
+				this._smallerHeight = height;
+			}
+
+			/**
+			 * initializes the thumb chooser
+			 */
+			public function init(
+				theme: CCThemeModel,
+				char: CCBodyModel,
+				type: String,
+				useSmallHeight: Boolean
+			) : void
+			{
+				this.thumbnailTileSpark.selectedItem = null;
+				this.thumbnailTileSpark.removeEventListener(IndexChangeEvent.CHANGE, this.onThumbSelect);
+				this.thumbnailTileSpark.removeEventListener(IndexChangeEvent.CHANGE, this.onDecoClick);
+
+				if (useSmallHeight) {
+					this.height = this._smallerHeight;
+					this.thumbnailTileSpark.height = this._smallerHeight;
+				} else {
+					this.height = this._biggerHeight;
+					this.thumbnailTileSpark.height = this._biggerHeight;
+				}
+
+				this._filter = CharacterCreator.instance.configuration.goTagFilter;
+				this.componentType = type;
+
+				var componentThumbs:Vector.<*> = new Vector.<*>();
+				if (CcLibConstant.ALL_LIBRARY_TYPES.indexOf(type) >= 0) {
+					componentThumbs = theme
+						.bodyShapes[char.bodyShapeId]
+						.getLibrariesByType(type) as Vector.<*>;
+				} else if (CcLibConstant.USER_CHOOSE_ABLE_HEAD_COMPONENT_TYPES.indexOf(type) >= 0) {
+					componentThumbs = theme
+						.getComponentsByType(type) as Vector.<*>;
+				} else if (CcLibConstant.USER_CHOOSE_ABLE_BODY_COMPONENT_TYPES.indexOf(type) >= 0) {
+					componentThumbs = theme
+						.bodyShapes[char.bodyShapeId]
+						.getComponentsByType(type) as Vector.<*>;
+				}
+				if (componentThumbs == null) {
+					componentThumbs = new Vector.<*>();
+				}
+
+				var filteredThumbs:Array = [];
+				for (var i:int = 0; i < componentThumbs.length; i++) {
+					var component = componentThumbs[i];
+					if (!component.enable) {
+						continue;
+					}
+					if (!this._filter || this._filter(componentThumbs[i])) {
+						filteredThumbs.push({
+							"data": componentThumbs[i],
+							"order": i
+						});
+						componentThumbs[i] = null;
+					}
+				}
+				componentThumbs = null;
+				filteredThumbs.sort(
+					function (thumb1:Object, thumb2:Object) : Number {
+						var diff:int = 0;
+						if (thumb1 is CCComponentModel) {
+							diff = thumb1.data.displayOrder - 
+								thumb2.data.displayOrder;
+						} else if (thumb1 is CCLibraryModel) {
+							diff = thumb1.data.localDisplayOrder - 
+								thumb2.data.localDisplayOrder;
+						}
+						return Number(diff == 0 ? thumb1.order - thumb2.order : diff);
+					}
+				);
+
+				this._thumbCollection = new ArrayCollection();
+				var isOptional:Boolean = CcLibConstant.OPTIONAL_COMPONENTS.containsKey(type);
+				if (isOptional) {
+					this._thumbCollection.addItem(null);
+				}
+				for each (var item:Object in filteredThumbs) {
+					this._thumbCollection.addItem(item.data);
+				}
+				filteredThumbs = null;
+
+				// this.thumbnailTileSpark.setStyle("backgroundColor", null);
+				// this.thumbnailTileSpark.setStyle("borderStyle", null);
+				this.dispatchEvent(new Event(EVENT_TAG_FILTER_CHANGED));
+				this.thumbnailTileSpark.scroller.verticalScrollBar.addEventListener(Event.CHANGE, this.scrollerUpdate);
+				this.thumbnailTileSpark.addEventListener(
+					IndexChangeEvent.CHANGE,
+					CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(this.componentType) > -1 ?
+						this.onDecoClick :
+						this.onThumbSelect
+				);
+				this.thumbnailTileSpark.addEventListener(FlexMouseEvent.MOUSE_WHEEL_CHANGING, thumbnailTileSpark_mouseWheelChanging);
+				this.thumbnailTileSpark.char = char;
+				this.thumbnailTileSpark.itemRenderer = new ClassFactory(ComponentItemRenderer);
+
+				callLater(this.ensureIndexIsVisible, [char, isOptional]);
+			}
+
+			public function ensureIndexIsVisible(char:CCBodyModel, isOptional:Boolean) : void
+			{
+				var i:int = isOptional ? 1 : 0;
+				if (CcLibConstant.ALL_LIBRARY_TYPES.indexOf(this.componentType) > -1) {
+					var selectedLib:String = char.libraries[this.componentType];
+					if (selectedLib) {
+						for (; i < this._thumbCollection.length; i++) {
+							if (this._thumbCollection.getItemAt(i).id == selectedLib) {
+								this.thumbnailTileSpark.setSelectedIndex(i);
+								break;
+							}
+						}
+					}
+				} else if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(this.componentType) == -1) {
+					var selectedComp:CCBodyComponentModel = char.components[this.componentType];
+					if (selectedComp) {
+						for (; i < this._thumbCollection.length; i++) {
+							if (this._thumbCollection.getItemAt(i).id == selectedComp.component_id) {
+								this.thumbnailTileSpark.setSelectedIndex(i);
+								break;
+							}
+						}
+					}
+				} else {
+					return;
+				}
+
+				if (this.thumbnailTileSpark.selectedIndex == -1 && isOptional) {
+					this.thumbnailTileSpark.setSelectedIndex(0);
+					return;
+				}
+
+				this.thumbnailTileSpark.ensureIndexIsVisible(
+					this.thumbnailTileSpark.selectedIndex + 10 > this.thumbnailTileSpark.dataProvider.length ? 
+							this.thumbnailTileSpark.selectedIndex :
+							this.thumbnailTileSpark.selectedIndex + 10
+				);
+				callLater(this.scrollerUpdate);
+			}
+
+			public function refreshChar(char:CCBodyModel) : void
+			{
+				this.thumbnailTileSpark.char = char;
+			}
+
+			private function scrollerUpdate(event:Event = null) : void
+			{
+				this.refreshButtons(this.thumbnailTileSpark.scroller.verticalScrollBar.value);
+			}
+
+			/**
+			 * switches the scroll buttons on and off depending on scroller position
+			 */
+			private function refreshButtons(value:Number) : void
+			{
+				if (value == 0) {
+					this.upBtn.enabled = false;
+				} else {
+					this.upBtn.enabled = true;
+				}
+				if (
+					value == 
+					this.thumbnailTileSpark.scroller.verticalScrollBar.maximum
+				) {
+					this.downBtn.enabled = false;
+				} else {
+					this.downBtn.enabled = true;
+				}
+				this.upLayer.visible = this.downLayer.visible = this.thumbnailTileSpark.scroller.verticalScrollBar.includeInLayout;
+			}
+
+			/**
+			 * called when a decoration component thumb is selected
+			 */
+			private function onDecoClick(event:IndexChangeEvent) : void
+			{
+				var chooserEvent:ThumbChooserEvent = new ThumbChooserEvent(ThumbChooserEvent.THUMB_CHOSEN, this);
+				chooserEvent.componentThumb = event.currentTarget.selectedItem;
+				this.dispatchEvent(chooserEvent);
+				this.thumbnailTileSpark.selectedIndex = -1;
+				this.thumbnailTileSpark.selectedIndices = new Vector.<int>();
+			}
+
+			/**
+			 * called when a component thumb is selected
+			 */
+			private function onThumbSelect(event:IndexChangeEvent) : void
+			{
+				var chooserEvent:ThumbChooserEvent;
+				var componentThumb = event.currentTarget.selectedItem;
+				if (componentThumb) {
+					chooserEvent = new ThumbChooserEvent(ThumbChooserEvent.THUMB_CHOSEN, this);
+					chooserEvent.componentThumb = componentThumb;
+				} else {
+					chooserEvent = new ThumbChooserEvent(ThumbChooserEvent.NONE_THUMB_CHOSEN, this);
+					chooserEvent.noneComponentThumbType = this.componentType;
+				}
+				this.dispatchEvent(chooserEvent);
+			}
+
+			private function thumbnailTileSpark_mouseWheelChanging(event:FlexMouseEvent) : void
+			{
+				var newValue:Number = Math.max(
+					0, Math.min(
+						this.thumbnailTileSpark.scroller.verticalScrollBar.value + event.delta,
+						this.thumbnailTileSpark.scroller.verticalScrollBar.maximum
+					)
+				);
+				refreshButtons(newValue);
+			}
+
+			/**
+			 * called on every frame enter, scrolls by a certain amount
+			 */
+			private function scrollEnterFrame(event:Event) : void
+			{
+				var scrollDy = 12 * direction;
+				this.thumbnailTileSpark.scroller.verticalScrollBar.value += scrollDy;
+			}
+
+			/**
+			 * called when the mouse goes down on one of the scroll buttons
+			 * starts scrolling
+			 */
+			private function scrollButton_mouseDown(event:Event) : void
+			{
+				switch (event.currentTarget) {
+					case this.upBtn:
+						direction = -1;
+						break;
+					case this.downBtn:
+						direction = 1;
+				}
+				addEventListener(Event.ENTER_FRAME, this.scrollEnterFrame);
+			}
+
+			/**
+			 * called when the mouse goes up from one of the scroll buttons
+			 * stops scrolling
+			 */
+			private function scrollButton_mouseUp(event:Event) : void
+			{
+				direction = 0;
+				removeEventListener(Event.ENTER_FRAME, this.scrollEnterFrame);
+				this.scrollerUpdate();
+			}
+		]]>
+	</fx:Script>
+
+	<components:ThumbList
+		id="thumbnailTileSpark"
+		width="100%"
+		height="100%"
+		useHandCursor="true"
+		borderVisible="false"
+		contentBackgroundAlpha="0"
+		verticalScrollPolicy="on"
+		dataProvider="{this._thumbCollection}">
+		<components:layout>
+			<s:TileLayout
+				paddingTop="30"
+				paddingRight="29"
+				paddingBottom="30"
+				paddingLeft="40"
+				horizontalGap="6"
+				verticalGap="9"
+				columnAlign="justifyUsingGap"
+				orientation="rows"/>
+		</components:layout>
+	</components:ThumbList>
+
+	<s:Group id="upLayer" height="45" width="{this.width - 15}" top="0">
+		<s:Rect width="100%" height="30">
+			<s:fill>
+				<s:LinearGradient rotation="90" spreadMethod="reflect">
+					<s:entries>
+						<s:GradientEntry color="#f3f2f5" alpha="0.65" ratio="0.2"/>
+						<s:GradientEntry color="#ffffff" alpha="0" ratio="1"/>
+					</s:entries>
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+		<components:IconButton
+			id="upBtn"
+			buttonMode="true"
+			enabled="true"
+			verticalCenter="0"
+			horizontalCenter="0"
+			visible="{this.upBtn.enabled}"
+			icon="@Embed('../images/componentChooser/scrollUpIcon.png')"
+			iconOver="@Embed('../images/componentChooser/scrollUpIcon_hover.png')"
+			iconDisabled="@Embed('../images/componentChooser/scrollUpIcon_disabled.png')"
+			mouseDown="scrollButton_mouseDown(event)"
+			mouseOut="scrollButton_mouseUp(event)"
+			mouseUp="scrollButton_mouseUp(event)"/>
+	</s:Group>
+
+	<s:Group id="downLayer" height="45" width="{this.width - 15}" bottom="0">
+		<s:Rect top="15" width="100%" height="30">
+			<s:fill>
+				<s:LinearGradient rotation="90" spreadMethod="reflect">
+					<s:entries>
+						<s:GradientEntry color="#ffffff" alpha="0" ratio="0.2"/>
+						<s:GradientEntry color="#f3f2f5" alpha="0.65" ratio="1"/>
+					</s:entries>
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+		<components:IconButton
+			id="downBtn"
+			buttonMode="true"
+			enabled="true"
+			verticalCenter="0"
+			horizontalCenter="0"
+			visible="{this.downBtn.enabled}"
+			icon="@Embed('../images/componentChooser/scrollDownIcon.png')"
+			iconOver="@Embed('../images/componentChooser/scrollDownIcon_hover.png')"
+			iconDisabled="@Embed('../images/componentChooser/scrollDownIcon_disabled.png')"
+			mouseDown="scrollButton_mouseDown(event)"
+			mouseOut="scrollButton_mouseUp(event)"
+			mouseUp="scrollButton_mouseUp(event)"/>
+	</s:Group>
+
+</s:Group>

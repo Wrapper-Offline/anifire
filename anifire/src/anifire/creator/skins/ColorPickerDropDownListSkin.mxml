@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:Skin
+<s:SparkSkin
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
 	xmlns:components="anifire.creator.components.*"
-	xmlns:component="anifire.component.*">
+	xmlns:component="anifire.component.*"
+	alpha.disabled="0.5">
 
 	<fx:Metadata>
 		[HostComponent("spark.components.DropDownList")]
@@ -14,29 +15,32 @@
 		<s:State name="normal"/>
 		<s:State name="open"/>
 		<s:State name="disabled"/>
+		<s:State name="hovered"/>
 	</s:states>
 
-	<fx:Declarations>
-		<components:PopUpAnchor
-			id="popUp"
-			left="0"
-			right="0"
-			top="0"
-			bottom="0"
-			popUpPosition="above"
-			popUpWidthMatchesAnchorWidth="true">
-			<components:popUp>
-				<s:Group id="dropDown">
-					<component:ColorInputPanel
-						id="colorInputPanel"
-						width="250"
-						height="250"
-						right="-10"
-						bottom="10"/>
-				</s:Group>
-			</components:popUp>
-		</components:PopUpAnchor>
-	</fx:Declarations>
+	<s:PopUpAnchor
+		id="popUp"
+		left="0"
+		right="0"
+		top="0"
+		bottom="0"
+		popUpPosition="above"
+		popUpWidthMatchesAnchorWidth="true"
+		includeIn="open"
+		itemDestructionPolicy="auto"
+		displayPopUp.normal="false"
+		displayPopUp.open="true">
+		<s:popUp>
+			<s:Group id="dropDown">
+				<component:ColorInputPanel
+					id="colorInputPanel"
+					width="250"
+					height="250"
+					right="-10"
+					bottom="10"/>
+			</s:Group>
+		</s:popUp>
+	</s:PopUpAnchor>
 
 	<s:Button
 		id="openButton"
@@ -48,20 +52,14 @@
 		tabEnabled="false"
 		buttonMode="true"
 		skinClass="anifire.creator.skins.ColorPickerOpenButtonSkin"/>
-	<s:Group width="35" height="25" verticalCenter="0" mouseChildren="false" mouseEnabled="false">
+	<s:Group width="60" height="32" verticalCenter="0" mouseChildren="false" mouseEnabled="false">
 		<components:ColorDisplayGroup
 			id="colorDisplay"
-			width="25"
-			height="25"
-			left="0"
-			top="0"
+			width="56"
+			height="26"
+			left="3"
+			top="3"
 			bottom="0"/>
-		<s:Path right="2" verticalCenter="0">
-			<s:data>m 0 0 l 6 0 l -3 3 Z</s:data>
-			<s:fill>
-				<s:SolidColor color="0xFFFFFF"/>
-			</s:fill>
-		</s:Path>
 	</s:Group>
 
-</s:Skin>
+</s:SparkSkin>

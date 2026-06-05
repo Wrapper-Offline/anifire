@@ -218,24 +218,22 @@ package anifire.models.creator
 			dispatchEvent(new Event(Event.COMPLETE));
 		}
 
-		public function addComponent(component:CCBodyComponentModel) : void
+		public function addComponent(bodyComponent:CCBodyComponentModel, index:int = -1) : void
 		{
-			if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(component.type) > -1)
-			{
-				var cmpntArray:Vector.<CCBodyComponentModel>;
-				if (!this.components[component.type])
-				{
-					cmpntArray = this.components[component.type] = new Vector.<CCBodyComponentModel>();
+			if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(bodyComponent.type) > -1) {
+				var components:Vector.<CCBodyComponentModel>;
+				if (!this.components[bodyComponent.type]) {
+					components = this.components[bodyComponent.type] = new Vector.<CCBodyComponentModel>();
+				} else {
+					components = this.components[bodyComponent.type];
 				}
-				else
-				{
-					cmpntArray = this.components[component.type];
+				if (index == -1) {
+					components.push(bodyComponent);
+				} else {
+					components.insertAt(index, bodyComponent);
 				}
-				cmpntArray.push(component);
-			}
-			else
-			{
-				this.components[component.type] = component;
+			} else {
+				this.components[bodyComponent.type] = bodyComponent;
 			}
 		}
 

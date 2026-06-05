@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	xmlns:components="anifire.creator.components.*">
+
+	<fx:Script>
+		<![CDATA[
+			import anifire.constant.CcLibConstant;
+			import anifire.creator.core.CharacterCreator;
+			import anifire.creator.events.TypeChooserEvent;
+			import anifire.models.creator.CCBodyModel;
+			import anifire.models.creator.CCThemeModel;
+			import spark.events.IndexChangeEvent;
+
+			private var _propChanged:Object;
+
+			override public function styleChanged(styleProp:String) : void
+			{
+				super.styleChanged(styleProp);
+				var allowed:Array = ["percentWidth", "navMarginRight"];
+				if (styleProp == null || allowed.indexOf(styleProp) >= 0) {
+					for each (var key:String in allowed) {
+						var value:* = getStyle(key);
+						if (value != undefined) {
+							this._propChanged[key] = value;
+						}
+					}
+				}
+			}
+
+			/**
+			 * initializes the TypeChooser with all buttons a
+			 * theme and characters's body shape supports.
+			 * emits `TypeChooserEvent.SELECT` when finished
+			 * @param theme cc theme
+			 * @param char char body
+			 */
+			public function init(theme:CCThemeModel, char:CCBodyModel) : void
+			{
+				var filter:Function = CharacterCreator.instance.configuration.goTagFilter;
+				var order:Array = char.version == 2 ?
+					CcLibConstant.COMPONENT_TYPE_CHOOSER_ORDERING_VER2 :
+					CcLibConstant.COMPONENT_TYPE_CHOOSER_ORDERING_VER1;
+				for (var typeObjI:String in this.typeList.source) {
+					var type:String = this.typeList.source[typeObjI].type;
+					if (order.indexOf(type) == -1) {
+						continue;
+					}
+
+					var searchArr:*;
+					if (CcLibConstant.ALL_LIBRARY_TYPES.indexOf(type) > -1) {
+						searchArr = theme.bodyShapes[char.bodyShapeId].getLibrariesByType(type);
+					} else {
+						searchArr = theme.bodyShapes[char.bodyShapeId].getComponentsByType(type);
+						if (searchArr.length <= 0) {
+							searchArr = theme.getComponentsByType(type);
+						}
+					}
+
+					var minimum:Number = CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) > -1 ? 0 : 1;
+					var matchCount:int = 0;
+					for (var index:int = 0; index < searchArr.length; index++) {
+						if (!searchArr[index].enable) {
+							continue;
+						}
+						if (filter(searchArr[index])) {
+							matchCount++;
+							if (matchCount >= minimum) {
+								this._displayList.addItem(this.typeList.source[typeObjI]);
+								break;
+							}
+						}
+					}
+				}
+				this.dispatchTypeChosenEvent(this._displayList.getItemAt(0).type);
+			}
+
+			/**
+			 * selects a certain component type
+			 */
+			public function switchToComponentType(type:String) : void
+			{
+				for (var i:int = 0; i < this._displayList.length; i++) {
+					var obj:Object = this._displayList.getItemAt(i);
+					if (obj.type == type) {
+						this.typeButtonBar.selectedIndex = i;
+						return;
+					}
+				}
+			}
+
+			/**
+			 * dispatches a TypeChooserEvent with the new type
+			 */
+			private function dispatchTypeChosenEvent(type:String) : void
+			{
+				var event:TypeChooserEvent = new TypeChooserEvent(TypeChooserEvent.SELECT, this);
+				event.componentType = type;
+				this.dispatchEvent(event);
+			}
+
+			/**
+			 * called when a type button is clicked
+			 */
+			private function typeButtonBar_change(event:IndexChangeEvent) : void
+			{
+				var i:int = int(event.newIndex);
+				var type:String = String(this._displayList.source[i].type);
+				this.dispatchTypeChosenEvent(type);
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<s:ArrayList id="typeList">
+			<fx:Object type="GoUpper" icon="@Embed('../images/componentIcons/upper.png')"/>
+			<fx:Object type="GoLower" icon="@Embed('../images/componentIcons/lower.png')"/>
+			<fx:Object type="GoHands" icon="@Embed('../images/componentIcons/hand.png')"/>
+			<fx:Object type="GoFeet" icon="@Embed('../images/componentIcons/shoes.png')"/>
+			<fx:Object type="GoBehindBody" icon="@Embed('../images/componentIcons/back.png')"/>
+			<fx:Object type="GoHair" icon="@Embed('../images/componentIcons/hair.png')"/>
+			<fx:Object type="upper_body" icon="@Embed('../images/componentIcons/upper.png')"/>
+			<fx:Object type="lower_body" icon="@Embed('../images/componentIcons/lower.png')"/>
+			<fx:Object type="faceshape" icon="@Embed('../images/componentIcons/face.png')"/>
+			<fx:Object type="hair" icon="@Embed('../images/componentIcons/hair.png')"/>
+			<fx:Object type="beard" icon="@Embed('../images/componentIcons/beard.png')"/>
+			<fx:Object type="mouth" icon="@Embed('../images/componentIcons/mouth.png')"/>
+			<fx:Object type="ear" icon="@Embed('../images/componentIcons/ear.png')"/>
+			<fx:Object type="mustache" icon="@Embed('../images/componentIcons/mustache.png')"/>
+			<fx:Object type="eye" icon="@Embed('../images/componentIcons/eyes.png')"/>
+			<fx:Object type="eyebrow" icon="@Embed('../images/componentIcons/eyebrows.png')"/>
+			<fx:Object type="nose" icon="@Embed('../images/componentIcons/nose.png')"/>
+			<fx:Object type="glasses" icon="@Embed('../images/componentIcons/glasses.png')"/>
+			<fx:Object type="facedecoration" icon="@Embed('../images/componentIcons/faceDecorations.png')"/>			
+		</s:ArrayList>
+	</fx:Declarations>
+
+	<s:ButtonBar
+		id="typeButtonBar"
+		width="100%"
+		height="100%"
+		visible="true"
+		requireSelection="true"
+		skinClass="anifire.creator.skins.HButtonBarSkin"
+		change="typeButtonBar_change(event)">
+		<s:dataProvider>
+			<s:ArrayList id="_displayList"/>
+		</s:dataProvider>
+	</s:ButtonBar>
+</s:HGroup>

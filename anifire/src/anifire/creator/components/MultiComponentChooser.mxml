@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	creationComplete="initArray()">
+
+	<fx:Script>
+		<![CDATA[
+			import anifire.creator.events.MultiComponentChooserEvent;
+			import anifire.models.creator.CCBodyModel;
+			import spark.components.List;
+			import spark.events.IndexChangeEvent;
+			import spark.events.ListEvent;
+			import anifire.models.creator.CCBodyComponentModel;
+			import anifire.models.creator.CCThemeModel;
+			import anifire.models.creator.CCComponentModel;
+			import anifire.models.creator.CCBodyComponentModel;
+
+			private var _theme:CCThemeModel;
+
+			/**
+			 * clears event listeners when the component list isn't visible
+			 */
+			override public function set visible(newValue:Boolean) : void
+			{
+				if (super.visible == newValue) {
+					return;
+				}
+				super.visible = newValue;
+				if (newValue) {
+					this.selectedList.addEventListener(ListEvent.ITEM_ROLL_OVER, this.onThumbMouseOver);
+					this.selectedList.addEventListener(ListEvent.ITEM_ROLL_OUT, this.onThumbMouseOut);
+					this.selectedList.addEventListener(IndexChangeEvent.CARET_CHANGE, this.onThumbDown);
+					this.selectedList.addEventListener(MultiComponentChooserEvent.DELETE, this.onThumbDelete);
+				} else {
+					this.selectedList.removeEventListener(ListEvent.ITEM_ROLL_OVER, this.onThumbMouseOver);
+					this.selectedList.removeEventListener(ListEvent.ITEM_ROLL_OUT, this.onThumbMouseOut);
+					this.selectedList.removeEventListener(IndexChangeEvent.CARET_CHANGE, this.onThumbDown);
+					this.selectedList.removeEventListener(MultiComponentChooserEvent.DELETE, this.onThumbDelete);
+				}
+			}
+
+			public function get selectedBodyComponent() : CCBodyComponentModel
+			{
+				var i:int = this.selectedList.selectedIndex;
+				if (i == -1) {
+					return null;
+				}
+				return this._thumbnailSource.getItemAt(i).bodyComponent;
+			}
+
+			private function initArray() : void
+			{
+				this._thumbnailSource.removeAll();
+			}
+
+			/**
+			 * initializes using a character body and a selected type
+			 */
+			public function init(theme:CCThemeModel, char:CCBodyModel, type:String) : void
+			{
+				this.initArray();
+				this._theme = theme;
+				for each (var bodyComponent:CCBodyComponentModel in char.components[type]) {
+					this.pushComponent(bodyComponent);
+				}
+				this.update();
+			}
+
+			public function addComponent(bodyComponent:CCBodyComponentModel, index:int = -1) : void
+			{
+				this.pushComponent(bodyComponent, index);
+				this.update();
+			}
+
+			public function removeComponent(id:String) : void
+			{
+				for (var i:int = 0; i < this._thumbnailSource.length; i++) {
+					var item:Object = this._thumbnailSource.getItemAt(i);
+					if (item.bodyComponent.id == id) {
+						break;
+					}
+				}
+				this._thumbnailSource.removeItemAt(i);
+				this.selectedList.validateNow();
+			}
+
+			private function pushComponent(bodyComponent:CCBodyComponentModel, index:int = -1) : void
+			{
+				var path:String;
+				for each (var component:CCComponentModel in this._theme.getComponentsByType(bodyComponent.type)) {
+					if (component.id != bodyComponent.component_id) {
+						continue;
+					}
+					path = component.basePath;
+				}
+				if (index == -1) {
+					this._thumbnailSource.addItem({
+						path: path,
+						bodyComponent: bodyComponent
+					});
+				} else {
+					this._thumbnailSource.addItemAt({
+						path: path,
+						bodyComponent: bodyComponent
+					}, index);
+				}
+			}
+
+			/**
+			 * ensures selectedList has updated and shows the last component in the list
+			 */
+			private function update() : void
+			{
+				this.selectedList.validateNow();
+				this.selectedList.selectedIndex = this.selectedList.dataProvider.length - 1;
+				this.selectedList.ensureIndexIsVisible(this.selectedList.dataProvider.length - 1);
+			}
+
+			private function onThumbDelete(event:MultiComponentChooserEvent) : void
+			{
+				this.removeComponent(event.bodyComponent.id);
+				var newEvent:MultiComponentChooserEvent = new MultiComponentChooserEvent(
+					MultiComponentChooserEvent.DELETE,
+					this,
+					null,
+					true
+				);
+				newEvent.bodyComponent = (event.bodyComponent) as CCBodyComponentModel;
+				this.dispatchEvent(newEvent);
+			}
+
+			private function onThumbDown(event:IndexChangeEvent) : void
+			{
+				if (event.newIndex <= -1) {
+					return;
+				}
+				var component:CCBodyComponentModel = this._thumbnailSource.getItemAt(event.newIndex).bodyComponent as CCBodyComponentModel;
+				var newEvent:MultiComponentChooserEvent = new MultiComponentChooserEvent(
+					MultiComponentChooserEvent.SELECT,
+					this,
+					null,
+					true
+				);
+				newEvent.bodyComponent = component;
+				this.dispatchEvent(newEvent);
+			}
+
+			private function onThumbMouseOver(event:ListEvent) : void
+			{
+				try {
+					var component:CCBodyComponentModel = this._thumbnailSource.getItemAt(event.itemIndex).bodyComponent as CCBodyComponentModel;
+					var newEvent:MultiComponentChooserEvent = new MultiComponentChooserEvent(
+						MultiComponentChooserEvent.MOUSE_OVER,
+						this,
+						null,
+						true
+					);
+					newEvent.bodyComponent = component;
+					this.dispatchEvent(newEvent);
+				} catch(e:Error) {
+				}
+			}
+			
+			private function onThumbMouseOut(event:ListEvent) : void
+			{
+				try {
+					var component:CCBodyComponentModel = this._thumbnailSource.getItemAt(event.itemIndex).bodyComponent as CCBodyComponentModel;
+					var newEvent:MultiComponentChooserEvent = new MultiComponentChooserEvent(
+						MultiComponentChooserEvent.MOUSE_OUT,
+						this,
+						null,
+						true
+					);
+					newEvent.bodyComponent = component;
+					this.dispatchEvent(newEvent);
+				} catch(e:Error) {
+				}
+			}
+		]]>
+	</fx:Script>
+
+	<s:Line width="100%">
+		<s:stroke>
+			<s:SolidColorStroke color="{getStyle('borderColor')}"/>
+		</s:stroke>
+	</s:Line>
+	<s:List
+		id="selectedList"
+		width="100%"
+		height="100%"
+		borderVisible="false"
+		contentBackgroundAlpha="0"
+		verticalScrollPolicy="off"
+		horizontalScrollPolicy="on"
+		itemRenderer="anifire.creator.components.MultiComponentItemRenderer">
+		<s:dataProvider>
+			<s:ArrayList id="_thumbnailSource"/>
+		</s:dataProvider>
+		<s:layout>
+			<s:HorizontalLayout paddingTop="10" paddingBottom="25" paddingLeft="28" paddingRight="28" gap="10"/>
+		</s:layout>
+	</s:List>
+
+</s:Group>

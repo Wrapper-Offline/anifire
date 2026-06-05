@@ -371,10 +371,10 @@ package anifire.component
 		{
 			var loadMgr:UtilLoadMgr = new UtilLoadMgr();
 			loadMgr.addEventListener(LoadMgrEvent.ALL_COMPLETE, this.doPrepareFinishedByCam);
-			for (var index:String in this._myActionModel.libraryPaths)
+			for (var type:String in this._myActionModel.libraryPaths)
 			{
 				var loader:ExtraDataLoader = new ExtraDataLoader();
-				var libraryPath:String = this._myActionModel.libraryPaths[index];
+				var libraryPath:String = this._myActionModel.libraryPaths[type];
 				if (this._useImageLibrary)
 				{
 					if (CcImageLibrary.library.requestImage(libraryPath, this._sceneId, loader) > 0)
@@ -388,7 +388,7 @@ package anifire.component
 				if (swfBytes != null)
 				{
 					var data:Object = new Object();
-					data["part"] = index;
+					data["part"] = type;
 					loader.extraData = data;
 					loadMgr.addEventDispatcher(loader.contentLoaderInfo, Event.COMPLETE);
 					loader.contentLoaderInfo.addEventListener(Event.COMPLETE, this.onLoadStyleDone);
@@ -913,7 +913,15 @@ package anifire.component
 			loadMgr.commit();
 		}
 		
-		public function updateComponentImageData(componentType:String, swfByteArray:ByteArray, properties:Object, loadMgr:UtilLoadMgr, colors:Array = null, id:String = "", node:XML = null) : ExtraDataLoader
+		public function updateComponentImageData(
+			componentType:String,
+			swfByteArray:ByteArray,
+			properties:Object,
+			loadMgr:UtilLoadMgr,
+			colors:Array = null,
+			id:String = "",
+			node:XML = null
+		) : ExtraDataLoader
 		{
 			if (CcLibConstant.ALL_BODY_COMPONENT_TYPES.indexOf(componentType) < 0)
 			{
@@ -1662,80 +1670,52 @@ package anifire.component
 			this.updateHeadRect();
 		}
 		
-		public function highlightComponent(param1:String) : void
+		public function highlightComponent(spriteName:String) : void
 		{
-			var _loc2_:DisplayObjectContainer = UtilPlain.getInstance(this, this.DEFAULTHEAD);
-			var _loc3_:DisplayObjectContainer;
-			_loc3_ = UtilPlain.getInstance(_loc2_, param1);
-			if (_loc3_)
-			{
-				var _loc4_:GlowFilter = new GlowFilter(16777215);
-				var _loc5_:Array = new Array();
-				_loc5_.push(_loc4_);
-				_loc3_.filters = _loc5_;
+			var container:DisplayObjectContainer = UtilPlain.getInstance(this, this.DEFAULTHEAD);
+			var sprite:DisplayObjectContainer = UtilPlain.getInstance(container, spriteName);
+			if (sprite) {
+				var glow:GlowFilter = new GlowFilter(16777215);
+				var filters:Array = new Array();
+				filters.push(glow);
+				sprite.filters = filters;
 			}
 		}
 		
-		public function removeHighlight(param1:String) : void
+		public function removeHighlight(spriteName:String) : void
 		{
-			var _loc2_:DisplayObjectContainer = UtilPlain.getInstance(this, this.DEFAULTHEAD);
-			var _loc3_:DisplayObjectContainer;
-			_loc3_ = UtilPlain.getInstance(_loc2_, param1);
-			if (_loc3_ != null)
-			{
-				_loc3_.filters = new Array();
+			var container:DisplayObjectContainer = UtilPlain.getInstance(this, this.DEFAULTHEAD);
+			var sprite:DisplayObjectContainer = UtilPlain.getInstance(container, spriteName);
+			if (sprite != null) {
+				sprite.filters = null;
 			}
 		}
 		
-		public function removeComponent(type:String, id:String) : void
+		/**
+		 * @param clipName name of the sprite container
+		 * @param deletecontainer should the container itself be
+		 * deleted rather than just its contents
+		 */
+		public function removeComponent(type:String, clipName:String, deleteContainer:Boolean = false, keepSuffix:Boolean = true) : void
 		{
-			// offsettable components are separated by sides
-			if (CcLibConstant.ALL_OFFSETABLE_COMPONENT_TYPES.indexOf(type) >= 0)
-			{
-				this.removeComponent(type + CcLibConstant.LEFT, id);
-				this.removeComponent(type + CcLibConstant.RIGHT, id);
-				return;
-			}
-			else if (type == CcLibConstant.COMPONENT_TYPE_HAIR)
-			{
-				this.removeComponent(CcLibConstant.COMPONENT_TYPE_FRONT_HAIR, id);
-				this.removeComponent(CcLibConstant.COMPONENT_TYPE_BACK_HAIR, id);
-			}
-			else if (CcLibConstant.ALL_MULTIPLE_COMPONENT_TYPES.indexOf(type) >= 0)
-			{
-				type = id;
-			}
-			else if (CcLibConstant.ALL_LIBRARY_TYPES.indexOf(type) >= 0)
-			{
-				this.CCM.removeStyle("body");
-			}
-
-			var clipName:String;
-			switch (type)
-			{
-				case CcLibConstant.COMPONENT_TYPE_UPPER_BODY:
-					clipName = this.UPPERBODY;
+			var bodyContainer:DisplayObjectContainer;
+			switch (type) {
+				case this.UPPERBODY:
+					bodyContainer = this;
 					break;
-				case CcLibConstant.COMPONENT_TYPE_LOWER_BODY:
-					clipName = this.LOWERBODY;
+				case this.LOWERBODY:
+					bodyContainer = this;
 					break;
 				default:
-					clipName = this.DEFAULTHEAD;
+					bodyContainer = UtilPlain.getInstance(this, this.DEFAULTHEAD);
+					clipName += CcLibConstant.MC_NAME_EXT;
 			}
-
-			var bodyContainer:DisplayObjectContainer = UtilPlain.getInstance(this, clipName);
-			var component:DisplayObjectContainer;
-			component = UtilPlain.getInstance(bodyContainer, type);
-			if (component)
-			{
-				var cmpntParent:DisplayObjectContainer = component.parent;
-				var index:int = cmpntParent.numChildren - 1;
-				for (; index >= 0; index--)
-				{
-					if (cmpntParent.getChildAt(index).name == type)
-					{
-						cmpntParent.removeChildAt(index);
-					}
+			var container:DisplayObjectContainer = UtilPlain.getInstance(bodyContainer, clipName);
+			if (container) {
+				if (deleteContainer) {
+					container.parent.removeChild(container);
+				} else {
+					container.removeChildren();
 				}
 			}
 		}

@@ -22,38 +22,21 @@ package anifire.creator.components
 		private static var imgBarFill:Class;
 		
 		private static const LOGO_WIDTH:int = 188;
-		
 		private static const LOGO_HEIGHT:int = 36;
-		
 		private static const TRACK_WIDTH:int = 224;
-		
 		private static const TRACK_HEIGHT:int = 12;
-		
 		private static const FILL_WIDTH:int = 221;
-		
 		private static const FILL_HEIGHT:int = 8;
-		
 		private static const MARGIN:int = 20;
-		
-		
 		private var _preloader:Sprite;
-		
 		private var _stageWidth:Number = 0;
-		
 		private var _stageHeight:Number = 0;
-		
 		private var _trackX:Number;
-		
 		private var _trackY:Number;
-		
 		private var _fillX:Number;
-		
 		private var _fillY:Number;
-		
 		private var _rendered:Boolean;
-		
 		private var _barFillBitmapData:BitmapData;
-		
 		private var _fillSprite:Sprite;
 		
 		public function CCPreloader()
@@ -61,13 +44,13 @@ package anifire.creator.components
 			super();
 		}
 		
-		public function set preloader(param1:Sprite) : void
+		public function set preloader(obj:Sprite) : void
 		{
-			this._preloader = param1;
-			param1.addEventListener(Event.COMPLETE,this.handleLoadComplete);
-			param1.addEventListener(ProgressEvent.PROGRESS,this.handleLoadProgress);
-			param1.addEventListener(FlexEvent.INIT_COMPLETE,this.handleInitComplete);
-			param1.addEventListener(RSLEvent.RSL_ERROR,this.handleRslError);
+			_preloader = obj;
+			obj.addEventListener(Event.COMPLETE, handleLoadComplete);
+			obj.addEventListener(ProgressEvent.PROGRESS, handleLoadProgress);
+			obj.addEventListener(FlexEvent.INIT_COMPLETE, handleInitComplete);
+			obj.addEventListener(RSLEvent.RSL_ERROR, handleRslError);
 		}
 		
 		public function initialize() : void
@@ -76,50 +59,50 @@ package anifire.creator.components
 		
 		private function show() : void
 		{
-			if(this.stageWidth == 0 && this.stageHeight == 0)
-			{
-				try
-				{
-					this.stageWidth = stage.stageWidth;
-					this.stageHeight = stage.stageHeight;
-				}
-				catch(e:Error)
-				{
+			if (stageWidth == 0 && stageHeight == 0) {
+				try {
+					stageWidth = stage.stageWidth;
+					stageHeight = stage.stageHeight;
+				} catch (e:Error) {
 					stageWidth = loaderInfo.width;
 					stageHeight = loaderInfo.height;
 				}
-				if(this.stageWidth == 0 && this.stageHeight == 0)
-				{
+				if (stageWidth == 0 && stageHeight == 0) {
 					return;
 				}
 			}
-			if(!this._rendered)
-			{
-				this.createChildren();
+			if (!_rendered) {
+				createChildren();
 			}
 		}
 		
 		protected function createChildren() : void
 		{
-			var _loc1_:Number = this._stageWidth * 0.5;
-			var _loc2_:Number = this._stageHeight * 0.5;
-			var _loc3_:Number = (LOGO_HEIGHT + MARGIN + TRACK_HEIGHT) * 0.5;
-			var _loc4_:Bitmap = new imgLogo();
-			var _loc5_:Number = _loc1_ - LOGO_WIDTH * 0.5;
-			var _loc6_:Number = _loc2_ - _loc3_;
-			graphics.beginBitmapFill(_loc4_.bitmapData,new Matrix(1,0,0,1,_loc5_,_loc6_),false,true);
-			graphics.drawRect(_loc5_,_loc6_,LOGO_WIDTH,LOGO_HEIGHT);
+			var stageOffsetX:Number = this._stageWidth * 0.5;
+			if (stageOffsetX % 1 != 0) {
+				stageOffsetX = Math.round(stageOffsetX) - 1;
+			}
+			var stageOffsetY:Number = this._stageHeight * 0.5;
+			if (stageOffsetY % 1 != 0) {
+				stageOffsetY = Math.round(stageOffsetY) - 1;
+			}
+			var contentOffsetY:Number = (LOGO_HEIGHT + MARGIN + TRACK_HEIGHT) * 0.5;
+			var logo:Bitmap = new imgLogo();
+			var logoX:Number = stageOffsetX - LOGO_WIDTH * 0.5;
+			var logoY:Number = stageOffsetY - contentOffsetY;
+			graphics.beginBitmapFill(logo.bitmapData, new Matrix(1, 0, 0, 1, logoX, logoY), false, true);
+			graphics.drawRect(logoX, logoY, LOGO_WIDTH, LOGO_HEIGHT);
 			graphics.endFill();
-			this._trackX = _loc1_ - TRACK_WIDTH * 0.5;
-			this._trackY = _loc2_ - _loc3_ + LOGO_HEIGHT + MARGIN;
-			this._fillX = _loc1_ - FILL_WIDTH * 0.5;
+			this._trackX = stageOffsetX - TRACK_WIDTH * 0.5;
+			this._trackY = stageOffsetY - contentOffsetY + LOGO_HEIGHT + MARGIN;
+			this._fillX = stageOffsetX - FILL_WIDTH * 0.5;
 			this._fillY = this._trackY + (TRACK_HEIGHT - FILL_HEIGHT) * 0.5;
-			var _loc7_:Bitmap = new imgBarTrack();
-			graphics.beginBitmapFill(_loc7_.bitmapData,new Matrix(1,0,0,1,this._trackX,this._trackY),false,true);
-			graphics.drawRect(this._trackX,this._trackY,TRACK_WIDTH,TRACK_HEIGHT);
+			var track:Bitmap = new imgBarTrack();
+			graphics.beginBitmapFill(track.bitmapData, new Matrix(1, 0, 0, 1, this._trackX, this._trackY), false, true);
+			graphics.drawRect(this._trackX, this._trackY, TRACK_WIDTH, TRACK_HEIGHT);
 			graphics.endFill();
-			var _loc8_:Bitmap = new imgBarFill();
-			this._barFillBitmapData = _loc8_.bitmapData;
+			var fill:Bitmap = new imgBarFill();
+			this._barFillBitmapData = fill.bitmapData;
 			this._fillSprite = new Sprite();
 			this._fillSprite.x = this._fillX;
 			this._fillSprite.y = this._fillY;
@@ -127,24 +110,23 @@ package anifire.creator.components
 			this._rendered = true;
 		}
 		
-		protected function updateProgress(param1:Number) : void
+		protected function updateProgress(percentage:Number) : void
 		{
-			this._fillSprite.graphics.clear();
-			this._fillSprite.graphics.beginBitmapFill(this._barFillBitmapData,null,false,true);
-			this._fillSprite.graphics.drawRect(0,0,FILL_WIDTH * param1,FILL_HEIGHT);
-			this._fillSprite.graphics.endFill();
+			_fillSprite.graphics.clear();
+			_fillSprite.graphics.beginBitmapFill(_barFillBitmapData, null, false, true);
+			_fillSprite.graphics.drawRect(0, 0, FILL_WIDTH * percentage, FILL_HEIGHT);
+			_fillSprite.graphics.endFill();
 		}
 		
-		private function handleLoadProgress(param1:ProgressEvent) : void
+		private function handleLoadProgress(event:ProgressEvent) : void
 		{
-			if(!this._rendered)
-			{
-				this.createChildren();
+			if (!_rendered) {
+				createChildren();
 			}
-			this.updateProgress(param1.bytesLoaded / param1.bytesTotal);
+			updateProgress(event.bytesLoaded / event.bytesTotal);
 		}
 		
-		private function handleLoadComplete(param1:Event) : void
+		private function handleLoadComplete(event:Event) : void
 		{
 		}
 		
@@ -155,14 +137,15 @@ package anifire.creator.components
 		
 		private function handleRslError(param1:Event) : void
 		{
+			updateProgress(.33);
 		}
 		
 		public function get backgroundColor() : uint
 		{
-			return 16777215;
+			return 0xFFFFFF;
 		}
 		
-		public function set backgroundColor(param1:uint) : void
+		public function set backgroundColor(value:uint) : void
 		{
 		}
 		
